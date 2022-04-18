@@ -13,15 +13,8 @@ class GamePage extends StatefulWidget {
 class _GamePageState extends State<GamePage> {
   MapboxMapController? mapController;
 
-  LatLng? center;
-
   _onMapCreated(MapboxMapController controller) {
     mapController = controller;
-    controller.addListener(() {
-      if (controller.isCameraMoving) {
-        center = controller.cameraPosition!.target;
-      }
-    });
   }
 
   _onStyleLoadedCallback() {}
@@ -34,14 +27,12 @@ class _GamePageState extends State<GamePage> {
     ));
   }
 
-  void _add() {
-    mapController!.toLatLng(Point(539.5, 435.0)).then((coords) {
-      mapController!.addCircle(
-        CircleOptions(geometry: coords, circleColor: "#FF0000"),
-      );
-    });
+  void _add(context) {
+    var pos = mapController!.cameraPosition!.target;
+    mapController!.addSymbol(
+      SymbolOptions(geometry: pos, iconImage: "assets/icons/marker.png", iconColor: "#FF0000", iconOpacity: 1.0, iconSize: 2.5),
+    );
   }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -64,6 +55,7 @@ class _GamePageState extends State<GamePage> {
                   onMapCreated: _onMapCreated,
                   rotateGesturesEnabled: false,
                   tiltGesturesEnabled: false,
+                  trackCameraPosition: true,
                   onMapClick: _onMapClickCallback,
                   initialCameraPosition: const CameraPosition(
                       target: LatLng(42.5617153, 25.5166978), zoom: 5.4),
@@ -75,22 +67,26 @@ class _GamePageState extends State<GamePage> {
                   ),
                   onStyleLoadedCallback: _onStyleLoadedCallback,
                 ),
-                Container(
-                  margin: EdgeInsets.only(
-                    top: MediaQuery.of(context).size.height * 0.15,
-                    left: MediaQuery.of(context).size.width * 0.437,
-                  ),
+                Align(
+                  alignment: Alignment.center,
                   child: IconButton(
                       icon: const Icon(Icons.location_pin),
-                      onPressed: () => _add()),
+                      onPressed: () => _add(context)),
                 ),
+                // Container(
+                //   // margin: EdgeInsets.only(
+                //   //   top: MediaQuery.of(context).size.height * 0.179,
+                //   //   left: MediaQuery.of(context).size.width * 0.437,
+                //   // ),
+                //
+                // ),
                 Align(
                   alignment: FractionalOffset.bottomRight,
                   child: Container(
                     margin: const EdgeInsets.only(bottom: 50, right: 10),
                     width: 100,
                     child: TextButton(
-                        child: const Text("Place"), onPressed: () => _add()),
+                        child: const Text("Place"), onPressed: () => _add(context)),
                   ),
                 )
               ],
