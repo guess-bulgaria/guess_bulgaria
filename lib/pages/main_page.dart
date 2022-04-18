@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
+import 'package:guess_bulgaria/pages/game_page.dart';
 import 'package:guess_bulgaria/storage/online_checker.dart';
 
 class MainPage extends StatefulWidget {
@@ -12,7 +13,9 @@ class MainPage extends StatefulWidget {
 class _MainPageState extends State<MainPage> {
   final onlineChecker = OnlineChecker();
 
-  playSingle() {}
+  playSingle() {
+    Navigator.push(context, MaterialPageRoute(builder: (context) => const GamePage()));
+  }
 
   createRoom() {}
 
@@ -37,7 +40,7 @@ class _MainPageState extends State<MainPage> {
               width: width,
               child: TextButton(
                 child: const Text("Самостоятелна игра"),
-                onPressed: () => playSingle,
+                onPressed: () => playSingle(),
               ),
             ),
             Observer(
@@ -46,7 +49,7 @@ class _MainPageState extends State<MainPage> {
                   width: width,
                   child: TextButton(
                     child: const Text("Създай онлайн игра"),
-                    onPressed: onlineChecker.isOnline ? (() => createRoom) : null,
+                    onPressed: onlineChecker.isOnline ? (() => createRoom()) : null,
                   ),
                 );
               },
@@ -57,7 +60,7 @@ class _MainPageState extends State<MainPage> {
                   width: width,
                   child: TextButton(
                     child: const Text("Присъедини се към стая"),
-                    onPressed: onlineChecker.isOnline ? (() => joinRoom) : null,
+                    onPressed: onlineChecker.isOnline ? (() => joinRoom()) : null,
                   ),
                 );
               },
@@ -66,14 +69,14 @@ class _MainPageState extends State<MainPage> {
               width: width,
               child: TextButton(
                 child: const Text("Статистики"),
-                onPressed: () => stats,
+                onPressed: () => stats(),
               ),
             ),
             SizedBox(
               width: width,
               child: TextButton(
                 child: const Text("Забележителности"),
-                onPressed: () => landmarks,
+                onPressed: () => landmarks(),
               ),
             ),
           ],

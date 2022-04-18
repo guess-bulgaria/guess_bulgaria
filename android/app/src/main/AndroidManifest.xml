@@ -4,6 +4,9 @@
         android:label="guess_bulgaria"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
+
+       <meta-data android:name="com.mapbox.token"
+                  android:value="sk.eyJ1IjoiemVhbGJnIiwiYSI6ImNsMjNsaHdpaDFxeXQzbXFvMzB5ZTEyOW8ifQ.8PjI-6zsGnxmrccgcpSeXQ" />
         <activity
             android:name=".MainActivity"
             android:exported="true"
