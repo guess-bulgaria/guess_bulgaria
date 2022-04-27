@@ -40,6 +40,7 @@ class _CreatePageState extends State<CreateGamePage> {
                   style: TextStyle(fontSize: 20),
                 ),
                 DropdownButton(
+                  isExpanded: true,
                   value: totalRounds,
                   style: const TextStyle(color: Colors.black),
                   items: <int>[1, 2, 3, 4]
@@ -55,7 +56,10 @@ class _CreatePageState extends State<CreateGamePage> {
                       totalRounds = newValue!;
                     });
                   },
-                  
+                ),
+                const Text(
+                  "Региони",
+                  style: TextStyle(fontSize: 20),
                 ),
               ]
                   .map((el) => Padding(
