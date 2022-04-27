@@ -42,7 +42,7 @@ class _CreatePageState extends State<CreateGamePage> {
                 DropdownButton(
                   value: dropdownValue,
                   style: const TextStyle(color: Colors.black),
-                  items: <int>[1, 2]
+                  items: <int>[1, 2, 3, 4]
                       .map<DropdownMenuItem<int>>((int? value) {
                     return DropdownMenuItem<int>(
                       value: value,
