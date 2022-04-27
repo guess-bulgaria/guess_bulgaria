@@ -8,7 +8,7 @@ class CreateGamePage extends StatefulWidget {
 }
 class _CreatePageState extends State<CreateGamePage> {
 
-  int dropdownValue = 1;
+  int totalRounds = 1;
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -40,7 +40,7 @@ class _CreatePageState extends State<CreateGamePage> {
                   style: TextStyle(fontSize: 20),
                 ),
                 DropdownButton(
-                  value: dropdownValue,
+                  value: totalRounds,
                   style: const TextStyle(color: Colors.black),
                   items: <int>[1, 2, 3, 4]
                       .map<DropdownMenuItem<int>>((int? value) {
@@ -52,7 +52,7 @@ class _CreatePageState extends State<CreateGamePage> {
                   onChanged: (int? newValue) {
                     // set state 
                     setState(() {
-                      dropdownValue = newValue!;
+                      totalRounds = newValue!;
                     });
                   },
                   
