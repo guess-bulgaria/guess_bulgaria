@@ -16,23 +16,25 @@ class WSService {
       Uri.parse(EnvConfig.backendWSUrl),
     );
     _messageCallback = callback;
-    _channel!.stream.listen((message) {
-      print("received: " + message);
-      if (_messageCallback != null) {
-        var jsonMessage = json.decode(message);
-        _messageCallback!(
-          jsonMessage?['type'] ?? '',
-          jsonMessage?['message'] ?? {},
-        );
-      }
-    },
-        onError: (_) => {
-              if (_lastMessage != {})
-                {
-                  _createChannel(_messageCallback!),
-                  _sendMessage(_lastMessage['type'], data: _lastMessage)
-                }
-            });
+    _channel!.stream.listen(
+      (message) {
+        print("received: " + message);
+        if (_messageCallback != null) {
+          var jsonMessage = json.decode(message);
+          _messageCallback!(
+            jsonMessage?['type'] ?? '',
+            jsonMessage?['message'] ?? {},
+          );
+        }
+      },
+      onError: (_) => {
+        if (_lastMessage != {})
+          {
+            _createChannel(_messageCallback!),
+            _sendMessage(_lastMessage['type'], data: _lastMessage)
+          }
+      },
+    );
   }
 
   static void _closeChannel() {
@@ -41,14 +43,7 @@ class WSService {
   }
 
   static void changeCallback(Function callback) {
-    _channel!.stream.listen((message) {
-      print("received: " + message);
-      var jsonMessage = json.decode(message);
-      callback(
-        jsonMessage?['type'] ?? '',
-        jsonMessage?['message'] ?? {},
-      );
-    });
+    _messageCallback = callback;
   }
 
   static void createGame(Function callback) {
