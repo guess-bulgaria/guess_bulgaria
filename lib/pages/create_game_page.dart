@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:guess_bulgaria/components/player_list.dart';
 import 'package:guess_bulgaria/services/ws_service.dart';
 import 'dart:async';
 
@@ -23,13 +24,14 @@ class _CreatePageState extends State<CreateGamePage> {
     });
   }
 
-  void onMessageReceived(dynamic message) {
-    switch (message['type']) {
+  void onMessageReceived(String type, dynamic message) {
+    switch (type) {
       case 'current-data':
         {
           setState(() {
-            roomId = message['message']['roomId'];
-            _sizeController.text = "${message['message']['settings']['maxRounds']}";
+            roomId = message['roomId'];
+            _sizeController.text = "${message['settings']['maxRounds']}";
+            players = message['players'];
           });
         }
     }
@@ -37,6 +39,7 @@ class _CreatePageState extends State<CreateGamePage> {
 
   int? roomId;
   int maxRounds = 0;
+  List<dynamic> players = [];
 
   void onRoundsChange(String r) {
     maxRounds = int.tryParse(r) ?? 0;
@@ -95,6 +98,7 @@ class _CreatePageState extends State<CreateGamePage> {
                   "Региони",
                   style: TextStyle(fontSize: 20),
                 ),
+                PlayerList(players),
               ]
                   .map((el) => Padding(
                         padding: const EdgeInsets.symmetric(

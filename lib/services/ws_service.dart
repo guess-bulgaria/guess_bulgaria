@@ -17,7 +17,11 @@ class WSService {
     _channel!.stream.listen((message) {
       print("received: " + message);
       if (_messageCallback != null) {
-        _messageCallback!(json.decode(message));
+        var jsonMessage = json.decode(message);
+        _messageCallback!(
+          jsonMessage?['type'] ?? '',
+          jsonMessage?['message'] ?? {},
+        );
       }
     });
   }
