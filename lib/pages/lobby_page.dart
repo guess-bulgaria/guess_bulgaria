@@ -30,7 +30,6 @@ class _CreatePageState extends State<CreateGamePage> {
   }
 
   void leave() {
-    WSService.leave(widget.roomId);
     Navigator.pop(context);
   }
 
@@ -72,7 +71,8 @@ class _CreatePageState extends State<CreateGamePage> {
   @override
   void dispose() {
     _sizeController.dispose();
-    //todo if game not started -> execute leave (if the player clicked back button)
+    //todo don't run next row if 
+    WSService.leave(widget.roomId);
     super.dispose();
   }
 

@@ -47,15 +47,11 @@ class WSService {
   }
 
   static void leave(int roomId) {
-    _sendMessage('leave', data: {
-      'roomId': roomId
-    });
+    _sendMessage('leave', data: {'roomId': roomId});
   }
 
   static void _sendMessage(String type, {dynamic data}) {
-    data ??= {};
-    data['type'] = type;
-    data['id'] = UserData.userId;
+    data = {'type': type, 'id': UserData.userId, ...(data ?? {})};
     _channel!.sink.add(json.encode(data));
   }
 }
