@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:guess_bulgaria/configs/env_config.dart';
 import 'package:guess_bulgaria/pages/main_page.dart';
+import 'package:guess_bulgaria/storage/user_data.dart';
 import 'package:guess_bulgaria/themes/light_theme.dart';
 
 void main() async {
@@ -10,7 +11,6 @@ void main() async {
   await dotenv.load(fileName: ".env");
   EnvConfig.setupEnvConfig();
   SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
-  // UserData().setupUserId();
   runApp(const App());
 }
 
@@ -19,6 +19,7 @@ class App extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    UserData().setupUserId();
     return MaterialApp(
       title: 'Guess Bulgaria',
       theme: LightTheme.getTheme(),

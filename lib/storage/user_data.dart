@@ -1,16 +1,10 @@
 import 'package:guess_bulgaria/services/user_service.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:mobx/mobx.dart';
 
 class UserData {
-  //todo rewrite so it auto gets when online
-  final _userId = Observable("");
+  static var _userId = "";
 
-  String get userId => _userId.value;
-
-  UserData() {
-    setupUserId();
-  }
+  static String get userId => _userId;
 
   SharedPreferences? _prefs;
 
@@ -20,15 +14,15 @@ class UserData {
   }
 
   Future<void> setupUserId() async {
-    if (_userId.value != "") return;
+    if (_userId != "") return;
 
-    _userId.value = await _getPrefString("id") ?? "";
-    if (_userId.value != "") return;
+    _userId = await _getPrefString("id") ?? "";
+    if (_userId != "") return;
 
     try {
       var response = await UserService.createUser();
-      _userId.value = response.data["_id"];
-      await _setPrefString("id", _userId.value);
+      _userId = response.data["_id"];
+      await _setPrefString("id", _userId);
     } catch (e) {}
   }
 

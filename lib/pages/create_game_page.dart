@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:guess_bulgaria/services/ws_service.dart';
+import 'dart:async';
 
 class CreateGamePage extends StatefulWidget {
   const CreateGamePage({Key? key}) : super(key: key);
@@ -6,9 +9,48 @@ class CreateGamePage extends StatefulWidget {
   @override
   State<StatefulWidget> createState() => _CreatePageState();
 }
-class _CreatePageState extends State<CreateGamePage> {
 
-  int totalRounds = 1;
+class _CreatePageState extends State<CreateGamePage> {
+  _CreatePageState() {
+    WSService.createGame(onMessageReceived);
+  }
+
+  Timer? _debounce;
+  _sendSettings(){
+    if (_debounce?.isActive ?? false) _debounce!.cancel();
+    _debounce = Timer(const Duration(milliseconds: 700), () {
+      WSService.changeSettings(roomId!, maxRounds, 0, []);
+    });
+  }
+
+  void onMessageReceived(dynamic message) {
+    switch (message['type']) {
+      case 'current-data':
+        {
+          setState(() {
+            roomId = message['message']['roomId'];
+            _sizeController.text = "${message['message']['settings']['maxRounds']}";
+          });
+        }
+    }
+  }
+
+  int? roomId;
+  int maxRounds = 0;
+
+  void onRoundsChange(String r) {
+    maxRounds = int.tryParse(r) ?? 0;
+    _sendSettings();
+  }
+
+  final TextEditingController _sizeController = TextEditingController();
+
+  @override
+  void dispose() {
+    _sizeController.dispose();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -25,37 +67,29 @@ class _CreatePageState extends State<CreateGamePage> {
               mainAxisAlignment: MainAxisAlignment.start,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: <Widget>[
-                const Text(
-                  'Код за достъп',
-                  style: TextStyle(fontSize: 20),
+                const Center(
+                  child: Text(
+                    "Код за присъединяване:",
+                    style: TextStyle(fontSize: 20),
+                  ),
                 ),
-                const TextField(
-                  enabled: false,
-                  decoration: InputDecoration(
-                      border: OutlineInputBorder(),
-                      labelText: "Random genereted code for room"),
+                Center(
+                  child: Text(
+                    '$roomId',
+                    style: const TextStyle(fontSize: 24),
+                  ),
                 ),
-                const Text(
-                  'Брой рундове',
-                  style: TextStyle(fontSize: 20),
-                ),
-                DropdownButton(
-                  isExpanded: true,
-                  value: totalRounds,
-                  style: const TextStyle(color: Colors.black),
-                  items: <int>[1, 2, 3, 4]
-                      .map<DropdownMenuItem<int>>((int? value) {
-                    return DropdownMenuItem<int>(
-                      value: value,
-                      child: Text(value.toString()),
-                    );
-                  }).toList(),
-                  onChanged: (int? newValue) {
-                    // set state 
-                    setState(() {
-                      totalRounds = newValue!;
-                    });
-                  },
+                TextFormField(
+                  keyboardType: TextInputType.number,
+                  showCursor: false,
+                  controller: _sizeController,
+                  onChanged: (rounds) => onRoundsChange(rounds),
+                  decoration: const InputDecoration(
+                    labelText: "Максимален брой рундове",
+                  ),
+                  inputFormatters: <TextInputFormatter>[
+                    FilteringTextInputFormatter.allow(RegExp(r'[0-9]')),
+                  ],
                 ),
                 const Text(
                   "Региони",
