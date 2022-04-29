@@ -124,6 +124,24 @@ class _CreatePageState extends State<CreateGamePage> {
                       style: TextStyle(fontSize: 20),
                     ),
                     PlayerList(players),
+                    Expanded(
+                      child: Align(
+                          alignment: Alignment.bottomCenter,
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.end,
+                            crossAxisAlignment: CrossAxisAlignment.end,
+                            children: const [
+                              NavigationButton(
+                                text: "Старт",
+                                width: double.maxFinite,
+                              ),
+                              NavigationButton(
+                                text: "Напусни",
+                                width: double.maxFinite,
+                              ),
+                            ],
+                          )),
+                    ),
                   ]),
             ),
           ),
