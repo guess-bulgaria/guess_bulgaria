@@ -19,7 +19,7 @@ class PlayerList extends StatelessWidget {
         ],
       ));
     }
-    return Container(
+    return SizedBox(
         height: 100,
         child: ScrollablePositionedList.builder(
           itemCount: rows.length,
