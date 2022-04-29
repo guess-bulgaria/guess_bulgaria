@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:guess_bulgaria/components/navigation_button.dart';
-import 'package:guess_bulgaria/pages/create_game_page.dart';
+import 'package:guess_bulgaria/pages/lobby_page.dart';
 import 'package:guess_bulgaria/pages/game_page.dart';
 import 'package:guess_bulgaria/storage/online_checker.dart';
 
@@ -22,7 +22,7 @@ class _MainPageState extends State<MainPage> {
 
   createRoom() {
     Navigator.push(
-      context, MaterialPageRoute(builder: (context) => const CreateGamePage())
+      context, MaterialPageRoute(builder: (context) => CreateGamePage())
     );
   }
 

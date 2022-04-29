@@ -5,45 +5,64 @@ import 'package:guess_bulgaria/components/player_list.dart';
 import 'package:guess_bulgaria/services/ws_service.dart';
 import 'dart:async';
 
+import 'package:guess_bulgaria/storage/user_data.dart';
+
 class CreateGamePage extends StatefulWidget {
-  const CreateGamePage({Key? key}) : super(key: key);
+  int roomId;
+
+  CreateGamePage({Key? key, this.roomId = 0}) : super(key: key);
 
   @override
   State<StatefulWidget> createState() => _CreatePageState();
 }
 
 class _CreatePageState extends State<CreateGamePage> {
-  _CreatePageState() {
-    WSService.createGame(onMessageReceived);
-  }
-
   Timer? _debounce;
-  _sendSettings() {
+  bool _isCreator = true;
+
+  void _sendSettings() {
+    // debounce so it won't activate on each number type
     if (_debounce?.isActive ?? false) _debounce!.cancel();
     _debounce = Timer(const Duration(milliseconds: 700), () {
-      WSService.changeSettings(roomId!, maxRounds, 0, []);
+      WSService.changeSettings(widget.roomId, maxRounds, 0, []);
     });
+  }
+
+  void leave() {
+    WSService.leave(widget.roomId);
+    Navigator.pop(context);
   }
 
   void onMessageReceived(String type, dynamic message) {
     switch (type) {
       case 'current-data':
-        {
-          setState(() {
-            roomId = message['roomId'];
-            _sizeController.text = "${message['settings']['maxRounds']}";
-            players = message['players'];
-          });
-        }
+        setState(() {
+          widget.roomId = message['roomId'];
+          _sizeController.text = "${message['settings']['maxRounds']}";
+          players = message['players'];
+        });
+        break;
+      case 'player-join':
+      case 'player-leave':
+        setState(() {
+          players = message['players'];
+          for (final player in players) {
+            if (player['id'] == UserData.userId) {
+              if (player['isCreator']) _isCreator = true;
+              break;
+            }
+          }
+        });
+        break;
     }
   }
 
-  int? roomId;
   int maxRounds = 0;
   List<dynamic> players = [];
 
   void onRoundsChange(String r) {
     maxRounds = int.tryParse(r) ?? 0;
+    if (maxRounds == 0) _sizeController.text = '0';
     _sendSettings();
   }
 
@@ -52,11 +71,15 @@ class _CreatePageState extends State<CreateGamePage> {
   @override
   void dispose() {
     _sizeController.dispose();
+    //todo if game not started -> execute leave (if the player clicked back button)
     super.dispose();
   }
 
+  start() {}
+
   @override
   Widget build(BuildContext context) {
+    if (widget.roomId == 0) WSService.createGame(onMessageReceived);
     return Scaffold(
       backgroundColor: Theme.of(context).colorScheme.secondary,
       body: Align(
@@ -81,13 +104,14 @@ class _CreatePageState extends State<CreateGamePage> {
                     ),
                     Center(
                       child: Text(
-                        '$roomId',
+                        '${widget.roomId}',
                         style: const TextStyle(fontSize: 24),
                       ),
                     ),
                     TextFormField(
                       keyboardType: TextInputType.number,
                       showCursor: false,
+                      enabled: _isCreator,
                       controller: _sizeController,
                       onChanged: (rounds) => onRoundsChange(rounds),
                       decoration: const InputDecoration(
@@ -108,9 +132,17 @@ class _CreatePageState extends State<CreateGamePage> {
                           child: Column(
                             mainAxisAlignment: MainAxisAlignment.end,
                             crossAxisAlignment: CrossAxisAlignment.end,
-                            children: const[
-                              NavigationButton(text: "Старт", width: double.maxFinite,),
-                              NavigationButton(text: "Напусни", width: double.maxFinite,),
+                            children: [
+                              NavigationButton(
+                                text: "Старт",
+                                width: double.maxFinite,
+                                onPressed: players.length > 1 ? start : null,
+                              ),
+                              NavigationButton(
+                                text: "Напусни",
+                                width: double.maxFinite,
+                                onPressed: leave,
+                              ),
                             ],
                           )),
                     ),

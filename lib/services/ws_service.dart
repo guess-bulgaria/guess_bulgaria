@@ -46,6 +46,12 @@ class WSService {
     });
   }
 
+  static void leave(int roomId) {
+    _sendMessage('leave', data: {
+      'roomId': roomId
+    });
+  }
+
   static void _sendMessage(String type, {dynamic data}) {
     data ??= {};
     data['type'] = type;
