@@ -14,7 +14,7 @@ class PlayerList extends StatelessWidget {
       rows.add(Row(
         children: [
           Icon(Icons.circle, color: PlayerColors.color(player['color'])),
-          Text(player['id']),
+          Text(player['username'] ?? player['id']),
           Icon(player['isCreator'] ? Icons.accessible : null),
         ],
       ));

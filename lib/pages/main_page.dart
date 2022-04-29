@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:guess_bulgaria/components/navigation_button.dart';
+import 'package:guess_bulgaria/pages/join_lobby_screen.dart';
 import 'package:guess_bulgaria/pages/lobby_page.dart';
 import 'package:guess_bulgaria/pages/game_page.dart';
 import 'package:guess_bulgaria/storage/online_checker.dart';
@@ -25,7 +26,10 @@ class _MainPageState extends State<MainPage> {
         context, MaterialPageRoute(builder: (context) => CreateGamePage()));
   }
 
-  joinRoom() {}
+  joinRoom() {
+    Navigator.push(context,
+        MaterialPageRoute(builder: (context) => const JoinLobbyScreen()));
+  }
 
   stats() {}
 
