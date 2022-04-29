@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:guess_bulgaria/components/navigation_button.dart';
 import 'package:guess_bulgaria/components/player_list.dart';
+import 'package:guess_bulgaria/pages/game_page.dart';
 import 'package:guess_bulgaria/services/ws_service.dart';
 import 'dart:async';
 
@@ -76,7 +77,11 @@ class _CreatePageState extends State<CreateGamePage> {
     super.dispose();
   }
 
-  start() {}
+  start() {
+    Navigator.push(
+      context, MaterialPageRoute(builder: (context) => GamePage(roomId: widget.roomId,))
+    );
+  }
 
   @override
   Widget build(BuildContext context) {

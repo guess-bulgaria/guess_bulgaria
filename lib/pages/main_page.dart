@@ -17,13 +17,12 @@ class _MainPageState extends State<MainPage> {
 
   playSingle() {
     Navigator.push(
-        context, MaterialPageRoute(builder: (context) => const GamePage()));
+        context, MaterialPageRoute(builder: (context) => GamePage()));
   }
 
   createRoom() {
     Navigator.push(
-      context, MaterialPageRoute(builder: (context) => CreateGamePage())
-    );
+        context, MaterialPageRoute(builder: (context) => CreateGamePage()));
   }
 
   joinRoom() {}

@@ -4,7 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:mapbox_gl/mapbox_gl.dart';
 
 class GamePage extends StatefulWidget {
-  const GamePage({Key? key}) : super(key: key);
+  int roomId;
+  GamePage({Key? key, this.roomId = 0}) : super(key: key);
 
   @override
   State<StatefulWidget> createState() => _GamePageState();
@@ -32,9 +33,7 @@ class _GamePageState extends State<GamePage> {
     );
   }
 
-  void _lockAnswer(){
-
-  }
+  void _lockAnswer() {}
 
   @override
   Widget build(BuildContext context) {
@@ -47,6 +46,7 @@ class _GamePageState extends State<GamePage> {
             child: FlutterLogo(),
             flex: 5,
           ),
+          Text(widget.roomId.toString()),
           Expanded(
             child: Stack(
               children: [
