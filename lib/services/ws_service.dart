@@ -9,6 +9,8 @@ class WSService {
 
   static Function? _messageCallback;
 
+  static dynamic _lastMessage = {};
+
   static void _createChannel(Function callback) {
     _channel = IOWebSocketChannel.connect(
       Uri.parse(EnvConfig.backendWSUrl),
@@ -23,7 +25,14 @@ class WSService {
           jsonMessage?['message'] ?? {},
         );
       }
-    });
+    },
+        onError: (_) => {
+              if (_lastMessage != {})
+                {
+                  _createChannel(_messageCallback!),
+                  _sendMessage(_lastMessage['type'], data: _lastMessage)
+                }
+            });
   }
 
   static void _closeChannel() {
@@ -31,9 +40,25 @@ class WSService {
     _channel = null;
   }
 
+  static void changeCallback(Function callback) {
+    _channel!.stream.listen((message) {
+      print("received: " + message);
+      var jsonMessage = json.decode(message);
+      callback(
+        jsonMessage?['type'] ?? '',
+        jsonMessage?['message'] ?? {},
+      );
+    });
+  }
+
   static void createGame(Function callback) {
     _createChannel(callback);
     _sendMessage('create');
+  }
+
+  static void joinGame(Function callback, int roomId) {
+    _createChannel(callback);
+    _sendMessage('join', data: {'roomId': roomId});
   }
 
   static void changeSettings(
@@ -52,6 +77,7 @@ class WSService {
 
   static void _sendMessage(String type, {dynamic data}) {
     data = {'type': type, 'id': UserData.userId, ...(data ?? {})};
+    _lastMessage = data;
     _channel!.sink.add(json.encode(data));
   }
 }
