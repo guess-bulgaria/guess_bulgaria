@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:guess_bulgaria/components/navigation_button.dart';
 import 'package:guess_bulgaria/components/player_list.dart';
 import 'package:guess_bulgaria/services/ws_service.dart';
 import 'dart:async';
@@ -17,7 +18,7 @@ class _CreatePageState extends State<CreateGamePage> {
   }
 
   Timer? _debounce;
-  _sendSettings(){
+  _sendSettings() {
     if (_debounce?.isActive ?? false) _debounce!.cancel();
     _debounce = Timer(const Duration(milliseconds: 700), () {
       WSService.changeSettings(roomId!, maxRounds, 0, []);
@@ -66,46 +67,54 @@ class _CreatePageState extends State<CreateGamePage> {
           child: DecoratedBox(
             decoration: BoxDecoration(
                 border: Border.all(color: Colors.black, width: 4.0)),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.start,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: <Widget>[
-                const Center(
-                  child: Text(
-                    "Код за присъединяване:",
-                    style: TextStyle(fontSize: 20),
-                  ),
-                ),
-                Center(
-                  child: Text(
-                    '$roomId',
-                    style: const TextStyle(fontSize: 24),
-                  ),
-                ),
-                TextFormField(
-                  keyboardType: TextInputType.number,
-                  showCursor: false,
-                  controller: _sizeController,
-                  onChanged: (rounds) => onRoundsChange(rounds),
-                  decoration: const InputDecoration(
-                    labelText: "Максимален брой рундове",
-                  ),
-                  inputFormatters: <TextInputFormatter>[
-                    FilteringTextInputFormatter.allow(RegExp(r'[0-9]')),
-                  ],
-                ),
-                const Text(
-                  "Региони",
-                  style: TextStyle(fontSize: 20),
-                ),
-                PlayerList(players),
-              ]
-                  .map((el) => Padding(
-                        padding: const EdgeInsets.symmetric(
-                            vertical: 10, horizontal: 25),
-                        child: el,
-                      ))
-                  .toList(),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(vertical: 15, horizontal: 25),
+              child: Column(
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: <Widget>[
+                    const Center(
+                      child: Text(
+                        "Код за присъединяване:",
+                        style: TextStyle(fontSize: 20),
+                      ),
+                    ),
+                    Center(
+                      child: Text(
+                        '$roomId',
+                        style: const TextStyle(fontSize: 24),
+                      ),
+                    ),
+                    TextFormField(
+                      keyboardType: TextInputType.number,
+                      showCursor: false,
+                      controller: _sizeController,
+                      onChanged: (rounds) => onRoundsChange(rounds),
+                      decoration: const InputDecoration(
+                        labelText: "Максимален брой рундове",
+                      ),
+                      inputFormatters: <TextInputFormatter>[
+                        FilteringTextInputFormatter.allow(RegExp(r'[0-9]')),
+                      ],
+                    ),
+                    const Text(
+                      "Региони",
+                      style: TextStyle(fontSize: 20),
+                    ),
+                    PlayerList(players),
+                    Expanded(
+                      child: Align(
+                          alignment: Alignment.bottomCenter,
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.end,
+                            crossAxisAlignment: CrossAxisAlignment.end,
+                            children: const[
+                              NavigationButton(text: "Старт", width: double.maxFinite,),
+                              NavigationButton(text: "Напусни", width: double.maxFinite,),
+                            ],
+                          )),
+                    ),
+                  ]),
             ),
           ),
         ),
