@@ -11,7 +11,7 @@ class GamePage extends StatefulWidget {
 }
 
 class _GamePageState extends State<GamePage> {
-  MapboxMapController? mapController;
+  late MapboxMapController mapController;
 
   _onMapCreated(MapboxMapController controller) {
     mapController = controller;
@@ -20,19 +20,22 @@ class _GamePageState extends State<GamePage> {
   _onStyleLoadedCallback() {}
 
   void _onMapClickCallback(Point<double> point, LatLng coordinates) {
-    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-      content: Text("${coordinates.latitude} ${coordinates.longitude}"),
-      backgroundColor: Theme.of(context).primaryColor,
-      duration: const Duration(seconds: 5),
-    ));
-  }
-
-  void _add(context) {
-    var pos = mapController!.cameraPosition!.target;
-    mapController!.addSymbol(
-      SymbolOptions(geometry: pos, iconImage: "assets/icons/marker.png", iconColor: "#FF0000", iconOpacity: 1.0, iconSize: 2.5),
+    mapController.clearSymbols();
+    mapController.addSymbol(
+      SymbolOptions(
+        geometry: coordinates,
+        iconImage: "assets/icons/marker.png",
+        iconColor: "#FF0000",
+        iconOpacity: 1.0,
+        iconSize: 1.02,
+      ),
     );
   }
+
+  void _lockAnswer(){
+
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -68,25 +71,14 @@ class _GamePageState extends State<GamePage> {
                   onStyleLoadedCallback: _onStyleLoadedCallback,
                 ),
                 Align(
-                  alignment: Alignment.center,
-                  child: IconButton(
-                      icon: const Icon(Icons.location_pin),
-                      onPressed: () => _add(context)),
-                ),
-                // Container(
-                //   // margin: EdgeInsets.only(
-                //   //   top: MediaQuery.of(context).size.height * 0.179,
-                //   //   left: MediaQuery.of(context).size.width * 0.437,
-                //   // ),
-                //
-                // ),
-                Align(
                   alignment: FractionalOffset.bottomRight,
                   child: Container(
-                    margin: const EdgeInsets.only(bottom: 50, right: 10),
+                    margin: const EdgeInsets.only(bottom: 20, right: 10),
                     width: 100,
                     child: TextButton(
-                        child: const Text("Place"), onPressed: () => _add(context)),
+                      child: const Text("Избери"),
+                      onPressed: () => _lockAnswer(),
+                    ),
                   ),
                 )
               ],

@@ -13,7 +13,12 @@ class PlayerColors {
     Colors.blueAccent,
     Colors.indigo,
     Colors.purple,
-    //todo more colors
+    //todo better colors
+    Colors.white,
+    Colors.white24,
+    Colors.white54,
+    Colors.white10,
+    Colors.white12,
   ];
 
   static Color color(int colorId) => _colors[colorId];
