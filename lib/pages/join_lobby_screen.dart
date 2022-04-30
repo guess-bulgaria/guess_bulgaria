@@ -51,7 +51,7 @@ class _JoinLobbyScreenState extends State<JoinLobbyScreen> {
       Navigator.push(
           ctx,
           MaterialPageRoute(
-              builder: (context) => CreateGamePage(joinData: message)));
+              builder: (context) => LobbyPage(joinData: message)));
     }
   }
 }

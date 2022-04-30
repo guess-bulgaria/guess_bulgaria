@@ -10,26 +10,38 @@ import 'dart:async';
 import 'package:guess_bulgaria/storage/user_data.dart';
 
 // ignore: must_be_immutable
-class CreateGamePage extends StatefulWidget {
-  int roomId;
+class LobbyPage extends StatefulWidget {
   dynamic joinData;
 
-  CreateGamePage({Key? key, this.roomId = 0, this.joinData}) : super(key: key);
+  LobbyPage({Key? key, this.joinData}) : super(key: key);
 
   @override
-  State<StatefulWidget> createState() => _CreatePageState();
+  State<StatefulWidget> createState() => _LobbyPageState();
 }
 
-class _CreatePageState extends State<CreateGamePage> {
+class _LobbyPageState extends State<LobbyPage> {
   Timer? _debounce;
   bool _isCreator = true;
+  int roomId = 0;
 
   void _sendSettings() {
+    if(!_isCreator) return;
     // debounce so it won't activate on each number type
     if (_debounce?.isActive ?? false) _debounce!.cancel();
     _debounce = Timer(const Duration(milliseconds: 700), () {
-      WSService.changeSettings(widget.roomId, maxRounds, 0, []);
+      WSService.changeSettings(roomId, maxRounds, 0, []);
     });
+  }
+
+
+  @override
+  void initState() {
+    super.initState();
+    if (widget.joinData == null) {
+      WSService.createGame(onMessageReceived);
+    } else {
+      setupJoinData();
+    }
   }
 
   void leave() {
@@ -39,11 +51,7 @@ class _CreatePageState extends State<CreateGamePage> {
   void onMessageReceived(String type, dynamic message) {
     switch (type) {
       case 'current-data':
-        setState(() {
-          widget.roomId = message['roomId'];
-          _sizeController.text = "${message['settings']['maxRounds']}";
-          players = message['players'];
-        });
+        setRoomData(message);
         break;
       case 'player-join':
       case 'player-leave':
@@ -61,13 +69,16 @@ class _CreatePageState extends State<CreateGamePage> {
   }
 
   void setupJoinData() {
-    setState(() {
-      widget.roomId = widget.joinData['roomId'];
-      _sizeController.text = "${widget.joinData['settings']['maxRounds']}";
-      players = widget.joinData['players'];
-    });
-    //doesnt work sadly
+    setRoomData(widget.joinData);
     WSService.changeCallback(onMessageReceived);
+  }
+
+  void setRoomData(message){
+    setState(() {
+      roomId = message['roomId'];
+      _sizeController.text = "${message['settings']['maxRounds']}";
+      players = message['players'];
+    });
   }
 
   int maxRounds = 0;
@@ -84,24 +95,21 @@ class _CreatePageState extends State<CreateGamePage> {
   @override
   void dispose() {
     _sizeController.dispose();
-    //todo don't run next row if
-    WSService.leave(widget.roomId);
+    //todo don't run next row if game has been started
+    WSService.leave(roomId);
     super.dispose();
   }
 
   start() {
-    Navigator.push(
-      context, MaterialPageRoute(builder: (context) => GamePage(roomId: widget.roomId,))
-    );
+    Navigator.push(context,
+        MaterialPageRoute(builder: (context) => GamePage(roomId: roomId)));
   }
 
   @override
   Widget build(BuildContext context) {
-    if (widget.joinData != null) setupJoinData();
-    if (widget.roomId == 0) WSService.createGame(onMessageReceived);
     return Scaffold(
       backgroundColor: Theme.of(context).colorScheme.secondary,
-      body: widget.roomId == 0
+      body: roomId == 0
           ? const GbLoader()
           : Align(
               alignment: Alignment.center,
@@ -126,7 +134,7 @@ class _CreatePageState extends State<CreateGamePage> {
                         ),
                         Center(
                           child: Text(
-                            '${widget.roomId}',
+                            '${roomId}',
                             style: const TextStyle(fontSize: 24),
                           ),
                         ),

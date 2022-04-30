@@ -23,7 +23,7 @@ class _MainPageState extends State<MainPage> {
 
   createRoom() {
     Navigator.push(
-        context, MaterialPageRoute(builder: (context) => CreateGamePage()));
+        context, MaterialPageRoute(builder: (context) => LobbyPage()));
   }
 
   joinRoom() {
