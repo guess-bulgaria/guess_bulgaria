@@ -17,6 +17,10 @@ class Clock {
     return _time;
   }
 
+  set seconds(int value) {
+    _time = value;
+  }
+
   void _startTimer() {
     _timer?.cancel();
     _timer = Timer.periodic(const Duration(seconds: 1), _onTick);

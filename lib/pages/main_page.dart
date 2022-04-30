@@ -48,6 +48,7 @@ class _MainPageState extends State<MainPage> {
     return Scaffold(
         backgroundColor: Theme.of(context).colorScheme.secondary,
         body: Stack(
+          clipBehavior: Clip.antiAlias,
           children: [
             const ScrollingBackground(),
             Align(
