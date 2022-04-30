@@ -41,6 +41,32 @@ class _MainPageState extends State<MainPage> {
         context, MaterialPageRoute(builder: (context) => const StatsPage()));
   }
 
+  getDrawerButton(VoidCallback callback, {double? left}) {
+    return Positioned(
+      top: MediaQuery.of(context).size.height / 6,
+      left: left ?? -MediaQuery.of(context).size.width / 14,
+      child: Stack(
+        children: [
+          Align(
+            alignment: Alignment.centerLeft,
+            child: Icon(Icons.circle,
+                color: Theme.of(context).colorScheme.primary, size: 64),
+          ),
+          Align(
+            alignment: Alignment.centerLeft,
+            child: Container(
+              margin: const EdgeInsets.only(left: 29, top: 20),
+              child: InkWell(
+                onTap: callback,
+                child: const Icon(Icons.person, color: Colors.black),
+              ),
+            ),
+          )
+        ],
+      ),
+    );
+  }
+
   landmarks() {}
 
   @override
@@ -52,29 +78,7 @@ class _MainPageState extends State<MainPage> {
           clipBehavior: Clip.antiAlias,
           children: [
             const ScrollingBackground(),
-            Positioned(
-              top: MediaQuery.of(context).size.height / 6,
-              left: -30,
-              child: Stack(
-                children: [
-                  Align(
-                    alignment: Alignment.centerLeft,
-                    child: Icon(Icons.circle,
-                        color: Theme.of(context).colorScheme.primary, size: 64),
-                  ),
-                  Align(
-                    alignment: Alignment.centerLeft,
-                    child: Container(
-                      margin: const EdgeInsets.only(left: 29, top: 20),
-                      child: InkWell(
-                        onTap: () => Scaffold.of(context).openDrawer(),
-                        child: const Icon(Icons.person, color: Colors.black),
-                      ),
-                    ),
-                  )
-                ],
-              ),
-            ),
+            getDrawerButton(() => Scaffold.of(context).openDrawer()),
             Align(
               alignment: Alignment.center,
               child: Column(
@@ -112,57 +116,36 @@ class _MainPageState extends State<MainPage> {
         if (isOpen) usernameController.text = UserData.username;
       },
       drawerEnableOpenDragGesture: false,
-      drawer: Container(
-        margin: EdgeInsets.only(bottom: MediaQuery.of(context).size.height / 4),
-        width: MediaQuery.of(context).size.width / 2.2,
-        height: MediaQuery.of(context).size.height / 2,
-        child: Stack(
-          children: [
-            Material(
+      drawer: Stack(
+        children: [
+          Material(
               color: Colors.transparent,
               elevation: 1000,
-              child: Container(
-                margin: EdgeInsets.only(
-                    bottom: MediaQuery.of(context).size.height / 3,
-                    left: MediaQuery.of(context).size.width / 2.7),
-                child: Stack(
+              child: Stack(children: [
+                getDrawerButton(() => Navigator.pop(context),
+                    left: MediaQuery.of(context).size.width / 2.6)
+              ])),
+          Positioned(
+            top: MediaQuery.of(context).size.height / 8,
+            child: SizedBox(
+              width: MediaQuery.of(context).size.width / 2.2,
+              height: MediaQuery.of(context).size.height / 2,
+              child: Drawer(
+                backgroundColor: Theme.of(context).colorScheme.secondary,
+                elevation: 1,
+                child: ListView(
                   children: [
-                    Align(
-                      alignment: Alignment.centerLeft,
-                      child: Icon(Icons.circle,
-                          color: Theme.of(context).colorScheme.primary,
-                          size: 64),
-                    ),
-                    Align(
-                      alignment: Alignment.centerLeft,
-                      child: Container(
-                        margin: const EdgeInsets.only(left: 23),
-                        child: IconButton(
-                          icon: const Icon(Icons.person),
-                          color: Colors.black,
-                          onPressed: () => Navigator.pop(context),
-                        ),
-                      ),
-                    )
+                    const SizedBox(height: 50),
+                    const Text('Никнейм'),
+                    TextFormField(controller: usernameController),
+                    ElevatedButton(
+                        onPressed: setUsername, child: const Text('Запазване')),
                   ],
                 ),
               ),
             ),
-            Drawer(
-              backgroundColor: Theme.of(context).colorScheme.secondary,
-              elevation: 1,
-              child: ListView(
-                children: [
-                  const SizedBox(height: 50),
-                  const Text('Никнейм'),
-                  TextFormField(controller: usernameController),
-                  ElevatedButton(
-                      onPressed: setUsername, child: const Text('Запазване')),
-                ],
-              ),
-            ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
