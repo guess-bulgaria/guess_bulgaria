@@ -80,4 +80,9 @@ class WSService {
     _lastMessage = data;
     _channel!.sink.add(json.encode(data));
   }
+
+  static void startGame(Function callback, int roomId) {
+    _createChannel(callback);
+    _sendMessage('start', data: {'roomId': roomId});
+  }
 }
