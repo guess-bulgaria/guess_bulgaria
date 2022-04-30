@@ -40,6 +40,7 @@ dependencies:
   flutter_dotenv: ^5.0.2
   scrollable_positioned_list: ^0.2.3
   web_socket_channel: ^2.2.0
+  wakelock: ^0.6.1+2
   flutter_mobx: ^2.0.4
   mapbox_gl: ^0.15.0
 

@@ -1,10 +1,11 @@
 import 'dart:math';
-
+import 'package:guess_bulgaria/models/player_stats_model.dart';
 import 'package:guess_bulgaria/services/user_service.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class UserData {
   static var _userId = "";
+  static PlayerStatsModel stats = PlayerStatsModel();
 
   static String get userId => _userId;
 
@@ -48,7 +49,7 @@ class UserData {
   }
 
   String getRandomUsername() {
-    return 'Johnny${Random().nextInt(9000) + 1000}';
+    return 'Пешо${Random().nextInt(9000) + 1000}';
   }
 
   Future<void> setupUserData() async {

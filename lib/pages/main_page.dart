@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:guess_bulgaria/components/navigation_button.dart';
+import 'package:guess_bulgaria/components/scrolling_background.dart';
 import 'package:guess_bulgaria/pages/join_lobby_screen.dart';
 import 'package:guess_bulgaria/pages/lobby_page.dart';
 import 'package:guess_bulgaria/pages/game_page.dart';
+import 'package:guess_bulgaria/pages/stats_page.dart';
 import 'package:guess_bulgaria/storage/online_checker.dart';
 import 'package:guess_bulgaria/storage/user_data.dart';
 
@@ -34,7 +36,10 @@ class _MainPageState extends State<MainPage> {
         MaterialPageRoute(builder: (context) => const JoinLobbyScreen()));
   }
 
-  stats() {}
+  stats() {
+    Navigator.push(
+        context, MaterialPageRoute(builder: (context) => const StatsPage()));
+  }
 
   landmarks() {}
 
@@ -42,28 +47,34 @@ class _MainPageState extends State<MainPage> {
   Widget build(BuildContext context) {
     return Scaffold(
         backgroundColor: Theme.of(context).colorScheme.secondary,
-        body: Align(
-          alignment: Alignment.center,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              NavigationButton(
-                  text: 'Самостоятелна игра', onPressed: playSingle),
-              Observer(builder: (_) {
-                return NavigationButton(
-                    text: 'Създай онлайн игра',
-                    onPressed: onlineChecker.isOnline ? createRoom : null);
-              }),
-              Observer(builder: (_) {
-                return NavigationButton(
-                    text: 'Присъедини се към стая',
-                    onPressed: onlineChecker.isOnline ? joinRoom : null);
-              }),
-              NavigationButton(text: 'Статистики', onPressed: stats),
-              NavigationButton(text: 'Забележителности', onPressed: landmarks),
-            ],
-          ),
+        body: Stack(
+          children: [
+            const ScrollingBackground(),
+            Align(
+              alignment: Alignment.center,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  NavigationButton(
+                      text: 'Самостоятелна игра', onPressed: playSingle),
+                  Observer(builder: (_) {
+                    return NavigationButton(
+                        text: 'Създай онлайн игра',
+                        onPressed: onlineChecker.isOnline ? createRoom : null);
+                  }),
+                  Observer(builder: (_) {
+                    return NavigationButton(
+                        text: 'Присъедини се към стая',
+                        onPressed: onlineChecker.isOnline ? joinRoom : null);
+                  }),
+                  NavigationButton(text: 'Статистики', onPressed: stats),
+                  NavigationButton(
+                      text: 'Забележителности', onPressed: landmarks),
+                ],
+              ),
+            )
+          ],
         ),
         floatingActionButton: Builder(builder: (context) {
           return FloatingActionButton(
