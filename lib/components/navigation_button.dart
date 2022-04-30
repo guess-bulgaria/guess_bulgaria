@@ -18,7 +18,8 @@ class NavigationButton extends StatelessWidget {
       margin: const EdgeInsets.only(bottom: 10),
       child: TextButton(
         style: ButtonStyle(
-            backgroundColor: MaterialStateProperty.all(Colors.brown)),
+          backgroundColor: MaterialStateProperty.all(Colors.brown),
+        ),
         child: Text(
           text,
           style: const TextStyle(fontSize: 16),

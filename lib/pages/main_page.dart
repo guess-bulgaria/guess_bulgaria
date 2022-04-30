@@ -46,11 +46,35 @@ class _MainPageState extends State<MainPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        backgroundColor: Theme.of(context).colorScheme.secondary,
-        body: Stack(
+      backgroundColor: Theme.of(context).colorScheme.secondary,
+      body: Builder(
+        builder: (context) => Stack(
           clipBehavior: Clip.antiAlias,
           children: [
             const ScrollingBackground(),
+            Positioned(
+              top: MediaQuery.of(context).size.height / 6,
+              left: -30,
+              child: Stack(
+                children: [
+                  Align(
+                    alignment: Alignment.centerLeft,
+                    child: Icon(Icons.circle,
+                        color: Theme.of(context).colorScheme.primary, size: 64),
+                  ),
+                  Align(
+                    alignment: Alignment.centerLeft,
+                    child: Container(
+                      margin: const EdgeInsets.only(left: 29, top: 20),
+                      child: InkWell(
+                        onTap: () => Scaffold.of(context).openDrawer(),
+                        child: const Icon(Icons.person, color: Colors.black),
+                      ),
+                    ),
+                  )
+                ],
+              ),
+            ),
             Align(
               alignment: Alignment.center,
               child: Column(
@@ -77,25 +101,70 @@ class _MainPageState extends State<MainPage> {
             )
           ],
         ),
-        floatingActionButton: Builder(builder: (context) {
-          return FloatingActionButton(
-            onPressed: () =>
-                Scaffold.of(context).openDrawer(), // <-- Opens drawer.
-          );
-        }),
-        onDrawerChanged: (_) => {usernameController.text = UserData.username},
-        drawerEnableOpenDragGesture: false,
-        drawer: Drawer(
-            backgroundColor: Theme.of(context).colorScheme.secondary,
-            child: ListView(
-              children: [
-                const SizedBox(height: 50),
-                const Text('Никнейм'),
-                TextFormField(controller: usernameController),
-                ElevatedButton(
-                    onPressed: setUsername, child: const Text('Запазване'))
-              ],
-            )));
+      ),
+      floatingActionButton: Builder(builder: (context) {
+        return FloatingActionButton(
+          onPressed: () =>
+              Scaffold.of(context).openDrawer(), // <-- Opens drawer.
+        );
+      }),
+      onDrawerChanged: (isOpen) {
+        if (isOpen) usernameController.text = UserData.username;
+      },
+      drawerEnableOpenDragGesture: false,
+      drawer: Container(
+        margin: EdgeInsets.only(bottom: MediaQuery.of(context).size.height / 4),
+        width: MediaQuery.of(context).size.width / 2.2,
+        height: MediaQuery.of(context).size.height / 2,
+        child: Stack(
+          children: [
+            Material(
+              color: Colors.transparent,
+              elevation: 1000,
+              child: Container(
+                margin: EdgeInsets.only(
+                    bottom: MediaQuery.of(context).size.height / 3,
+                    left: MediaQuery.of(context).size.width / 2.7),
+                child: Stack(
+                  children: [
+                    Align(
+                      alignment: Alignment.centerLeft,
+                      child: Icon(Icons.circle,
+                          color: Theme.of(context).colorScheme.primary,
+                          size: 64),
+                    ),
+                    Align(
+                      alignment: Alignment.centerLeft,
+                      child: Container(
+                        margin: const EdgeInsets.only(left: 23),
+                        child: IconButton(
+                          icon: const Icon(Icons.person),
+                          color: Colors.black,
+                          onPressed: () => Navigator.pop(context),
+                        ),
+                      ),
+                    )
+                  ],
+                ),
+              ),
+            ),
+            Drawer(
+              backgroundColor: Theme.of(context).colorScheme.secondary,
+              elevation: 1,
+              child: ListView(
+                children: [
+                  const SizedBox(height: 50),
+                  const Text('Никнейм'),
+                  TextFormField(controller: usernameController),
+                  ElevatedButton(
+                      onPressed: setUsername, child: const Text('Запазване')),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
   }
 
   void setUsername() {

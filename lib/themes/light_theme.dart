@@ -3,18 +3,18 @@ import 'package:google_fonts/google_fonts.dart';
 
 class LightTheme {
   static const mainColor = MaterialColor(
-    0x99C4F7A1,
+    0xFF448012,
     <int, Color>{
-      50: Color(0x99C4F7A1),
-      100: Color(0x99C4F7A1),
-      200: Color(0x99C4F7A1),
-      300: Color(0x99C4F7A1),
-      400: Color(0x99C4F7A1),
-      500: Color(0x99C4F7A1),
-      600: Color(0x99C4F7A1),
-      700: Color(0x99C4F7A1),
-      800: Color(0x99C4F7A1),
-      900: Color(0x99C4F7A1),
+      50: Color(0xFF448012),
+      100: Color(0xFF448012),
+      200: Color(0xFF448012),
+      300: Color(0xFF448012),
+      400: Color(0xFF448012),
+      500: Color(0xFF448012),
+      600: Color(0xFF448012),
+      700: Color(0xFF448012),
+      800: Color(0xFF448012),
+      900: Color(0xFF448012),
     },
   );
 

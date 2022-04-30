@@ -21,15 +21,15 @@ class ScrollingBackground extends StatelessWidget {
         child: RotationTransition(
           turns: const AlwaysStoppedAnimation(20 / 360),
           child: Image.asset(
-            'assets/icons/church.png',
+            'assets/icons/background.png',
             color: Colors.black,
             repeat: ImageRepeat.repeat,
             alignment: Alignment.topRight,
             opacity: const AlwaysStoppedAnimation(0.7),
           ),
         ),
-        top: clock.seconds * 5.0 - MediaQuery.of(context).size.height * 4,
-        right: clock.seconds * 5.0 - MediaQuery.of(context).size.height * 4,
+        top: clock.seconds * 6.0 - MediaQuery.of(context).size.height * 4,
+        right: clock.seconds * 6.0 - MediaQuery.of(context).size.height * 4,
         duration: Duration(
             seconds: offset >= -MediaQuery.of(context).size.height * 4 ? 0 : 1),
       );
