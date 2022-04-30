@@ -71,7 +71,12 @@ class WSService {
   }
 
   static void _sendMessage(String type, {dynamic data}) {
-    data = {'type': type, 'id': UserData.userId, ...(data ?? {})};
+    data = {
+      'type': type,
+      'id': UserData.userId,
+      'username': UserData.username,
+      ...(data ?? {})
+    };
     _lastMessage = data;
     _channel!.sink.add(json.encode(data));
   }

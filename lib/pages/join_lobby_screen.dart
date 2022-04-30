@@ -11,11 +11,9 @@ class JoinLobbyScreen extends StatefulWidget {
 }
 
 class _JoinLobbyScreenState extends State<JoinLobbyScreen> {
-  late BuildContext ctx;
   bool isLoading = false;
   @override
   Widget build(BuildContext context) {
-    ctx = context;
     TextEditingController code = TextEditingController();
     return Scaffold(
       backgroundColor: Theme.of(context).colorScheme.secondary,
@@ -36,7 +34,7 @@ class _JoinLobbyScreenState extends State<JoinLobbyScreen> {
                               isLoading = true;
                             }),
                           },
-                      child: const Text('Join papi'))
+                      child: const Text('Присъединяване'))
                 ],
               ),
             ),
@@ -49,7 +47,7 @@ class _JoinLobbyScreenState extends State<JoinLobbyScreen> {
     });
     if (type == 'current-data') {
       Navigator.push(
-          ctx,
+          context,
           MaterialPageRoute(
               builder: (context) => LobbyPage(joinData: message)));
     }

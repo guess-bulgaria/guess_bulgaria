@@ -11,6 +11,7 @@ void main() async {
   await dotenv.load(fileName: ".env");
   EnvConfig.setupEnvConfig();
   SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
+  await UserData().setupUserData();
   runApp(const App());
 }
 
@@ -19,7 +20,6 @@ class App extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    UserData().setupUserId();
     return MaterialApp(
       title: 'Guess Bulgaria',
       theme: LightTheme.getTheme(),

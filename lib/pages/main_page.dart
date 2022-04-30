@@ -5,6 +5,7 @@ import 'package:guess_bulgaria/pages/join_lobby_screen.dart';
 import 'package:guess_bulgaria/pages/lobby_page.dart';
 import 'package:guess_bulgaria/pages/game_page.dart';
 import 'package:guess_bulgaria/storage/online_checker.dart';
+import 'package:guess_bulgaria/storage/user_data.dart';
 
 class MainPage extends StatefulWidget {
   const MainPage({Key? key}) : super(key: key);
@@ -15,6 +16,8 @@ class MainPage extends StatefulWidget {
 
 class _MainPageState extends State<MainPage> {
   final onlineChecker = OnlineChecker();
+  TextEditingController usernameController =
+      TextEditingController(text: UserData.username);
 
   playSingle() {
     Navigator.push(
@@ -38,29 +41,52 @@ class _MainPageState extends State<MainPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Theme.of(context).colorScheme.secondary,
-      body: Align(
-        alignment: Alignment.center,
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.center,
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            NavigationButton(text: 'Самостоятелна игра', onPressed: playSingle),
-            Observer(builder: (_) {
-              return NavigationButton(
-                  text: 'Създай онлайн игра',
-                  onPressed: onlineChecker.isOnline ? createRoom : null);
-            }),
-            Observer(builder: (_) {
-              return NavigationButton(
-                  text: 'Присъедини се към стая',
-                  onPressed: onlineChecker.isOnline ? joinRoom : null);
-            }),
-            NavigationButton(text: 'Статистики', onPressed: stats),
-            NavigationButton(text: 'Забележителности', onPressed: landmarks)
-          ],
+        backgroundColor: Theme.of(context).colorScheme.secondary,
+        body: Align(
+          alignment: Alignment.center,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              NavigationButton(
+                  text: 'Самостоятелна игра', onPressed: playSingle),
+              Observer(builder: (_) {
+                return NavigationButton(
+                    text: 'Създай онлайн игра',
+                    onPressed: onlineChecker.isOnline ? createRoom : null);
+              }),
+              Observer(builder: (_) {
+                return NavigationButton(
+                    text: 'Присъедини се към стая',
+                    onPressed: onlineChecker.isOnline ? joinRoom : null);
+              }),
+              NavigationButton(text: 'Статистики', onPressed: stats),
+              NavigationButton(text: 'Забележителности', onPressed: landmarks),
+            ],
+          ),
         ),
-      ),
-    );
+        floatingActionButton: Builder(builder: (context) {
+          return FloatingActionButton(
+            onPressed: () =>
+                Scaffold.of(context).openDrawer(), // <-- Opens drawer.
+          );
+        }),
+        onDrawerChanged: (_) => {usernameController.text = UserData.username},
+        drawerEnableOpenDragGesture: false,
+        drawer: Drawer(
+            backgroundColor: Theme.of(context).colorScheme.secondary,
+            child: ListView(
+              children: [
+                const SizedBox(height: 50),
+                const Text('Никнейм'),
+                TextFormField(controller: usernameController),
+                ElevatedButton(
+                    onPressed: setUsername, child: const Text('Запазване'))
+              ],
+            )));
+  }
+
+  void setUsername() {
+    UserData().setUsername(usernameController.text);
   }
 }
