@@ -1,6 +1,7 @@
 import 'dart:math';
 
 import 'package:flutter/material.dart';
+import 'package:guess_bulgaria/services/ws_service.dart';
 import 'package:mapbox_gl/mapbox_gl.dart';
 
 class GamePage extends StatefulWidget {
@@ -34,6 +35,15 @@ class _GamePageState extends State<GamePage> {
   }
 
   void _lockAnswer() {}
+
+  @override
+  void initState() {
+    if (widget.roomId != 0) {
+      WSService.startGame(onMessageReceived, widget.roomId);
+    }
+
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -88,5 +98,9 @@ class _GamePageState extends State<GamePage> {
         ],
       ),
     );
+  }
+
+  void onMessageReceived(String type, dynamic message) {
+    
   }
 }
