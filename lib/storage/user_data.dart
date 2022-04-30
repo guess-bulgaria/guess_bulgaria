@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:guess_bulgaria/services/user_service.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -5,6 +7,10 @@ class UserData {
   static var _userId = "";
 
   static String get userId => _userId;
+
+  static var _username = "";
+
+  static String get username => _username;
 
   SharedPreferences? _prefs;
 
@@ -23,7 +29,31 @@ class UserData {
       var response = await UserService.createUser();
       _userId = response.data["_id"];
       await _setPrefString("id", _userId);
-    } catch (e) {}
+    } catch (_) {}
+  }
+
+  Future<void> setUsername(String username) {
+    _username = username;
+    return _setPrefString("username", username);
+  }
+
+  Future<void> loadUsername() async {
+    var storedUsername = await _getPrefString("username");
+    if (storedUsername != null && storedUsername.isNotEmpty) {
+      _username = storedUsername;
+    } else {
+      _username = getRandomUsername();
+      await setUsername(_username);
+    }
+  }
+
+  String getRandomUsername() {
+    return 'Johnny${Random().nextInt(9000) + 1000}';
+  }
+
+  Future<void> setupUserData() async {
+    await setupUserId();
+    await loadUsername();
   }
 
   Future<void> _setPrefString(String key, String value) async {

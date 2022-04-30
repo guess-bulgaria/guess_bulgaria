@@ -51,6 +51,9 @@ class _GamePageState extends State<GamePage> {
             child: Stack(
               children: [
                 MapboxMap(
+                  //Out of the box logo w/ info that crashes the app on click
+                  logoViewMargins: const Point(15000, 15000),
+                  attributionButtonMargins: const Point(15000, 15000),
                   styleString:
                       "mapbox://styles/zealbg/cl23l4amx000m14nvowuqneao",
                   accessToken:

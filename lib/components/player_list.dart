@@ -13,9 +13,11 @@ class PlayerList extends StatelessWidget {
     for (var player in players) {
       rows.add(Row(
         children: [
-          Icon(Icons.circle, color: PlayerColors.color(player['color'])),
+          Stack(children: [
+            Icon(Icons.circle, color: PlayerColors.color(player['color'])),
+            Icon(player['isCreator'] ? Icons.check : null, size: 24),
+          ]),
           Text(player['username'] ?? player['id']),
-          Icon(player['isCreator'] ? Icons.accessible : null),
         ],
       ));
     }
@@ -25,7 +27,6 @@ class PlayerList extends StatelessWidget {
           itemCount: rows.length,
           itemBuilder: (context, index) => rows[index],
           padding: const EdgeInsets.only(bottom: 20),
-        )
-    );
+        ));
   }
 }

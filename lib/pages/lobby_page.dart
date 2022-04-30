@@ -4,6 +4,7 @@ import 'package:guess_bulgaria/components/loader.dart';
 import 'package:guess_bulgaria/components/navigation_button.dart';
 import 'package:guess_bulgaria/components/player_list.dart';
 import 'package:guess_bulgaria/pages/game_page.dart';
+import 'package:guess_bulgaria/pages/main_page.dart';
 import 'package:guess_bulgaria/services/ws_service.dart';
 import 'dart:async';
 
@@ -25,14 +26,13 @@ class _LobbyPageState extends State<LobbyPage> {
   int roomId = 0;
 
   void _sendSettings() {
-    if(!_isCreator) return;
+    if (!_isCreator) return;
     // debounce so it won't activate on each number type
     if (_debounce?.isActive ?? false) _debounce!.cancel();
     _debounce = Timer(const Duration(milliseconds: 700), () {
       WSService.changeSettings(roomId, maxRounds, 0, []);
     });
   }
-
 
   @override
   void initState() {
@@ -45,7 +45,8 @@ class _LobbyPageState extends State<LobbyPage> {
   }
 
   void leave() {
-    Navigator.pop(context);
+    Navigator.push(
+        context, MaterialPageRoute(builder: (context) => const MainPage()));
   }
 
   void onMessageReceived(String type, dynamic message) {
@@ -73,7 +74,7 @@ class _LobbyPageState extends State<LobbyPage> {
     WSService.changeCallback(onMessageReceived);
   }
 
-  void setRoomData(message){
+  void setRoomData(message) {
     setState(() {
       roomId = message['roomId'];
       _sizeController.text = "${message['settings']['maxRounds']}";
@@ -128,13 +129,13 @@ class _LobbyPageState extends State<LobbyPage> {
                       children: <Widget>[
                         const Center(
                           child: Text(
-                            "Код за присъединяване:",
+                            "Код за присъединяване",
                             style: TextStyle(fontSize: 20),
                           ),
                         ),
                         Center(
                           child: Text(
-                            '${roomId}',
+                            '$roomId',
                             style: const TextStyle(fontSize: 24),
                           ),
                         ),
@@ -151,10 +152,12 @@ class _LobbyPageState extends State<LobbyPage> {
                             FilteringTextInputFormatter.allow(RegExp(r'[0-9]')),
                           ],
                         ),
+                        const SizedBox(height: 15),
                         const Text(
                           "Региони",
                           style: TextStyle(fontSize: 20),
                         ),
+                        const SizedBox(height: 15),
                         PlayerList(players),
                         Expanded(
                           child: Align(
