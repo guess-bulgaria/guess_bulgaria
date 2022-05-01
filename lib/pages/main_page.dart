@@ -41,28 +41,31 @@ class _MainPageState extends State<MainPage> {
         context, MaterialPageRoute(builder: (context) => const StatsPage()));
   }
 
-  getDrawerButton(VoidCallback callback, {double? left}) {
+  getDrawerButton(VoidCallback callback, {double? left, int top = 6}) {
     return Positioned(
-      top: MediaQuery.of(context).size.height / 6,
+      top: MediaQuery.of(context).size.height / top,
       left: left ?? -MediaQuery.of(context).size.width / 14,
-      child: Stack(
-        children: [
-          Align(
-            alignment: Alignment.centerLeft,
-            child: Icon(Icons.circle,
-                color: Theme.of(context).colorScheme.primary, size: 64),
-          ),
-          Align(
-            alignment: Alignment.centerLeft,
-            child: Container(
-              margin: const EdgeInsets.only(left: 29, top: 20),
-              child: InkWell(
-                onTap: callback,
+      child: InkWell(
+        hoverColor: Colors.transparent,
+        splashColor: Colors.transparent,
+        highlightColor: Colors.transparent,
+        onTap: callback,
+        child: Stack(
+          children: [
+            Align(
+              alignment: Alignment.centerLeft,
+              child: Icon(Icons.circle,
+                  color: Theme.of(context).colorScheme.primary, size: 64),
+            ),
+            Align(
+              alignment: Alignment.centerLeft,
+              child: Container(
+                margin: const EdgeInsets.only(left: 29, top: 20),
                 child: const Icon(Icons.person, color: Colors.black),
               ),
             ),
-          )
-        ],
+          ],
+        ),
       ),
     );
   }
@@ -78,7 +81,7 @@ class _MainPageState extends State<MainPage> {
           clipBehavior: Clip.antiAlias,
           children: [
             const ScrollingBackground(),
-            getDrawerButton(() => Scaffold.of(context).openDrawer()),
+            getDrawerButton(() => Scaffold.of(context).openDrawer(), top: 6),
             Align(
               alignment: Alignment.center,
               child: Column(
@@ -116,27 +119,31 @@ class _MainPageState extends State<MainPage> {
         if (isOpen) usernameController.text = UserData.username;
       },
       drawerEnableOpenDragGesture: false,
-      drawer: Stack(
-        children: [
-          Material(
+      drawer: Container(
+        margin: EdgeInsets.only(bottom: MediaQuery.of(context).size.height / 4),
+        width: MediaQuery.of(context).size.width / 2.2,
+        height: MediaQuery.of(context).size.height / 2,
+        child: Stack(
+          children: [
+            Material(
               color: Colors.transparent,
               elevation: 1000,
-              child: Stack(children: [
-                getDrawerButton(() => Navigator.pop(context),
-                    left: MediaQuery.of(context).size.width / 2.6)
-              ])),
-          Positioned(
-            top: MediaQuery.of(context).size.height / 8,
-            child: SizedBox(
-              width: MediaQuery.of(context).size.width / 2.2,
-              height: MediaQuery.of(context).size.height / 2,
+              child: Stack(
+                clipBehavior: Clip.none,
+                children: [
+                  getDrawerButton(() => Navigator.pop(context),
+                      left: MediaQuery.of(context).size.width / 2.6, top: 24)
+                ],
+              ),
+            ),
+            Positioned(
               child: Drawer(
                 backgroundColor: Theme.of(context).colorScheme.secondary,
                 elevation: 1,
                 child: ListView(
                   children: [
                     const SizedBox(height: 50),
-                    const Text('Никнейм'),
+                    const Text('Потребителско име'),
                     TextFormField(controller: usernameController),
                     ElevatedButton(
                         onPressed: setUsername, child: const Text('Запазване')),
@@ -144,8 +151,8 @@ class _MainPageState extends State<MainPage> {
                 ),
               ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
