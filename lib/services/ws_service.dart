@@ -75,6 +75,7 @@ class WSService {
       'type': type,
       'id': UserData.userId,
       'username': UserData.username,
+      'color': UserData.defaultColor,
       ...(data ?? {})
     };
     _lastMessage = data;

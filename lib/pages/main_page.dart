@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
+import 'package:guess_bulgaria/components/color_picker.dart';
 import 'package:guess_bulgaria/components/navigation_button.dart';
 import 'package:guess_bulgaria/components/scrolling_background.dart';
 import 'package:guess_bulgaria/pages/join_lobby_screen.dart';
@@ -109,14 +110,12 @@ class _MainPageState extends State<MainPage> {
           ],
         ),
       ),
-      floatingActionButton: Builder(builder: (context) {
-        return FloatingActionButton(
-          onPressed: () =>
-              Scaffold.of(context).openDrawer(), // <-- Opens drawer.
-        );
-      }),
       onDrawerChanged: (isOpen) {
-        if (isOpen) usernameController.text = UserData.username;
+        if (isOpen) {
+          usernameController.text = UserData.username;
+        } else {
+          setUsername();
+        }
       },
       drawerEnableOpenDragGesture: false,
       drawer: Container(
@@ -141,12 +140,23 @@ class _MainPageState extends State<MainPage> {
                 backgroundColor: Theme.of(context).colorScheme.secondary,
                 elevation: 1,
                 child: ListView(
+                  padding: const EdgeInsets.all(14),
                   children: [
-                    const SizedBox(height: 50),
-                    const Text('Потребителско име'),
-                    TextFormField(controller: usernameController),
-                    ElevatedButton(
-                        onPressed: setUsername, child: const Text('Запазване')),
+                    TextFormField(
+                      controller: usernameController,
+                      decoration: const InputDecoration(
+                        labelText: "Потребителско име",
+                      ),
+                    ),
+                    Container(
+                      margin: const EdgeInsets.only(top: 10),
+                      child: ColorPicker(
+                        iconMargin: 3,
+                        selectedColor: UserData.defaultColor,
+                        title: "Предпочитан цвят",
+                        onColorChange: setDefaultColor,
+                      ),
+                    )
                   ],
                 ),
               ),
@@ -157,7 +167,14 @@ class _MainPageState extends State<MainPage> {
     );
   }
 
+  void setDefaultColor(int i) async {
+    await UserData().setDefaultColor(i);
+    setState(() => {});
+  }
+
   void setUsername() {
-    UserData().setUsername(usernameController.text);
+    if (usernameController.text.isNotEmpty) {
+      UserData().setUsername(usernameController.text);
+    }
   }
 }
