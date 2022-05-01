@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:guess_bulgaria/configs/player_colors.dart';
+import 'package:guess_bulgaria/storage/user_data.dart';
 import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
 
 class PlayerList extends StatelessWidget {
   final List<dynamic> players;
   final PlayerListTypes type;
+
   const PlayerList(this.players, this.type, {Key? key}) : super(key: key);
 
   @override
@@ -37,8 +39,18 @@ class PlayerList extends StatelessWidget {
       rows.add(Row(
         children: [
           Stack(children: [
-            Icon(Icons.circle, color: PlayerColors.color(player['color'])),
-            Icon(player['isCreator'] ? Icons.check : null, size: 24),
+            Icon(Icons.circle,
+                color: PlayerColors.color(player['color']), size: 25),
+            Container(
+              margin: const EdgeInsets.only(top: 3, left: 3),
+              child: Icon(
+                  player['isCreator']
+                      ? Icons.star
+                      : player['_id'] == UserData.userId
+                          ? Icons.person
+                          : null,
+                  size: 19),
+            ),
           ]),
           Text(player['username'] ?? player['id']),
         ],
@@ -49,7 +61,7 @@ class PlayerList extends StatelessWidget {
 
   List<Widget> endGameResults() {
     List<Widget> rows = [];
-    
+
     players.sort(((a, b) => b["points"] - a["points"]));
     int index = 1;
     for (var player in players) {

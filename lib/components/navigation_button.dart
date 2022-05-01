@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:guess_bulgaria/services/audio_service.dart';
 
 class NavigationButton extends StatelessWidget {
   const NavigationButton(
@@ -10,6 +11,11 @@ class NavigationButton extends StatelessWidget {
   final String text;
   final VoidCallback? onPressed;
 
+  void onClick(){
+    AudioService.click();
+    onPressed!();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -17,15 +23,12 @@ class NavigationButton extends StatelessWidget {
       height: height ?? 60,
       margin: const EdgeInsets.only(bottom: 10),
       child: TextButton(
-        style: ButtonStyle(
-          backgroundColor: MaterialStateProperty.all(Colors.brown),
-        ),
         child: Text(
           text,
-          style: const TextStyle(fontSize: 16),
+          style: TextStyle(fontSize: 18, color: Theme.of(context).secondaryHeaderColor),
           textAlign: TextAlign.center,
         ),
-        onPressed: onPressed,
+        onPressed: onPressed != null ? onClick : null,
       ),
     );
   }

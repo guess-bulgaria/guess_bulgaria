@@ -42,10 +42,16 @@ class _ColorPickerState extends State<ColorPicker> {
                   padding: EdgeInsets.all(widget.iconMargin),
                   child: i == widget.selectedColor
                       ? Stack(children: [
-                          Icon(Icons.circle,
-                              color: colors[i], size: widget.iconSize),
-                          Icon(Icons.check,
-                              color: Colors.black, size: widget.iconSize)
+                          Center(
+                            child: Icon(Icons.circle,
+                                color: colors[i], size: widget.iconSize),
+                          ),
+                          Container(
+                            margin: const EdgeInsets.only(top: 5, left: 5),
+                            child: Icon(Icons.check,
+                                color: Colors.black,
+                                size: widget.iconSize - 10),
+                          )
                         ])
                       : InkWell(
                           hoverColor: Colors.transparent,

@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:guess_bulgaria/components/color_picker.dart';
+import 'package:guess_bulgaria/components/main_page_drawer.dart';
 import 'package:guess_bulgaria/components/navigation_button.dart';
 import 'package:guess_bulgaria/components/scrolling_background.dart';
 import 'package:guess_bulgaria/pages/join_lobby_screen.dart';
@@ -9,6 +11,8 @@ import 'package:guess_bulgaria/pages/game_page.dart';
 import 'package:guess_bulgaria/pages/stats_page.dart';
 import 'package:guess_bulgaria/storage/online_checker.dart';
 import 'package:guess_bulgaria/storage/user_data.dart';
+
+import '../components/open_drawer_button.dart';
 
 class MainPage extends StatefulWidget {
   const MainPage({Key? key}) : super(key: key);
@@ -42,53 +46,43 @@ class _MainPageState extends State<MainPage> {
         context, MaterialPageRoute(builder: (context) => const StatsPage()));
   }
 
-  getDrawerButton(VoidCallback callback, {double? left, int top = 6}) {
-    return Positioned(
-      top: MediaQuery.of(context).size.height / top,
-      left: left ?? -MediaQuery.of(context).size.width / 14,
-      child: InkWell(
-        hoverColor: Colors.transparent,
-        splashColor: Colors.transparent,
-        highlightColor: Colors.transparent,
-        onTap: callback,
-        child: Stack(
-          children: [
-            Align(
-              alignment: Alignment.centerLeft,
-              child: Icon(Icons.circle,
-                  color: Theme.of(context).colorScheme.primary, size: 64),
-            ),
-            Align(
-              alignment: Alignment.centerLeft,
-              child: Container(
-                margin: const EdgeInsets.only(left: 29, top: 20),
-                child: const Icon(Icons.person, color: Colors.black),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
   landmarks() {}
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      resizeToAvoidBottomInset: false,
       backgroundColor: Theme.of(context).colorScheme.secondary,
       body: Builder(
         builder: (context) => Stack(
           clipBehavior: Clip.antiAlias,
           children: [
             const ScrollingBackground(),
-            getDrawerButton(() => Scaffold.of(context).openDrawer(), top: 6),
             Align(
-              alignment: Alignment.center,
+              alignment: Alignment.topCenter,
               child: Column(
-                crossAxisAlignment: CrossAxisAlignment.center,
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
+                  Container(
+                    margin: EdgeInsets.only(
+                        bottom: MediaQuery.of(context).size.height / 16,
+                        left: 50,
+                        right: 50),
+                    child: Stack(
+                      children: [
+                        Text(
+                          // "РАЗУЧИ БългариЯ",
+                          // "Познай къде в българия",
+                          "НАМЕРИ БългариЯ",
+                          style: GoogleFonts.amaticSc(
+                              fontSize: 64,
+                              fontWeight: FontWeight.bold,
+                              height: 0.77),
+                          textAlign: TextAlign.center,
+                        )
+                      ],
+                    ),
+                  ),
                   NavigationButton(
                       text: 'Самостоятелна игра', onPressed: playSingle),
                   Observer(builder: (_) {
@@ -106,7 +100,8 @@ class _MainPageState extends State<MainPage> {
                       text: 'Забележителности', onPressed: landmarks),
                 ],
               ),
-            )
+            ),
+            OpenDrawerButton(clickCallback: () => Scaffold.of(context).openDrawer(), top: 6)
           ],
         ),
       ),
@@ -118,58 +113,8 @@ class _MainPageState extends State<MainPage> {
         }
       },
       drawerEnableOpenDragGesture: false,
-      drawer: Container(
-        margin: EdgeInsets.only(bottom: MediaQuery.of(context).size.height / 4),
-        width: MediaQuery.of(context).size.width / 2.2,
-        height: MediaQuery.of(context).size.height / 2,
-        child: Stack(
-          children: [
-            Material(
-              color: Colors.transparent,
-              elevation: 1000,
-              child: Stack(
-                clipBehavior: Clip.none,
-                children: [
-                  getDrawerButton(() => Navigator.pop(context),
-                      left: MediaQuery.of(context).size.width / 2.6, top: 24)
-                ],
-              ),
-            ),
-            Positioned(
-              child: Drawer(
-                backgroundColor: Theme.of(context).colorScheme.secondary,
-                elevation: 1,
-                child: ListView(
-                  padding: const EdgeInsets.all(14),
-                  children: [
-                    TextFormField(
-                      controller: usernameController,
-                      decoration: const InputDecoration(
-                        labelText: "Потребителско име",
-                      ),
-                    ),
-                    Container(
-                      margin: const EdgeInsets.only(top: 10),
-                      child: ColorPicker(
-                        iconMargin: 3,
-                        selectedColor: UserData.defaultColor,
-                        title: "Предпочитан цвят",
-                        onColorChange: setDefaultColor,
-                      ),
-                    )
-                  ],
-                ),
-              ),
-            ),
-          ],
-        ),
-      ),
+      drawer: MainPageDrawer(usernameController: usernameController),
     );
-  }
-
-  void setDefaultColor(int i) async {
-    await UserData().setDefaultColor(i);
-    setState(() => {});
   }
 
   void setUsername() {
