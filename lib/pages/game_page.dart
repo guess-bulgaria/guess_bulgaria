@@ -1,8 +1,11 @@
 import 'dart:math';
 
 import 'package:flutter/material.dart';
+import 'package:guess_bulgaria/components/navigation_button.dart';
+import 'package:guess_bulgaria/pages/main_page.dart';
 import 'package:guess_bulgaria/services/ws_service.dart';
 import 'package:mapbox_gl/mapbox_gl.dart';
+import 'package:guess_bulgaria/components/player_list.dart';
 
 class GamePage extends StatefulWidget {
   int roomId;
@@ -104,6 +107,45 @@ class _GamePageState extends State<GamePage> {
   }
 
   void onMessageReceived(String type, dynamic message) {
-    
+    switch (type) {
+      case "end-game":
+        showEndGameResults(message);
+        break;
+    }
+  }
+
+  void showEndGameResults(dynamic message) {
+    showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (BuildContext context) => AlertDialog(
+              title: const Align(
+                alignment: Alignment.center,
+                child: Text("Резултати"),
+              ),
+              content: SizedBox(
+                height: double.maxFinite,
+                width: double.maxFinite,
+                child:
+                    PlayerList(message["players"], PlayerListTypes.gameResults),
+              ),
+              actions: [
+                Align(
+                  alignment: Alignment.center,
+                  child: NavigationButton(
+                    text: "Начална страница",
+                    onPressed: endGame,
+                    width: double.maxFinite,
+                  ),
+                )
+              ],
+            ));
+  }
+
+  void endGame() {
+    // Navigator.push(
+    //       context,
+    //       MaterialPageRoute(
+    //           builder: (context) => const MainPage()));
   }
 }

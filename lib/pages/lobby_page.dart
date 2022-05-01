@@ -158,7 +158,7 @@ class _LobbyPageState extends State<LobbyPage> {
                           style: TextStyle(fontSize: 20),
                         ),
                         const SizedBox(height: 15),
-                        PlayerList(players),
+                        PlayerList(players, PlayerListTypes.lobby),
                         Expanded(
                           child: Align(
                             alignment: Alignment.bottomCenter,
