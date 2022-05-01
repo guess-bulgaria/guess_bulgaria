@@ -5,21 +5,21 @@ import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
 
 class PlayerList extends StatelessWidget {
   final List<dynamic> players;
+  final double height;
   final PlayerListTypes type;
 
-  const PlayerList(this.players, this.type, {Key? key}) : super(key: key);
+  const PlayerList(this.players, this.type, {Key? key, this.height = 100})
+      : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     List<Widget> rows = generateRows(type);
 
-    return SizedBox(
-        height: 100,
-        child: ScrollablePositionedList.builder(
-          itemCount: rows.length,
-          itemBuilder: (context, index) => rows[index],
-          padding: const EdgeInsets.only(bottom: 20),
-        ));
+    return ScrollablePositionedList.builder(
+      itemCount: rows.length,
+      itemBuilder: (context, index) => rows[index],
+      padding: const EdgeInsets.only(bottom: 20),
+    );
   }
 
   List<Widget> generateRows(PlayerListTypes type) {
@@ -40,19 +40,16 @@ class PlayerList extends StatelessWidget {
         children: [
           Stack(children: [
             Icon(Icons.circle,
-                color: PlayerColors.color(player['color']), size: 25),
+                color: PlayerColors.color(player['color']), size: 32),
             Container(
-              margin: const EdgeInsets.only(top: 3, left: 3),
-              child: Icon(
-                  player['isCreator']
-                      ? Icons.star
-                      : player['_id'] == UserData.userId
-                          ? Icons.person
-                          : null,
-                  size: 19),
+              margin: const EdgeInsets.only(top: 6, left: 6),
+              child: Icon(player['isCreator'] ? Icons.star : null, size: 20),
             ),
           ]),
-          Text(player['username'] ?? player['id']),
+          Text(
+            '${player['username'] ?? player['id']} ${player['id'] == UserData.userId ? '(Ти)' : ''}',
+            style: const TextStyle(fontSize: 26),
+          ),
         ],
       ));
     }

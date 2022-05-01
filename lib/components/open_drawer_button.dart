@@ -3,9 +3,10 @@ import 'package:flutter/material.dart';
 class OpenDrawerButton extends StatelessWidget {
   final double? left;
   final int top;
+  final IconData? icon;
   final VoidCallback clickCallback;
 
-  const OpenDrawerButton({Key? key, required this.clickCallback, this.left, this.top = 6}) : super(key: key);
+  const OpenDrawerButton({Key? key, required this.clickCallback, this.left, this.top = 6, this.icon}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -28,7 +29,7 @@ class OpenDrawerButton extends StatelessWidget {
               alignment: Alignment.centerLeft,
               child: Container(
                 margin: const EdgeInsets.only(left: 29, top: 20),
-                child: const Icon(Icons.person, color: Colors.black),
+                child: Icon(icon ?? Icons.person, color: Colors.black),
               ),
             ),
           ],

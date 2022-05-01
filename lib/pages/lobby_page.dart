@@ -10,6 +10,11 @@ import 'dart:async';
 
 import 'package:guess_bulgaria/storage/user_data.dart';
 
+import '../components/color_picker.dart';
+import '../components/drawer.dart';
+import '../components/open_drawer_button.dart';
+import '../components/scrolling_background.dart';
+
 // ignore: must_be_immutable
 class LobbyPage extends StatefulWidget {
   dynamic joinData;
@@ -24,13 +29,23 @@ class _LobbyPageState extends State<LobbyPage> {
   Timer? _debounce;
   bool _isCreator = true;
   int roomId = 0;
+  bool _isStarted = false;
+  int color = UserData.defaultColor;
+  List<dynamic> players = [];
+  List<int> usedColors = [];
+
+  int maxRounds = 0;
+  int roundTime = 0;
+
+  final TextEditingController _sizeController = TextEditingController();
+  final TextEditingController _timeController = TextEditingController();
 
   void _sendSettings() {
     if (!_isCreator) return;
     // debounce so it won't activate on each number type
     if (_debounce?.isActive ?? false) _debounce!.cancel();
     _debounce = Timer(const Duration(milliseconds: 700), () {
-      WSService.changeSettings(roomId, maxRounds, 0, []);
+      WSService.changeSettings(roomId, maxRounds, roundTime, []);
     });
   }
 
@@ -53,6 +68,18 @@ class _LobbyPageState extends State<LobbyPage> {
     switch (type) {
       case 'current-data':
         setRoomData(message);
+        break;
+      case 'color-change':
+        setState(() {
+          usedColors = [];
+          for (final player in players) {
+            if (player['id'] == message['id']) {
+              player['color'] = message['color'];
+              if(player['id'] == UserData.userId) color = player['color'];
+            }
+            usedColors.add(player['color']);
+          }
+        });
         break;
       case 'player-join':
       case 'player-leave':
@@ -78,114 +105,192 @@ class _LobbyPageState extends State<LobbyPage> {
     setState(() {
       roomId = message['roomId'];
       _sizeController.text = "${message['settings']['maxRounds']}";
+      _timeController.text = "${message['settings']['answerTimeInSeconds']}";
       players = message['players'];
+      usedColors = [];
+      for (var player in players) {
+        if (player['id'] == UserData.userId) {
+          color = player['color'];
+        }
+        usedColors.add(player['color']);
+      }
     });
   }
 
-  int maxRounds = 0;
-  List<dynamic> players = [];
-
   void onRoundsChange(String r) {
+    print("asd: ${_sizeController.selection.start} ${_sizeController.selection.end} ${_sizeController.selection.extent}");
     maxRounds = int.tryParse(r) ?? 0;
-    if (maxRounds == 0) _sizeController.text = '0';
+    if (maxRounds == 0) {
+      _sizeController.text = '0';
+      _sizeController.selection =
+          TextSelection.fromPosition(const TextPosition(offset: 0)).extendTo(const TextPosition(offset: 1));
+    }
     _sendSettings();
   }
 
-  final TextEditingController _sizeController = TextEditingController();
+  void onTimeChange(String r) {
+    roundTime = int.tryParse(r) ?? 0;
+    if (roundTime == 0) {
+      _timeController.text = '0';
+      _timeController.selection =
+          TextSelection.fromPosition(const TextPosition(offset: 0)).extendTo(const TextPosition(offset: 1));
+    }
+    _sendSettings();
+  }
 
   @override
   void dispose() {
     _sizeController.dispose();
-    //todo don't run next row if game has been started
-    WSService.leave(roomId);
+    _timeController.dispose();
+    if (!_isStarted) WSService.leave(roomId);
     super.dispose();
   }
 
-  start() {
+  void start() {
+    _isStarted = true;
     Navigator.push(context,
         MaterialPageRoute(builder: (context) => GamePage(roomId: roomId)));
   }
 
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      resizeToAvoidBottomInset: false,
       backgroundColor: Theme.of(context).colorScheme.secondary,
-      body: roomId == 0
-          ? const GbLoader()
-          : Align(
-              alignment: Alignment.center,
-              child: FractionallySizedBox(
-                widthFactor: 0.9,
-                heightFactor: 0.9,
-                child: DecoratedBox(
-                  decoration: BoxDecoration(
-                      border: Border.all(color: Colors.black, width: 4.0)),
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(
-                        vertical: 15, horizontal: 25),
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.start,
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: <Widget>[
-                        const Center(
-                          child: Text(
-                            "Код за присъединяване",
-                            style: TextStyle(fontSize: 20),
-                          ),
-                        ),
-                        Center(
-                          child: Text(
-                            '$roomId',
-                            style: const TextStyle(fontSize: 24),
-                          ),
-                        ),
-                        TextFormField(
-                          keyboardType: TextInputType.number,
-                          showCursor: false,
-                          enabled: _isCreator,
-                          controller: _sizeController,
-                          onChanged: (rounds) => onRoundsChange(rounds),
-                          decoration: const InputDecoration(
-                            labelText: "Максимален брой рундове",
-                          ),
-                          inputFormatters: <TextInputFormatter>[
-                            FilteringTextInputFormatter.allow(RegExp(r'[0-9]')),
+      body: Builder(
+        builder: (context) => Stack(
+          clipBehavior: Clip.antiAlias,
+          children: [
+            const ScrollingBackground(),
+            OpenDrawerButton(
+              icon: Icons.settings,
+              clickCallback: () => Scaffold.of(context).openDrawer(),
+              top: 6,
+            ),
+            roomId == 0
+                ? const GbLoader()
+                : Align(
+                    alignment: Alignment.center,
+                    child: FractionallySizedBox(
+                      widthFactor: 0.9,
+                      heightFactor: 0.9,
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(
+                            vertical: 15, horizontal: 25),
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.start,
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: <Widget>[
+                            Expanded(
+                              flex: 10,
+                              child: Column(
+                                children: [
+                                  const Text(
+                                    "Код за присъединяване",
+                                    style: TextStyle(fontSize: 20),
+                                  ),
+                                  Text(
+                                    '$roomId',
+                                    style: const TextStyle(
+                                        fontSize: 24,
+                                        fontWeight: FontWeight.bold),
+                                  ),
+                                  const SizedBox(height: 15),
+                                  const Text(
+                                    "Играчи",
+                                    style: TextStyle(fontSize: 26),
+                                  ),
+                                  const Divider(thickness: 0.7),
+                                  Expanded(
+                                    child: PlayerList(
+                                      players,
+                                      PlayerListTypes.lobby,
+                                    ),
+                                  ),
+                                  const Divider(thickness: 0.7),
+                                ],
+                              ),
+                            ),
+                            Expanded(
+                              child: Align(
+                                alignment: Alignment.bottomCenter,
+                                child: Row(
+                                  children: [
+                                    Expanded(
+                                      flex: 1,
+                                      child: NavigationButton(
+                                        text: "Излез",
+                                        onPressed: leave,
+                                      ),
+                                    ),
+                                    Expanded(
+                                      flex: 1,
+                                      child: NavigationButton(
+                                        text: "Старт",
+                                        onPressed:
+                                            players.length > 1 ? start : null,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
                           ],
                         ),
-                        const SizedBox(height: 15),
-                        const Text(
-                          "Региони",
-                          style: TextStyle(fontSize: 20),
-                        ),
-                        const SizedBox(height: 15),
-                        PlayerList(players, PlayerListTypes.lobby),
-                        Expanded(
-                          child: Align(
-                            alignment: Alignment.bottomCenter,
-                            child: Column(
-                              mainAxisAlignment: MainAxisAlignment.end,
-                              crossAxisAlignment: CrossAxisAlignment.end,
-                              children: [
-                                NavigationButton(
-                                  text: "Старт",
-                                  width: double.maxFinite,
-                                  onPressed: players.length > 1 ? start : null,
-                                ),
-                                NavigationButton(
-                                  text: "Напусни",
-                                  width: double.maxFinite,
-                                  onPressed: leave,
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
-                      ],
+                      ),
                     ),
                   ),
+          ],
+        ),
+      ),
+      drawerEnableOpenDragGesture: false,
+      drawer: GbDrawer(
+        icon: Icons.settings,
+        children: [
+          TextFormField(
+            keyboardType: TextInputType.number,
+            decoration: InputDecoration(
+                prefix: Container(
+                    child: const Text("Рундове:"),
+                    margin: const EdgeInsets.only(right: 10)),
+                prefixStyle: const TextStyle(fontSize: 16)),
+            enabled: _isCreator,
+            controller: _sizeController,
+            onChanged: (rounds) => onRoundsChange(rounds),
+            inputFormatters: <TextInputFormatter>[
+              FilteringTextInputFormatter.allow(RegExp(r'[0-9]')),
+            ],
+          ),
+          TextFormField(
+            keyboardType: TextInputType.number,
+            decoration: InputDecoration(
+                prefix: Container(
+                  child: const Text("Време:"),
+                  margin: const EdgeInsets.only(right: 10),
                 ),
-              ),
+                prefixStyle: const TextStyle(fontSize: 16),
+                suffix: const Text("сек."),
+                suffixStyle: const TextStyle(fontSize: 16)),
+            enabled: _isCreator,
+            controller: _timeController,
+            onChanged: (rounds) => onTimeChange(rounds),
+            inputFormatters: <TextInputFormatter>[
+              FilteringTextInputFormatter.allow(RegExp(r'[0-9]')),
+            ],
+          ),
+          Container(
+            margin: const EdgeInsets.only(top: 10),
+            child: ColorPicker(
+              iconMargin: 3,
+              selectedColor: color,
+              title: "Цвят",
+              onColorChange: (i) => WSService.changeColor(roomId, i),
             ),
+          ),
+          const Divider(thickness: 0.45)
+        ],
+      ),
     );
   }
 }

@@ -50,32 +50,43 @@ class LightTheme {
     },
   );
 
+  static const textColor = Colors.white70;
+
   static ThemeData getTheme() {
     return ThemeData(
-        // brightness: Brightness.dark,
-        primaryColor: mainColor,
-        primarySwatch: mainColor,
-        backgroundColor: buttonBackground,
-        secondaryHeaderColor: Colors.white70,
-        dividerColor: Colors.black,
-        colorScheme: ThemeData().colorScheme.copyWith(
-              primary: mainColor,
-              secondary: backgroundColor,
-            ),
-        textButtonTheme: TextButtonThemeData(
-          style: ButtonStyle(
-            backgroundColor: MaterialStateProperty.all<Color>(buttonBackground),
-            shape: MaterialStateProperty.all<RoundedRectangleBorder>(
-              RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(18.0),
-                side: BorderSide(color: buttonBackground.shade50, width: 4),
-              ),
+      // brightness: Brightness.dark,
+      primaryColor: mainColor,
+      primarySwatch: mainColor,
+      backgroundColor: buttonBackground,
+      secondaryHeaderColor: textColor,
+      dividerColor: Colors.black,
+      colorScheme: ThemeData().colorScheme.copyWith(
+          primary: mainColor,
+          secondary: backgroundColor,
+          inversePrimary: buttonBackground.shade50),
+      elevatedButtonTheme: ElevatedButtonThemeData(
+        style: ButtonStyle(
+          textStyle: MaterialStateProperty.all<TextStyle>(GoogleFonts.caveat(
+            fontSize: 16,
+            color: textColor,
+            height: 1,
+          )),
+          backgroundColor: MaterialStateProperty.all<Color>(buttonBackground),
+          shape: MaterialStateProperty.all<RoundedRectangleBorder>(
+            RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(18.0),
+              side: BorderSide(color: buttonBackground.shade50, width: 4),
             ),
           ),
         ),
-        textTheme: TextTheme(
-          bodyText1: GoogleFonts.roboto(color: Colors.white70),
-          bodyText2: GoogleFonts.roboto(color: Colors.white70),
-        ));
+      ),
+      textTheme: TextTheme(
+        bodyText1: GoogleFonts.roboto(color: textColor),
+        bodyText2: GoogleFonts.roboto(color: textColor),
+        subtitle1: GoogleFonts.roboto(color: textColor),
+      ),
+      inputDecorationTheme: const InputDecorationTheme(
+          prefixIconColor: textColor, labelStyle: TextStyle(color: textColor)),
+    );
   }
 }

@@ -66,6 +66,14 @@ class WSService {
     });
   }
 
+  static void changeColor(
+      int roomId, int color) {
+    _sendMessage('change-color', data: {
+      'roomId': roomId,
+      'color': color,
+    });
+  }
+
   static void leave(int roomId) {
     _sendMessage('leave', data: {'roomId': roomId});
   }

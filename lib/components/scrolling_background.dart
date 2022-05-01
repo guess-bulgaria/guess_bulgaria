@@ -10,14 +10,15 @@ class ScrollingBackground extends StatelessWidget {
     Clock clock = Clock(100000, startTime: 0);
     return Observer(builder: (_) {
       double offset =
-          clock.seconds * 5.0 - (MediaQuery.of(context).size.height * 6);
-      if (offset >= -MediaQuery.of(context).size.height * 4) {
-        clock.seconds = 0;
-        Future.delayed(const Duration(seconds: 0), () => clock.seconds = 1,);
-      }
+          clock.seconds * 5.0 - (MediaQuery.of(context).size.height * 10);
+      double leaveSize = -MediaQuery.of(context).size.height * 4;
+      // if (offset >= leaveSize) {
+      //   clock.seconds = 1;
+      //   Future.delayed(const Duration(milliseconds: 1), () => clock.seconds = 2,);
+      // }
       return AnimatedPositioned(
-        height: MediaQuery.of(context).size.height * 6,
-        width: MediaQuery.of(context).size.height * 6,
+        height: MediaQuery.of(context).size.height * 10,
+        width: MediaQuery.of(context).size.height * 10,
         child: RotationTransition(
           turns: const AlwaysStoppedAnimation(20 / 360),
           child: Image.asset(
@@ -28,10 +29,10 @@ class ScrollingBackground extends StatelessWidget {
             opacity: const AlwaysStoppedAnimation(0.7),
           ),
         ),
-        top: clock.seconds * 6.0 - MediaQuery.of(context).size.height * 4,
-        right: clock.seconds * 6.0 - MediaQuery.of(context).size.height * 4,
+        top: clock.seconds * 6.0 - MediaQuery.of(context).size.height * 7,
+        right: clock.seconds * 6.0 - MediaQuery.of(context).size.height * 7,
         duration: Duration(
-            seconds: offset >= -MediaQuery.of(context).size.height * 4 ? 0 : 1),
+            seconds: offset >= leaveSize ? 0 : 1),
       );
     });
   }

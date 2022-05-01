@@ -43,6 +43,7 @@ dependencies:
   wakelock: ^0.6.1+2
   flutter_mobx: ^2.0.4
   mapbox_gl: ^0.15.0
+  flutter_keyboard_visibility: ^5.2.0
   audioplayers: ^0.20.1
 
 dev_dependencies:
