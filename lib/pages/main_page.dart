@@ -190,11 +190,13 @@ class _MainPageState extends State<MainPage> {
                         onPressed: onlineChecker.isOnline ? createRoom : null,
                       );
                     }),
-                    NavigationButton(
-                      icon: Icons.person_search,
-                      text: 'Намери онлайн стая',
-                      onPressed: publicRooms,
-                    ),
+                    Observer(builder: (_) {
+                      return NavigationButton(
+                        icon: Icons.person_search,
+                        text: 'Намери онлайн стая',
+                        onPressed: onlineChecker.isOnline ? publicRooms : null,
+                      );
+                    }),
                     Container(
                       width: 230,
                       decoration: BoxDecoration(
