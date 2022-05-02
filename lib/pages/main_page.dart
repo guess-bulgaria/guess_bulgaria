@@ -293,7 +293,7 @@ class _MainPageState extends State<MainPage> {
                     ),
                     NavigationButton(
                       icon: Icons.account_box,
-                      text: 'Моята статистика',
+                      text: 'Моите статистики',
                       onPressed: stats,
                     ),
                   ],
