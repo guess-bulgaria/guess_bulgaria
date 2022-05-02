@@ -66,8 +66,7 @@ class WSService {
     });
   }
 
-  static void changeColor(
-      int roomId, int color) {
+  static void changeColor(int roomId, int color) {
     _sendMessage('change-color', data: {
       'roomId': roomId,
       'color': color,
@@ -93,5 +92,10 @@ class WSService {
   static void startRound(Function callback, int roomId) {
     _createChannel(callback);
     _sendMessage('start', data: {'roomId': roomId});
+  }
+
+  static void lockAnswer(Function callback, int roomId, List<double> answer) {
+    _createChannel(callback);
+    _sendMessage('answer', data: {'lastAnswer': answer, 'roomId': roomId});
   }
 }

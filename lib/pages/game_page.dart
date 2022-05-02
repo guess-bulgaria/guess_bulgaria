@@ -21,6 +21,9 @@ class GamePage extends StatefulWidget {
 class _GamePageState extends State<GamePage> {
   late MapboxMapController mapController;
   dynamic roundData;
+  LatLng? pin;
+  List<dynamic> players = [];
+  late Image img;
 
   _onMapCreated(MapboxMapController controller) {
     mapController = controller;
@@ -39,9 +42,36 @@ class _GamePageState extends State<GamePage> {
         iconSize: 1.02,
       ),
     );
+    pin = coordinates;
   }
 
-  void _lockAnswer() {}
+  void onMessageReceived(String type, dynamic message) {
+    switch (type) {
+      case 'player-join':
+      case 'player-leave':
+        setState(() {
+          players = message['players'];
+        });
+        break;
+      case "end-game":
+        showEndGameResults(message);
+        break;
+      case "start-round":
+        loadRound(message['currentRound']);
+        break;
+      case "player-answer":
+        var p = players.firstWhere((p) => p['id'] == message['id']);
+        if (p != null) p['hasAnswered'] = true;
+        setState(() {});
+        break;
+      case "end-round":
+    }
+  }
+
+  void _lockAnswer() {
+    WSService.lockAnswer(
+        onMessageReceived, widget.roomId, [pin!.latitude, pin!.longitude]);
+  }
 
   @override
   void initState() {
@@ -49,6 +79,10 @@ class _GamePageState extends State<GamePage> {
       WSService.startRound(onMessageReceived, widget.roomId);
     } else if (widget.gameData != null) {
       roundData = widget.gameData['currentRound'];
+      players = widget.gameData['players'];
+    }
+    if (roundData?['image'] != null) {
+      img = Image.memory(base64Decode(roundData?['image']));
     }
 
     super.initState();
@@ -63,12 +97,15 @@ class _GamePageState extends State<GamePage> {
         children: [
           Expanded(
             flex: 3,
-            child: roundData?['image'] != null ? PhotoView(
-                backgroundDecoration: BoxDecoration(color: Theme.of(context).colorScheme.secondary),
-                basePosition: Alignment.center,
-                imageProvider: Image.memory(base64Decode(roundData?['image'])).image,
-                minScale: PhotoViewComputedScale.contained,
-                maxScale: 3.5) : const GbLoader(),
+            child: roundData?['image'] != null
+                ? PhotoView(
+                    backgroundDecoration: BoxDecoration(
+                        color: Theme.of(context).colorScheme.secondary),
+                    basePosition: Alignment.center,
+                    imageProvider: img.image,
+                    minScale: PhotoViewComputedScale.contained,
+                    maxScale: 3.5)
+                : const GbLoader(),
           ),
           Expanded(
             flex: 2,
@@ -76,7 +113,20 @@ class _GamePageState extends State<GamePage> {
               color: Theme.of(context).colorScheme.secondary,
               height: MediaQuery.of(context).size.height * 0.2,
               child: Row(
-                children: const [Text('hello haha')],
+                children: [
+                  if (players.isNotEmpty)
+                    ...players
+                        .map((p) => Text(
+                              p['username'],
+                              style: TextStyle(
+                                  color: p['hasAnswered'] != null
+                                      ? Colors.blue
+                                      : Colors.red),
+                            ))
+                        .toList()
+                  else
+                    const Text('No players')
+                ],
               ),
             ),
           ),
@@ -115,7 +165,7 @@ class _GamePageState extends State<GamePage> {
                     width: 100,
                     child: TextButton(
                       child: const Text("Избери"),
-                      onPressed: () => _lockAnswer(),
+                      onPressed: _lockAnswer,
                     ),
                   ),
                 )
@@ -125,16 +175,6 @@ class _GamePageState extends State<GamePage> {
         ],
       ),
     );
-  }
-
-  void onMessageReceived(String type, dynamic message) {
-    switch (type) {
-      case "end-game":
-        showEndGameResults(message);
-        break;
-      case "start-round":
-        loadRound(message['currentRound']);
-    }
   }
 
   void showEndGameResults(dynamic message) {

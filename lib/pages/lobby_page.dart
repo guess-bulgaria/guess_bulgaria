@@ -125,8 +125,6 @@ class _LobbyPageState extends State<LobbyPage> {
   }
 
   void onRoundsChange(String r) {
-    print(
-        "asd: ${_sizeController.selection.start} ${_sizeController.selection.end} ${_sizeController.selection.extent}");
     maxRounds = int.tryParse(r) ?? 0;
     if (maxRounds == 0) {
       _sizeController.text = '0';
@@ -159,6 +157,7 @@ class _LobbyPageState extends State<LobbyPage> {
   void start() {
     _isStarted = true;
     WSService.startRound(onMessageReceived, roomId);
+    setState(() {});
   }
 
   @override
@@ -237,7 +236,7 @@ class _LobbyPageState extends State<LobbyPage> {
                                       child: NavigationButton(
                                         text: "Старт",
                                         onPressed:
-                                        //todo > 1
+                                            //todo > 1
                                             players.length > 0 ? start : null,
                                       ),
                                     ),
