@@ -2,23 +2,30 @@ import 'package:flutter/material.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:guess_bulgaria/storage/clock.dart';
 
-class ScrollingBackground extends StatelessWidget {
+class ScrollingBackground extends StatefulWidget {
   const ScrollingBackground({Key? key}) : super(key: key);
 
   @override
+  State<StatefulWidget> createState() => _ScrollingBackgroundState();
+}
+
+class _ScrollingBackgroundState extends State<ScrollingBackground>{
+  static Clock clock = Clock(100000, startTime: 0);
+
+  @override
   Widget build(BuildContext context) {
-    Clock clock = Clock(100000, startTime: 0);
+    final backgroundHeight = MediaQuery.of(context).size.height;
     return Observer(builder: (_) {
       double offset =
-          clock.seconds * 5.0 - (MediaQuery.of(context).size.height * 10);
-      double leaveSize = -MediaQuery.of(context).size.height * 4;
-      // if (offset >= leaveSize) {
-      //   clock.seconds = 1;
-      //   Future.delayed(const Duration(milliseconds: 1), () => clock.seconds = 2,);
-      // }
+          clock.seconds * 5.0 - (backgroundHeight * 10);
+      double leaveSize = -MediaQuery.of(context).size.height * 5;
+      if (offset >= leaveSize) {
+        clock.seconds = 1;
+        Future.delayed(const Duration(milliseconds: 1), () => clock.seconds = 2,);
+      }
       return AnimatedPositioned(
-        height: MediaQuery.of(context).size.height * 10,
-        width: MediaQuery.of(context).size.height * 10,
+        height: backgroundHeight * 10,
+        width: backgroundHeight * 10,
         child: RotationTransition(
           turns: const AlwaysStoppedAnimation(20 / 360),
           child: Image.asset(
@@ -29,8 +36,8 @@ class ScrollingBackground extends StatelessWidget {
             opacity: const AlwaysStoppedAnimation(0.7),
           ),
         ),
-        top: clock.seconds * 6.0 - MediaQuery.of(context).size.height * 7,
-        right: clock.seconds * 6.0 - MediaQuery.of(context).size.height * 7,
+        top: clock.seconds * 6.0 - backgroundHeight * 7,
+        right: clock.seconds * 6.0 - backgroundHeight * 7,
         duration: Duration(
             seconds: offset >= leaveSize ? 0 : 1),
       );

@@ -16,6 +16,7 @@ import 'package:photo_view/photo_view.dart';
 class GamePage extends StatefulWidget {
   final int roomId;
   final dynamic gameData;
+
   const GamePage({Key? key, this.roomId = 0, this.gameData}) : super(key: key);
 
   @override
@@ -135,7 +136,9 @@ class _GamePageState extends State<GamePage> {
       img = Image.memory(base64Decode(roundData?['image']));
     }
     myColor = PlayerColors.color(
-        players.firstWhere((p) => p['id'] == UserData.userId)['color']);
+      players.firstWhere((p) => p['id'] == UserData.userId,
+          orElse: () => {'color': UserData.defaultColor})['color'],
+    );
 
     super.initState();
   }

@@ -290,6 +290,7 @@ class _LobbyPageState extends State<LobbyPage> {
           Container(
             margin: const EdgeInsets.only(top: 10),
             child: ColorPicker(
+              usedColors: usedColors,
               iconMargin: 3,
               selectedColor: color,
               title: "Цвят",

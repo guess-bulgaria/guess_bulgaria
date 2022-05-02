@@ -58,26 +58,32 @@ class _MainPageState extends State<MainPage> {
   }
 
   playSingle() {
+    _joinCodeController.text = "";
     Navigator.push(
         context, MaterialPageRoute(builder: (context) => const GamePage()));
   }
 
   createRoom() {
+    _joinCodeController.text = "";
     Navigator.push(
         context, MaterialPageRoute(builder: (context) => LobbyPage()));
   }
 
   stats() {
+    _joinCodeController.text = "";
     Navigator.push(
         context, MaterialPageRoute(builder: (context) => const StatsPage()));
   }
 
-  landmarks() {}
+  landmarks() {
+    _joinCodeController.text = "";
+  }
 
   bool _hasError = false;
 
   void onMessageReceived(String type, dynamic message) {
     if (type == 'current-data') {
+      _joinCodeController.text = "";
       Navigator.push(
           context,
           MaterialPageRoute(
@@ -193,11 +199,11 @@ class _MainPageState extends State<MainPage> {
                         return Row(
                           children: [
                             Expanded(
-                              flex: 4,
+                              flex: 20,
                               child: Align(
                                 alignment: Alignment.centerRight,
                                 child: Icon(
-                                  Icons.people,
+                                  Icons.person,
                                   color: onlineChecker.isOnline
                                       ? Colors.white
                                       : Colors.black45,
@@ -205,7 +211,7 @@ class _MainPageState extends State<MainPage> {
                               ),
                             ),
                             Expanded(
-                              flex: 6,
+                              flex: 40,
                               child: TextFormField(
                                 enabled: onlineChecker.isOnline,
                                 autofocus: false,
@@ -251,7 +257,7 @@ class _MainPageState extends State<MainPage> {
                               ),
                             ),
                             Expanded(
-                              flex: 4,
+                              flex: 30,
                               child: InkWell(
                                 focusNode: _joinFocusNode,
                                 onTap: onlineChecker.isOnline

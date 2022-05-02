@@ -6,6 +6,7 @@ class ColorPicker extends StatefulWidget {
   final double iconSize;
   final double iconMargin;
   final int selectedColor;
+  final List<int>? usedColors;
   final String title;
   final Function onColorChange;
 
@@ -17,6 +18,7 @@ class ColorPicker extends StatefulWidget {
     this.colorsPerRow = 4,
     this.iconMargin = 2,
     this.iconSize = 30.0,
+    this.usedColors,
   }) : super(key: key);
 
   @override
@@ -40,7 +42,7 @@ class _ColorPickerState extends State<ColorPicker> {
                   i++)
                 Container(
                   padding: EdgeInsets.all(widget.iconMargin),
-                  child: i == widget.selectedColor
+                  child: i == widget.selectedColor || (widget.usedColors ?? [2]).contains(i)
                       ? Stack(children: [
                           Center(
                             child: Icon(Icons.circle,
@@ -48,7 +50,7 @@ class _ColorPickerState extends State<ColorPicker> {
                           ),
                           Container(
                             margin: const EdgeInsets.only(top: 5, left: 5),
-                            child: Icon(Icons.check,
+                            child: Icon(i == widget.selectedColor ? Icons.check : Icons.close,
                                 color: Colors.black,
                                 size: widget.iconSize - 10),
                           )
