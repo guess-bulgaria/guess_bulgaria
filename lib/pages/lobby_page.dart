@@ -61,8 +61,7 @@ class _LobbyPageState extends State<LobbyPage> {
   }
 
   void leave() {
-    Navigator.push(
-        context, MaterialPageRoute(builder: (context) => const MainPage()));
+    Navigator.pop(context);
   }
 
   void onMessageReceived(String type, dynamic message) {
@@ -166,9 +165,9 @@ class _LobbyPageState extends State<LobbyPage> {
 
   @override
   void dispose() {
+    if (!_isStarted) WSService.leave(roomId);
     _sizeController.dispose();
     _timeController.dispose();
-    if (!_isStarted) WSService.leave(roomId);
     super.dispose();
   }
 
@@ -243,21 +242,24 @@ class _LobbyPageState extends State<LobbyPage> {
                                 child: Row(
                                   children: [
                                     Expanded(
-                                      flex: 1,
+                                      flex: 10,
                                       child: NavigationButton(
                                         text: "Излез",
                                         onPressed: leave,
                                       ),
                                     ),
-                                    Expanded(
-                                      flex: 1,
-                                      child: NavigationButton(
-                                        text: "Старт",
-                                        onPressed:
-                                            //todo > 1
-                                            players.length > 0 ? start : null,
+                                    if (_isCreator)
+                                      const Expanded(flex: 1, child: Text("")),
+                                    if (_isCreator)
+                                      Expanded(
+                                        flex: 10,
+                                        child: NavigationButton(
+                                          text: "Старт",
+                                          onPressed:
+                                              //todo > 1
+                                              players.length > 0 ? start : null,
+                                        ),
                                       ),
-                                    ),
                                   ],
                                 ),
                               ),
@@ -274,50 +276,67 @@ class _LobbyPageState extends State<LobbyPage> {
       drawer: GbDrawer(
         icon: Icons.settings,
         children: [
-          Row(
-            children: [
-              Container(
+          SizedBox(
+            height: 20,
+            child: Row(
+              children: [
+                Container(
                   padding: const EdgeInsets.only(right: 4),
-                  child:
-                      const Text('Видимост', style: TextStyle(fontSize: 16))),
-              Switch(
-                value: _isRoomPublic,
-                onChanged: _isCreator ? (val) => changeRoomPrivacy(val) : null,
-                activeColor: Theme.of(context).colorScheme.tertiary,
-              ),
-            ],
+                  child: const Text(
+                    'Видимост',
+                    style: TextStyle(fontSize: 16),
+                  ),
+                ),
+                Switch(
+                  value: _isRoomPublic,
+                  onChanged:
+                      _isCreator ? (val) => changeRoomPrivacy(val) : null,
+                  activeColor: Theme.of(context).colorScheme.tertiary,
+                ),
+              ],
+            ),
           ),
           const Divider(thickness: 0.45),
-          TextFormField(
-            keyboardType: TextInputType.number,
-            decoration: InputDecoration(
-                prefix: Container(
-                    child: const Text("Рундове:"),
-                    margin: const EdgeInsets.only(right: 10)),
-                prefixStyle: const TextStyle(fontSize: 16)),
-            enabled: _isCreator,
-            controller: _sizeController,
-            onChanged: (rounds) => onRoundsChange(rounds),
-            inputFormatters: <TextInputFormatter>[
-              FilteringTextInputFormatter.allow(RegExp(r'[0-9]')),
-            ],
+          SizedBox(
+            height: 30,
+            child: TextFormField(
+              keyboardType: TextInputType.number,
+              decoration: const InputDecoration(
+                isDense: true,
+                contentPadding: EdgeInsets.only(right: 30, top: 2, bottom: 9),
+                prefix: Text("Рундове:"),
+                prefixStyle: TextStyle(fontSize: 16),
+              ),
+              enabled: _isCreator,
+              textAlign: TextAlign.end,
+              controller: _sizeController,
+              onChanged: (rounds) => onRoundsChange(rounds),
+              inputFormatters: <TextInputFormatter>[
+                FilteringTextInputFormatter.allow(RegExp(r'[0-9]')),
+              ],
+            ),
           ),
-          TextFormField(
-            keyboardType: TextInputType.number,
-            decoration: InputDecoration(
+          SizedBox(
+            height: 38,
+            child: TextFormField(
+              keyboardType: TextInputType.number,
+              decoration: InputDecoration(
                 prefix: Container(
                   child: const Text("Време:"),
                   margin: const EdgeInsets.only(right: 10),
                 ),
                 prefixStyle: const TextStyle(fontSize: 16),
                 suffix: const Text("сек."),
-                suffixStyle: const TextStyle(fontSize: 16)),
-            enabled: _isCreator,
-            controller: _timeController,
-            onChanged: (rounds) => onTimeChange(rounds),
-            inputFormatters: <TextInputFormatter>[
-              FilteringTextInputFormatter.allow(RegExp(r'[0-9]')),
-            ],
+                suffixStyle: const TextStyle(fontSize: 16),
+              ),
+              textAlign: TextAlign.end,
+              enabled: _isCreator,
+              controller: _timeController,
+              onChanged: (rounds) => onTimeChange(rounds),
+              inputFormatters: <TextInputFormatter>[
+                FilteringTextInputFormatter.allow(RegExp(r'[0-9]')),
+              ],
+            ),
           ),
           Container(
             margin: const EdgeInsets.only(top: 10),

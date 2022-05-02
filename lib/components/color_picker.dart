@@ -42,7 +42,7 @@ class _ColorPickerState extends State<ColorPicker> {
                   i++)
                 Container(
                   padding: EdgeInsets.all(widget.iconMargin),
-                  child: i == widget.selectedColor || (widget.usedColors ?? [2]).contains(i)
+                  child: i == widget.selectedColor || (widget.usedColors ?? []).contains(i)
                       ? Stack(children: [
                           Center(
                             child: Icon(Icons.circle,

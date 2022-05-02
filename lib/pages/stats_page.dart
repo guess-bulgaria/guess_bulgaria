@@ -1,9 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:guess_bulgaria/components/badge.dart';
-import 'package:guess_bulgaria/components/loader.dart';
+import 'package:guess_bulgaria/components/board.dart';
 import 'package:guess_bulgaria/components/scrolling_background.dart';
-import 'package:guess_bulgaria/pages/lobby_page.dart';
-import 'package:guess_bulgaria/services/ws_service.dart';
 import 'package:guess_bulgaria/storage/user_data.dart';
 
 class StatsPage extends StatefulWidget {
@@ -14,72 +12,140 @@ class StatsPage extends StatefulWidget {
 }
 
 class _StatsPageState extends State<StatsPage> {
-
   final List<Widget> singleStats = [];
   final List<Widget> multiStats = [];
 
   @override
-  void initState() {
-    super.initState();
-    final Map<String, int> singleStatsData = {
-      "Изиграни рундове": UserData.stats.single.roundsPlayed,
-      "Общо спечелени точки": UserData.stats.single.totalPoints,
-      "Перфектни отговорени": UserData.stats.single.perfectAnswers
-    };
-    for (var entry in singleStatsData.entries) {
-      singleStats.add(Text('${entry.key}: ${entry.value}'));
-    }
-
+  Widget build(BuildContext context) {
+    final List<dynamic> singleStatsData = [
+      {
+        'title': 'Изиграни рундове',
+        'value': UserData.stats.single.roundsPlayed,
+        'image': "assets/icons/gamepad.svg"
+      },
+      {
+        'title': 'Перфектни отговорени',
+        'value': UserData.stats.single.perfectAnswers,
+        'icon': Icons.star
+      },
+      {
+        'title': 'Общо спечелени точки',
+        'value': UserData.stats.single.totalPoints,
+        'image': "assets/icons/location-dot.svg"
+      },
+    ];
     final gamesPlayed = UserData.stats.multi.gamesPlayed;
     final winRate = UserData.stats.multi.firstPlaces /
         (gamesPlayed == 0 ? 1 : gamesPlayed) *
         100;
-    final Map<String, dynamic> multiStatsData = {
-      "Изиграни игри": gamesPlayed,
-      "Победи": UserData.stats.multi.firstPlaces,
-      "Процент спечелени игри": '${winRate.toStringAsFixed(2)}%',
-      "Изиграни рундове": UserData.stats.multi.roundsPlayed,
-      "Общо спечелени точки": UserData.stats.multi.totalPoints,
-      "Перфектни отговорени": UserData.stats.multi.perfectAnswers,
-    };
-    for (var entry in multiStatsData.entries) {
-      multiStats.add(Text('${entry.key}: ${entry.value}'));
-    }
-  }
-
-  @override
-  Widget build(BuildContext context) {
+    final List<dynamic> multiStatsData = [
+      {
+        'title': 'Изиграни рундове',
+        'value': UserData.stats.multi.roundsPlayed,
+        'image': "assets/icons/gamepad.svg"
+      },
+      {
+        'title': 'Перфектни отговорени',
+        'value': UserData.stats.multi.perfectAnswers,
+        'icon': Icons.star
+      },
+      {
+        'title': 'Общо спечелени точки',
+        'value': UserData.stats.multi.totalPoints,
+        'image': "assets/icons/location-dot.svg"
+      },
+      {
+        'title': 'Изиграни игри',
+        'value': gamesPlayed,
+        'icon': Icons.play_circle_outline
+      },
+      {
+        'title': 'Победи',
+        'value': UserData.stats.multi.firstPlaces,
+        'image': "assets/icons/ranking-star.svg"
+      },
+      {
+        'title': 'Процент спечелени игри',
+        'value': '${winRate.toStringAsFixed(2)}%',
+        'icon': Icons.percent
+      },
+    ];
     return Scaffold(
       backgroundColor: Theme.of(context).colorScheme.secondary,
       body: Stack(
         clipBehavior: Clip.antiAlias,
         children: [
           const ScrollingBackground(),
-          Align(
-            alignment: Alignment.center,
+          Board(
+            title: "Моята статистика",
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.center,
               mainAxisAlignment: MainAxisAlignment.start,
               children: [
-                Badge(
+                Padding(
+                  padding: const EdgeInsets.only(top: 4),
                   child: Row(
-                    mainAxisSize: MainAxisSize.max,
                     mainAxisAlignment: MainAxisAlignment.center,
-                    children: const [Icon(Icons.person), Text("Самостоятелна")],
+                    children: [
+                      Icon(Icons.person,
+                          color: Theme.of(context).secondaryHeaderColor),
+                      const Text("Самостоятелна игра")
+                    ],
                   ),
                 ),
-                ...singleStats,
+                const Divider(thickness: 0.7),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    for (int j = 0; j < 2; j++)
+                      Expanded(
+                        child: Badge(
+                          title: singleStatsData[j]['title'],
+                          text: '${singleStatsData[j]['value']}',
+                          icon: singleStatsData[j]['icon'],
+                          image: singleStatsData[j]['image'],
+                        ),
+                      )
+                  ],
+                ),
                 Badge(
+                  title: singleStatsData[2]['title'],
+                  text: '${singleStatsData[2]['value']}',
+                  icon: singleStatsData[2]['icon'],
+                  image: singleStatsData[2]['image'],
+                ),
+                Padding(
+                  padding: const EdgeInsets.only(top: 4),
                   child: Row(
-                    mainAxisSize: MainAxisSize.max,
                     mainAxisAlignment: MainAxisAlignment.center,
-                    children: const [Icon(Icons.people), Text("Мултиплейър")],
+                    children: [
+                      Icon(Icons.people,
+                          color: Theme.of(context).secondaryHeaderColor),
+                      const Text(" Мултиплейър")
+                    ],
                   ),
                 ),
-                ...multiStats
+                const Divider(
+                  thickness: 0.7,
+                ),
+                for (int i = 0; i < 3; i++)
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      for (int j = 0; j < 2; j++)
+                        Expanded(
+                          child: Badge(
+                            title: multiStatsData[(i + i) + j]['title'],
+                            text: '${multiStatsData[(i + i) + j]['value']}',
+                            icon: multiStatsData[(i + i) + j]['icon'],
+                            image: multiStatsData[(i + i) + j]['image'],
+                          ),
+                        )
+                    ],
+                  )
               ],
             ),
-          ),
+          )
         ],
       ),
     );
