@@ -92,6 +92,7 @@ class _GamePageState extends State<GamePage> {
   void onMessageReceived(String type, dynamic message) {
     switch (type) {
       case 'player-join':
+        break;
       case 'player-leave':
         setState(() {
           players = message['players'];
@@ -116,6 +117,7 @@ class _GamePageState extends State<GamePage> {
         hasRoundEnded = true;
         _setEndRoundSymbols(
             message['players'], message['currentRound']['coordinates']);
+        players = message['players'];
         setState(() {});
     }
   }

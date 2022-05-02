@@ -105,8 +105,7 @@ class PlayerList extends StatelessWidget {
     int index = 1;
     for (var player in players) {
       int total = player["points"];
-      //todo get points for current round
-      int points = 1000;
+      int points = player["roundPoints"] ?? 0;
       rows.add(Row(
         children: [
           Icon(Icons.circle,
