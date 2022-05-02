@@ -102,4 +102,7 @@ class WSService {
   static void nextRound(int roomId) {
     _sendMessage('next-round', data: {'roomId': roomId});
   }
+  static void roomPrivacy(int roomId, bool isPublic) {
+    _sendMessage('room-privacy', data: {'roomId': roomId, 'isPublic': isPublic});
+  }
 }

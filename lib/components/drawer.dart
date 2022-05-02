@@ -46,7 +46,7 @@ class GbDrawer extends StatelessWidget {
               backgroundColor: Theme.of(context).colorScheme.secondary,
               elevation: 1,
               child: ListView(
-                padding: const EdgeInsets.only(top: 49, left: 14, right: 14),
+                padding: const EdgeInsets.only(top: 20, left: 14, right: 14),
                 children: children,
               ),
             ),

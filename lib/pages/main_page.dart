@@ -11,6 +11,7 @@ import 'package:guess_bulgaria/components/navigation_button.dart';
 import 'package:guess_bulgaria/components/scrolling_background.dart';
 import 'package:guess_bulgaria/pages/lobby_page.dart';
 import 'package:guess_bulgaria/pages/game_page.dart';
+import 'package:guess_bulgaria/pages/public_lobbies_page.dart';
 import 'package:guess_bulgaria/pages/stats_page.dart';
 import 'package:guess_bulgaria/services/ws_service.dart';
 import 'package:guess_bulgaria/storage/online_checker.dart';
@@ -77,6 +78,11 @@ class _MainPageState extends State<MainPage> {
 
   landmarks() {
     _joinCodeController.text = "";
+  }
+
+  publicRooms() {
+    _joinCodeController.text = "";
+    Navigator.push(context, MaterialPageRoute(builder: (context) => const PublicLobbiesPage()));
   }
 
   bool _hasError = false;
@@ -184,6 +190,11 @@ class _MainPageState extends State<MainPage> {
                         onPressed: onlineChecker.isOnline ? createRoom : null,
                       );
                     }),
+                    NavigationButton(
+                      icon: Icons.person_search,
+                      text: 'Намери онлайн стая',
+                      onPressed: publicRooms,
+                    ),
                     Container(
                       width: 230,
                       decoration: BoxDecoration(
@@ -241,9 +252,7 @@ class _MainPageState extends State<MainPage> {
                                         : Colors.black45,
                                     height: 1,
                                   ),
-                                  errorStyle: const TextStyle(
-                                    height: 0
-                                  ),
+                                  errorStyle: const TextStyle(height: 0),
                                   errorText: _hasError ? '' : null,
                                   contentPadding:
                                       const EdgeInsets.only(left: 7),

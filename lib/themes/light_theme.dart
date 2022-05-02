@@ -5,7 +5,7 @@ class LightTheme {
   static const mainColor = MaterialColor(
     0xFF7eb4a2,
     <int, Color>{
-      50: Color(0xFF42a59f),
+      50: Color(0xFF4fc9c2),
       100: Color(0xFF42a59f),
       200: Color(0xFF42a59f),
       300: Color(0xFF42a59f),
@@ -63,7 +63,8 @@ class LightTheme {
       colorScheme: ThemeData().colorScheme.copyWith(
           primary: mainColor,
           secondary: backgroundColor,
-          inversePrimary: buttonBackground.shade50),
+          inversePrimary: buttonBackground.shade50,
+          tertiary: mainColor.shade50),
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ButtonStyle(
           textStyle: MaterialStateProperty.all<TextStyle>(GoogleFonts.mulish(

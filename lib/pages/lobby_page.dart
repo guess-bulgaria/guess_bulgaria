@@ -36,6 +36,7 @@ class _LobbyPageState extends State<LobbyPage> {
 
   int maxRounds = 0;
   int roundTime = 0;
+  bool _isRoomPublic = false;
 
   final TextEditingController _sizeController = TextEditingController();
   final TextEditingController _timeController = TextEditingController();
@@ -68,6 +69,9 @@ class _LobbyPageState extends State<LobbyPage> {
     switch (type) {
       case 'current-data':
         setRoomData(message);
+        break;
+      case 'room-privacy-notifier':
+        setRoomPrivacy(message);
         break;
       case 'color-change':
         setState(() {
@@ -111,6 +115,7 @@ class _LobbyPageState extends State<LobbyPage> {
   void setRoomData(message) {
     setState(() {
       roomId = message['roomId'];
+      _isRoomPublic = message['isPublic'] ?? true;
       _sizeController.text = "${message['settings']['maxRounds']}";
       _timeController.text = "${message['settings']['answerTimeInSeconds']}";
       players = message['players'];
@@ -121,6 +126,12 @@ class _LobbyPageState extends State<LobbyPage> {
         }
         usedColors.add(player['color']);
       }
+    });
+  }
+
+  void setRoomPrivacy(message) {
+    setState(() {
+      _isRoomPublic = message['isPublic'];
     });
   }
 
@@ -144,6 +155,13 @@ class _LobbyPageState extends State<LobbyPage> {
               .extendTo(const TextPosition(offset: 1));
     }
     _sendSettings();
+  }
+
+  void changeRoomPrivacy(bool value) {
+    WSService.roomPrivacy(roomId, value);
+    setState(() {
+      _isRoomPublic = value;
+    });
   }
 
   @override
@@ -256,6 +274,20 @@ class _LobbyPageState extends State<LobbyPage> {
       drawer: GbDrawer(
         icon: Icons.settings,
         children: [
+          Row(
+            children: [
+              Container(
+                  padding: const EdgeInsets.only(right: 4),
+                  child:
+                      const Text('Видимост', style: TextStyle(fontSize: 16))),
+              Switch(
+                value: _isRoomPublic,
+                onChanged: _isCreator ? (val) => changeRoomPrivacy(val) : null,
+                activeColor: Theme.of(context).colorScheme.tertiary,
+              ),
+            ],
+          ),
+          const Divider(thickness: 0.45),
           TextFormField(
             keyboardType: TextInputType.number,
             decoration: InputDecoration(
