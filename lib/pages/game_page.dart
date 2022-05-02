@@ -23,6 +23,8 @@ class GamePage extends StatefulWidget {
 }
 
 class _GamePageState extends State<GamePage> {
+  final initalCameraPosition =
+      const CameraPosition(target: LatLng(42.5617153, 25.5166978), zoom: 5.4);
   late MapboxMapController mapController;
   late Color myColor;
   dynamic roundData;
@@ -70,16 +72,17 @@ class _GamePageState extends State<GamePage> {
         ),
       );
     }
-    mapController.addSymbol(
-      SymbolOptions(
-        geometry: LatLng(answer[0], answer[1]),
-        iconColor: Colors.black.toHexStringRGB(),
-        textSize: 20,
-        iconImage: "pin",
-        iconOpacity: 1.0,
-        iconSize: 1.02,
-      ),
-    );
+    var answerLatLng = LatLng(answer[0], answer[1]);
+    mapController.addSymbol(SymbolOptions(
+      geometry: answerLatLng,
+      iconColor: Colors.black.toHexStringRGB(),
+      textSize: 20,
+      iconImage: "pin",
+      iconOpacity: 1.0,
+      iconSize: 1.02,
+    ));
+    mapController.animateCamera(
+        CameraUpdate.newLatLngZoom(answerLatLng, initalCameraPosition.zoom));
   }
 
   void onMessageReceived(String type, dynamic message) {
@@ -212,8 +215,7 @@ class _GamePageState extends State<GamePage> {
                   tiltGesturesEnabled: false,
                   trackCameraPosition: true,
                   onMapClick: _onMapClickCallback,
-                  initialCameraPosition: const CameraPosition(
-                      target: LatLng(42.5617153, 25.5166978), zoom: 5.4),
+                  initialCameraPosition: initalCameraPosition,
                   minMaxZoomPreference: const MinMaxZoomPreference(5.4, 16),
                   cameraTargetBounds: CameraTargetBounds(
                     LatLngBounds(
@@ -277,7 +279,9 @@ class _GamePageState extends State<GamePage> {
           roundData = roundData,
           if (roundData?['image'] != null)
             {img = Image.memory(base64Decode(roundData?['image']))},
-          for (var p in players) {p['hasAnswered'] = false}
+          for (var p in players) {p['hasAnswered'] = false},
+          mapController.animateCamera(CameraUpdate.newLatLngZoom(
+              initalCameraPosition.target, initalCameraPosition.zoom))
         });
   }
 
