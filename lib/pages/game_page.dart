@@ -160,10 +160,6 @@ class _GamePageState extends State<GamePage> {
         builder: (context) => Flex(
           direction: Axis.vertical,
           children: [
-            OpenDrawerButton(
-              clickCallback: () => Scaffold.of(context).openDrawer(),
-              icon: Icons.people,
-            ),
             Expanded(
               flex: 3,
               child: roundData?['image'] != null
@@ -179,32 +175,41 @@ class _GamePageState extends State<GamePage> {
             Expanded(
               flex: 2,
               child: Container(
-                color: Theme.of(context).colorScheme.secondary,
-                height: MediaQuery.of(context).size.height * 0.2,
-                child: Row(
-                  children: [
-                    Column(children: [
-                      if (players.isNotEmpty)
-                        ...players
-                            .map((p) => Text(
-                                  p['username'],
-                                  style: TextStyle(
-                                      color: p['hasAnswered'] != null &&
-                                              p['hasAnswered']
-                                          ? Colors.blue
-                                          : Colors.red),
-                                ))
-                            .toList()
-                      else
-                        const Text('No players'),
-                    ]),
-                    ElevatedButton(
-                      onPressed: isNextRoundAllowed() ? _nextRound : null,
-                      child: const Text('Start round'),
-                    ),
-                  ],
-                ),
-              ),
+                  color: Theme.of(context).colorScheme.secondary,
+                  height: MediaQuery.of(context).size.height * 0.2,
+                  child: Stack(
+                    clipBehavior: Clip.none,
+                    children: [
+                      OpenDrawerButton(
+                        clickCallback: () => Scaffold.of(context).openDrawer(),
+                        icon: Icons.people,
+                        top: 10,
+                      ),
+                      Row(
+                        children: [
+                          Column(children: [
+                            if (players.isNotEmpty)
+                              ...players
+                                  .map((p) => Text(
+                                        p['username'],
+                                        style: TextStyle(
+                                            color: p['hasAnswered'] != null &&
+                                                    p['hasAnswered']
+                                                ? Colors.blue
+                                                : Colors.red),
+                                      ))
+                                  .toList()
+                            else
+                              const Text('No players'),
+                          ]),
+                          ElevatedButton(
+                            onPressed: isNextRoundAllowed() ? _nextRound : null,
+                            child: const Text('Start round'),
+                          ),
+                        ],
+                      ),
+                    ],
+                  )),
             ),
             Expanded(
               flex: 4,
