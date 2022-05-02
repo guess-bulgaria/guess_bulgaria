@@ -75,11 +75,15 @@ class _LobbyPageState extends State<LobbyPage> {
           for (final player in players) {
             if (player['id'] == message['id']) {
               player['color'] = message['color'];
-              if(player['id'] == UserData.userId) color = player['color'];
+              if (player['id'] == UserData.userId) color = player['color'];
             }
             usedColors.add(player['color']);
           }
         });
+        break;
+      case 'start-round':
+        Navigator.push(
+            context, MaterialPageRoute(builder: (context) => GamePage(gameData: message, roomId: message['roomId'])));
         break;
       case 'player-join':
       case 'player-leave':
@@ -118,12 +122,14 @@ class _LobbyPageState extends State<LobbyPage> {
   }
 
   void onRoundsChange(String r) {
-    print("asd: ${_sizeController.selection.start} ${_sizeController.selection.end} ${_sizeController.selection.extent}");
+    print(
+        "asd: ${_sizeController.selection.start} ${_sizeController.selection.end} ${_sizeController.selection.extent}");
     maxRounds = int.tryParse(r) ?? 0;
     if (maxRounds == 0) {
       _sizeController.text = '0';
       _sizeController.selection =
-          TextSelection.fromPosition(const TextPosition(offset: 0)).extendTo(const TextPosition(offset: 1));
+          TextSelection.fromPosition(const TextPosition(offset: 0))
+              .extendTo(const TextPosition(offset: 1));
     }
     _sendSettings();
   }
@@ -133,7 +139,8 @@ class _LobbyPageState extends State<LobbyPage> {
     if (roundTime == 0) {
       _timeController.text = '0';
       _timeController.selection =
-          TextSelection.fromPosition(const TextPosition(offset: 0)).extendTo(const TextPosition(offset: 1));
+          TextSelection.fromPosition(const TextPosition(offset: 0))
+              .extendTo(const TextPosition(offset: 1));
     }
     _sendSettings();
   }
@@ -151,7 +158,6 @@ class _LobbyPageState extends State<LobbyPage> {
     Navigator.push(context,
         MaterialPageRoute(builder: (context) => GamePage(roomId: roomId)));
   }
-
 
   @override
   Widget build(BuildContext context) {

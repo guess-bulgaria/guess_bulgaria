@@ -55,7 +55,7 @@ class _MainPageState extends State<MainPage> {
 
   playSingle() {
     Navigator.push(
-        context, MaterialPageRoute(builder: (context) => GamePage()));
+        context, MaterialPageRoute(builder: (context) => const GamePage()));
   }
 
   createRoom() {
