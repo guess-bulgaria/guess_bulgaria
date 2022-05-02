@@ -34,10 +34,10 @@ class Badge extends StatelessWidget {
           margin: const EdgeInsets.symmetric(vertical: 5, horizontal: 10),
           height: 30,
           decoration: BoxDecoration(
-            color: Theme.of(context).colorScheme.primary,
+            color: Theme.of(context).colorScheme.secondary,
             borderRadius: BorderRadius.circular(10.0),
             border: Border.all(
-              color: Theme.of(context).colorScheme.primary,
+              color: Theme.of(context).colorScheme.secondary,
               width: 4,
             ),
           ),

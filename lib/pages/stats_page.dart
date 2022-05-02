@@ -66,7 +66,7 @@ class _StatsPageState extends State<StatsPage> {
       },
       {
         'title': 'Процент спечелени игри',
-        'value': '${winRate.toStringAsFixed(2)}%',
+        'value': winRate.toStringAsFixed(2),
         'icon': Icons.percent
       },
     ];
@@ -77,7 +77,7 @@ class _StatsPageState extends State<StatsPage> {
         children: [
           const ScrollingBackground(),
           Board(
-            title: "Моята статистика",
+            title: "Статистики",
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.center,
               mainAxisAlignment: MainAxisAlignment.start,

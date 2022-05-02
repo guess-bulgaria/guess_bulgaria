@@ -1,13 +1,16 @@
 import 'package:flutter/material.dart';
+import 'package:guess_bulgaria/components/board.dart';
 import 'package:guess_bulgaria/components/color_picker.dart';
 import 'package:guess_bulgaria/components/drawer.dart';
 import 'package:guess_bulgaria/components/loader.dart';
+import 'package:guess_bulgaria/components/room_row.dart';
 import 'package:guess_bulgaria/components/scrolling_background.dart';
 import 'package:guess_bulgaria/pages/lobby_page.dart';
 import 'package:guess_bulgaria/services/room_service.dart';
 import 'package:guess_bulgaria/services/ws_service.dart';
 import 'package:guess_bulgaria/storage/online_checker.dart';
 import 'package:guess_bulgaria/storage/user_data.dart';
+import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
 
 import '../components/open_drawer_button.dart';
 
@@ -21,7 +24,7 @@ class PublicLobbiesPage extends StatefulWidget {
 class _PublicLobbiesPageState extends State<PublicLobbiesPage> {
   final onlineChecker = OnlineChecker();
   late TextEditingController _usernameController;
-  late List<dynamic> rooms;
+  List<dynamic>? rooms;
   bool hasLoaded = false;
 
   @override
@@ -29,7 +32,6 @@ class _PublicLobbiesPageState extends State<PublicLobbiesPage> {
     super.initState();
     _usernameController = TextEditingController(text: UserData.username);
     RoomService.getPublicRooms().then((value) => setState(() => {
-          print('asd ${value.data}'),
           rooms = value.data ?? [],
           hasLoaded = true
         }));
@@ -65,6 +67,11 @@ class _PublicLobbiesPageState extends State<PublicLobbiesPage> {
 
   @override
   Widget build(BuildContext context) {
+    List<Widget> roomWidgets = (rooms ?? [])
+        .map((room) =>
+            RoomRow(room, (id) => WSService.joinGame(onMessageReceived, id)))
+        .toList(growable: false);
+
     return Scaffold(
       resizeToAvoidBottomInset: false,
       backgroundColor: Theme.of(context).colorScheme.secondary,
@@ -77,11 +84,35 @@ class _PublicLobbiesPageState extends State<PublicLobbiesPage> {
                   clipBehavior: Clip.antiAlias,
                   children: [
                     const ScrollingBackground(),
-                    Align(
-                      alignment: Alignment.center,
+                    Board(
+                      title: "Онлайн стаи",
                       child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.center,
                         mainAxisAlignment: MainAxisAlignment.start,
-                        children: [...rooms.map((r) => Text('$r'))],
+                        children: [
+                          if (roomWidgets.isEmpty)
+                            Container(
+                              margin: const EdgeInsets.only(top: 20),
+                              width: double.infinity,
+                              child: const Center(
+                                  child: Text(
+                                "Няма намерени стаи",
+                                style: TextStyle(
+                                  fontSize: 20,
+                                ),
+                              )),
+                            ),
+                          if (roomWidgets.isNotEmpty)
+                            Expanded(
+                              flex: 10,
+                              child: ScrollablePositionedList.builder(
+                                itemCount: roomWidgets.length,
+                                itemBuilder: (context, index) =>
+                                    roomWidgets[index],
+                                padding: const EdgeInsets.only(bottom: 20),
+                              ),
+                            ),
+                        ],
                       ),
                     ),
                     OpenDrawerButton(
