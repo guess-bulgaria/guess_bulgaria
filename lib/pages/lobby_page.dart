@@ -156,7 +156,7 @@ class _LobbyPageState extends State<LobbyPage> {
 
   void start() {
     _isStarted = true;
-    WSService.startRound(onMessageReceived, roomId);
+    WSService.startRound(roomId, callback: onMessageReceived);
     setState(() {});
   }
 

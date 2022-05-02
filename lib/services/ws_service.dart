@@ -89,13 +89,17 @@ class WSService {
     _channel!.sink.add(json.encode(data));
   }
 
-  static void startRound(Function callback, int roomId) {
-    _createChannel(callback);
+  static void startRound(int roomId, {Function? callback}) {
+    if(callback != null) _createChannel(callback);
     _sendMessage('start', data: {'roomId': roomId});
   }
 
   static void lockAnswer(Function callback, int roomId, List<double> answer) {
     _createChannel(callback);
-    _sendMessage('answer', data: {'lastAnswer': answer, 'roomId': roomId});
+    _sendMessage('answer', data: {'answer': answer, 'roomId': roomId});
+  }
+
+  static void nextRound(int roomId) {
+    _sendMessage('next-round', data: {'roomId': roomId});
   }
 }

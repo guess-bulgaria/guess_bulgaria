@@ -1,10 +1,14 @@
 import 'dart:convert';
 import 'dart:math';
+import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:guess_bulgaria/components/loader.dart';
 import 'package:guess_bulgaria/components/navigation_button.dart';
+import 'package:guess_bulgaria/configs/player_colors.dart';
 import 'package:guess_bulgaria/services/ws_service.dart';
+import 'package:guess_bulgaria/storage/user_data.dart';
 import 'package:mapbox_gl/mapbox_gl.dart';
 import 'package:guess_bulgaria/components/player_list.dart';
 import 'package:photo_view/photo_view.dart';
@@ -20,29 +24,62 @@ class GamePage extends StatefulWidget {
 
 class _GamePageState extends State<GamePage> {
   late MapboxMapController mapController;
+  late Color myColor;
   dynamic roundData;
   LatLng? pin;
   List<dynamic> players = [];
   late Image img;
+  bool hasRoundEnded = false;
 
   _onMapCreated(MapboxMapController controller) {
     mapController = controller;
   }
 
-  _onStyleLoadedCallback() {}
+  _onStyleLoadedCallback() async {
+    final Uint8List list =
+        (await rootBundle.load("assets/icons/marker.png")).buffer.asUint8List();
+    await mapController.addImage("pin", list, true);
+  }
 
   void _onMapClickCallback(Point<double> point, LatLng coordinates) {
     mapController.clearSymbols();
     mapController.addSymbol(
       SymbolOptions(
         geometry: coordinates,
-        iconImage: "assets/icons/marker.png",
-        iconColor: "#FF0000",
+        iconImage: "pin",
+        iconColor: myColor.toHexStringRGB(),
+        textSize: 20,
         iconOpacity: 1.0,
         iconSize: 1.02,
       ),
     );
     pin = coordinates;
+  }
+
+  void _setEndRoundSymbols(List<dynamic> players, List<dynamic> answer) {
+    mapController.clearSymbols();
+    for (var p in players) {
+      mapController.addSymbol(
+        SymbolOptions(
+          geometry: LatLng(p['answer'][0], p['answer'][1]),
+          iconOpacity: 1.0,
+          iconImage: "pin",
+          iconColor: PlayerColors.color(p['color']).toHexStringRGB(),
+          textSize: 20,
+          iconSize: 1.02,
+        ),
+      );
+    }
+    mapController.addSymbol(
+      SymbolOptions(
+        geometry: LatLng(answer[0], answer[1]),
+        iconColor: Colors.black.toHexStringRGB(),
+        textSize: 20,
+        iconImage: "pin",
+        iconOpacity: 1.0,
+        iconSize: 1.02,
+      ),
+    );
   }
 
   void onMessageReceived(String type, dynamic message) {
@@ -60,11 +97,19 @@ class _GamePageState extends State<GamePage> {
         loadRound(message['currentRound']);
         break;
       case "player-answer":
-        var p = players.firstWhere((p) => p['id'] == message['id']);
-        if (p != null) p['hasAnswered'] = true;
-        setState(() {});
+        setState(() {
+          for (final player in players) {
+            if (player['id'] == message['id']) {
+              player['hasAnswered'] = true;
+            }
+          }
+        });
         break;
       case "end-round":
+        hasRoundEnded = true;
+        _setEndRoundSymbols(
+            message['players'], message['currentRound']['coordinates']);
+        setState(() {});
     }
   }
 
@@ -73,10 +118,15 @@ class _GamePageState extends State<GamePage> {
         onMessageReceived, widget.roomId, [pin!.latitude, pin!.longitude]);
   }
 
+  void _nextRound() {
+    WSService.nextRound(widget.roomId);
+  }
+
   @override
   void initState() {
+    WSService.changeCallback(onMessageReceived);
     if (widget.gameData == null && widget.roomId != 0) {
-      WSService.startRound(onMessageReceived, widget.roomId);
+      WSService.startRound(widget.roomId);
     } else if (widget.gameData != null) {
       roundData = widget.gameData['currentRound'];
       players = widget.gameData['players'];
@@ -84,8 +134,16 @@ class _GamePageState extends State<GamePage> {
     if (roundData?['image'] != null) {
       img = Image.memory(base64Decode(roundData?['image']));
     }
+    myColor = PlayerColors.color(
+        players.firstWhere((p) => p['id'] == UserData.userId)['color']);
 
     super.initState();
+  }
+
+  bool isNextRoundAllowed() {
+    return players.firstWhere((p) => p['isCreator'] == true)['id'] ==
+            UserData.userId &&
+        hasRoundEnded;
   }
 
   @override
@@ -114,18 +172,25 @@ class _GamePageState extends State<GamePage> {
               height: MediaQuery.of(context).size.height * 0.2,
               child: Row(
                 children: [
-                  if (players.isNotEmpty)
-                    ...players
-                        .map((p) => Text(
-                              p['username'],
-                              style: TextStyle(
-                                  color: p['hasAnswered'] != null
-                                      ? Colors.blue
-                                      : Colors.red),
-                            ))
-                        .toList()
-                  else
-                    const Text('No players')
+                  Column(children: [
+                    if (players.isNotEmpty)
+                      ...players
+                          .map((p) => Text(
+                                p['username'],
+                                style: TextStyle(
+                                    color: p['hasAnswered'] != null &&
+                                            p['hasAnswered']
+                                        ? Colors.blue
+                                        : Colors.red),
+                              ))
+                          .toList()
+                    else
+                      const Text('No players'),
+                  ]),
+                  ElevatedButton(
+                    onPressed: isNextRoundAllowed() ? _nextRound : null,
+                    child: const Text('Start round'),
+                  ),
                 ],
               ),
             ),
@@ -206,7 +271,14 @@ class _GamePageState extends State<GamePage> {
   }
 
   void loadRound(dynamic roundData) {
-    setState(() => {roundData = roundData});
+    setState(() => {
+          hasRoundEnded = false,
+          mapController.clearSymbols(),
+          roundData = roundData,
+          if (roundData?['image'] != null)
+            {img = Image.memory(base64Decode(roundData?['image']))},
+          for (var p in players) {p['hasAnswered'] = false}
+        });
   }
 
   void endGame() {
