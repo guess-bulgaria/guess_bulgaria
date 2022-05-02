@@ -157,8 +157,14 @@ class _GamePageState extends State<GamePage> {
         hasRoundEnded;
   }
 
+  int currentRound = 0;
+
   @override
   Widget build(BuildContext context) {
+    var player =
+        players.firstWhere((element) => element["id"] == UserData.userId);
+    int totalPoints = player["points"];
+    int totalRounds = widget.gameData["settings"]["maxRounds"];
     return Scaffold(
       backgroundColor: Theme.of(context).colorScheme.secondary,
       body: Builder(
@@ -180,38 +186,31 @@ class _GamePageState extends State<GamePage> {
             Expanded(
               flex: 2,
               child: Container(
+                  width: double.maxFinite,
                   color: Theme.of(context).colorScheme.secondary,
                   height: MediaQuery.of(context).size.height * 0.2,
                   child: Stack(
                     clipBehavior: Clip.none,
                     children: [
+                      Container(
+                        width: double.maxFinite,
+                        height: double.maxFinite,
+                        child: Column(
+                          children: [
+                            Text('Брой точки: $totalPoints'),
+                            Text('Рунд: $currentRound/$totalRounds'),
+                            ElevatedButton(
+                              onPressed:
+                                  isNextRoundAllowed() ? _nextRound : null,
+                              child: const Text('Start round'),
+                            ),
+                          ],
+                        ),
+                      ),
                       OpenDrawerButton(
                         clickCallback: () => Scaffold.of(context).openDrawer(),
                         icon: Icons.people,
-                        top: 10,
-                      ),
-                      Row(
-                        children: [
-                          Column(children: [
-                            if (players.isNotEmpty)
-                              ...players
-                                  .map((p) => Text(
-                                        p['username'],
-                                        style: TextStyle(
-                                            color: p['hasAnswered'] != null &&
-                                                    p['hasAnswered']
-                                                ? Colors.blue
-                                                : Colors.red),
-                                      ))
-                                  .toList()
-                            else
-                              const Text('No players'),
-                          ]),
-                          ElevatedButton(
-                            onPressed: isNextRoundAllowed() ? _nextRound : null,
-                            child: const Text('Start round'),
-                          ),
-                        ],
+                        top: 6,
                       ),
                     ],
                   )),
@@ -309,6 +308,7 @@ class _GamePageState extends State<GamePage> {
           hasRoundEnded = false,
           mapController.clearSymbols(),
           roundData = roundData,
+          currentRound++,
           if (roundData?['image'] != null)
             {img = Image.memory(base64Decode(roundData?['image']))},
           for (var p in players) {p['hasAnswered'] = false},
@@ -324,3 +324,20 @@ class _GamePageState extends State<GamePage> {
     //           builder: (context) => const MainPage()));
   }
 }
+
+
+// Column(children: [
+                          //   if (players.isNotEmpty)
+                          //     ...players
+                          //         .map((p) => Text(
+                          //               p['username'],
+                          //               style: TextStyle(
+                          //                   color: p['hasAnswered'] != null &&
+                          //                           p['hasAnswered']
+                          //                       ? Colors.blue
+                          //                       : Colors.red),
+                          //             ))
+                          //         .toList()
+                          //   else
+                          //     const Text('No players'),
+                          // ]),
