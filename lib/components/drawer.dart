@@ -6,18 +6,18 @@ import 'package:guess_bulgaria/storage/user_data.dart';
 class GbDrawer extends StatelessWidget {
   final List<Widget> children;
   final double? height;
+  final double? width;
   final IconData? icon;
 
-  const GbDrawer({Key? key, required this.children, this.height, this.icon})
+  const GbDrawer({Key? key, required this.children, this.height, this.icon, this.width = 0})
       : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return Container(
       margin: EdgeInsets.only(
-          bottom:
-              (height ?? MediaQuery.of(context).size.height / 2) / 2),
-      width: MediaQuery.of(context).size.width / 2.2,
+          bottom: (height ?? MediaQuery.of(context).size.height / 2) / 2),
+      width: width == 0 ? MediaQuery.of(context).size.width / 2.2 : width ,
       height: (height ?? MediaQuery.of(context).size.height) / 2,
       child: Stack(
         children: [

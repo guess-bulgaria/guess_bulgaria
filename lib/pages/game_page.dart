@@ -3,9 +3,12 @@ import 'dart:math';
 import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
+import 'package:guess_bulgaria/components/drawer.dart';
 import 'package:guess_bulgaria/components/loader.dart';
 import 'package:guess_bulgaria/components/navigation_button.dart';
+import 'package:guess_bulgaria/components/open_drawer_button.dart';
 import 'package:guess_bulgaria/configs/player_colors.dart';
 import 'package:guess_bulgaria/services/ws_service.dart';
 import 'package:guess_bulgaria/storage/user_data.dart';
@@ -24,6 +27,8 @@ class GamePage extends StatefulWidget {
 }
 
 class _GamePageState extends State<GamePage> {
+  final initalCameraPosition =
+      const CameraPosition(target: LatLng(42.5617153, 25.5166978), zoom: 5.4);
   late MapboxMapController mapController;
   late Color myColor;
   dynamic roundData;
@@ -71,16 +76,17 @@ class _GamePageState extends State<GamePage> {
         ),
       );
     }
-    mapController.addSymbol(
-      SymbolOptions(
-        geometry: LatLng(answer[0], answer[1]),
-        iconColor: Colors.black.toHexStringRGB(),
-        textSize: 20,
-        iconImage: "pin",
-        iconOpacity: 1.0,
-        iconSize: 1.02,
-      ),
-    );
+    var answerLatLng = LatLng(answer[0], answer[1]);
+    mapController.addSymbol(SymbolOptions(
+      geometry: answerLatLng,
+      iconColor: Colors.black.toHexStringRGB(),
+      textSize: 20,
+      iconImage: "pin",
+      iconOpacity: 1.0,
+      iconSize: 1.02,
+    ));
+    mapController.animateCamera(
+        CameraUpdate.newLatLngZoom(answerLatLng, initalCameraPosition.zoom));
   }
 
   void onMessageReceived(String type, dynamic message) {
@@ -153,94 +159,117 @@ class _GamePageState extends State<GamePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Theme.of(context).colorScheme.secondary,
-      body: Flex(
-        direction: Axis.vertical,
-        children: [
-          Expanded(
-            flex: 3,
-            child: roundData?['image'] != null
-                ? PhotoView(
-                    backgroundDecoration: BoxDecoration(
-                        color: Theme.of(context).colorScheme.secondary),
-                    basePosition: Alignment.center,
-                    imageProvider: img.image,
-                    minScale: PhotoViewComputedScale.contained,
-                    maxScale: 3.5)
-                : const GbLoader(),
-          ),
-          Expanded(
-            flex: 2,
-            child: Container(
-              color: Theme.of(context).colorScheme.secondary,
-              height: MediaQuery.of(context).size.height * 0.2,
-              child: Row(
+      body: Builder(
+        builder: (context) => Flex(
+          direction: Axis.vertical,
+          children: [
+            Expanded(
+              flex: 3,
+              child: roundData?['image'] != null
+                  ? PhotoView(
+                      backgroundDecoration: BoxDecoration(
+                          color: Theme.of(context).colorScheme.secondary),
+                      basePosition: Alignment.center,
+                      imageProvider: img.image,
+                      minScale: PhotoViewComputedScale.contained,
+                      maxScale: 3.5)
+                  : const GbLoader(),
+            ),
+            Expanded(
+              flex: 2,
+              child: Container(
+                  color: Theme.of(context).colorScheme.secondary,
+                  height: MediaQuery.of(context).size.height * 0.2,
+                  child: Stack(
+                    clipBehavior: Clip.none,
+                    children: [
+                      OpenDrawerButton(
+                        clickCallback: () => Scaffold.of(context).openDrawer(),
+                        icon: Icons.people,
+                        top: 10,
+                      ),
+                      Row(
+                        children: [
+                          Column(children: [
+                            if (players.isNotEmpty)
+                              ...players
+                                  .map((p) => Text(
+                                        p['username'],
+                                        style: TextStyle(
+                                            color: p['hasAnswered'] != null &&
+                                                    p['hasAnswered']
+                                                ? Colors.blue
+                                                : Colors.red),
+                                      ))
+                                  .toList()
+                            else
+                              const Text('No players'),
+                          ]),
+                          ElevatedButton(
+                            onPressed: isNextRoundAllowed() ? _nextRound : null,
+                            child: const Text('Start round'),
+                          ),
+                        ],
+                      ),
+                    ],
+                  )),
+            ),
+            Expanded(
+              flex: 4,
+              child: Stack(
                 children: [
-                  Column(children: [
-                    if (players.isNotEmpty)
-                      ...players
-                          .map((p) => Text(
-                                p['username'],
-                                style: TextStyle(
-                                    color: p['hasAnswered'] != null &&
-                                            p['hasAnswered']
-                                        ? Colors.blue
-                                        : Colors.red),
-                              ))
-                          .toList()
-                    else
-                      const Text('No players'),
-                  ]),
-                  ElevatedButton(
-                    onPressed: isNextRoundAllowed() ? _nextRound : null,
-                    child: const Text('Start round'),
+                  MapboxMap(
+                    //Out of the box logo w/ info that crashes the app on click
+                    logoViewMargins: const Point(15000, 15000),
+                    attributionButtonMargins: const Point(15000, 15000),
+                    styleString:
+                        "mapbox://styles/zealbg/cl23l4amx000m14nvowuqneao",
+                    accessToken:
+                        "pk.eyJ1IjoiemVhbGJnIiwiYSI6ImNsMjNsMTFydzFxYngzaW10ZnR6Mmp5cXIifQ.-sw5o3XCLxMoSjUhs3li2A",
+                    onMapCreated: _onMapCreated,
+                    rotateGesturesEnabled: false,
+                    tiltGesturesEnabled: false,
+                    trackCameraPosition: true,
+                    onMapClick: _onMapClickCallback,
+                    initialCameraPosition: initalCameraPosition,
+                    minMaxZoomPreference: const MinMaxZoomPreference(5.4, 16),
+                    cameraTargetBounds: CameraTargetBounds(
+                      LatLngBounds(
+                          northeast: const LatLng(44.213, 28.609),
+                          southwest: const LatLng(41.235, 22.36)),
+                    ),
+                    onStyleLoadedCallback: _onStyleLoadedCallback,
                   ),
+                  Align(
+                    alignment: FractionalOffset.bottomRight,
+                    child: Container(
+                      color: Colors.red,
+                      margin: const EdgeInsets.only(bottom: 20, right: 10),
+                      width: 100,
+                      child: TextButton(
+                        child: const Text("Избери"),
+                        onPressed: _lockAnswer,
+                      ),
+                    ),
+                  )
                 ],
               ),
-            ),
+            )
+          ],
+        ),
+      ),
+      onDrawerChanged: (isOpen) {},
+      drawerEnableOpenDragGesture: false,
+      drawer: GbDrawer(
+        width: MediaQuery.of(context).size.width / 1.7,
+        children: [
+          SizedBox(
+            height: (MediaQuery.of(context).size.height / 2) - 85.0,
+            width: double.maxFinite,
+            child: PlayerList(players, PlayerListTypes.scoreboard),
           ),
-          Expanded(
-            flex: 4,
-            child: Stack(
-              children: [
-                MapboxMap(
-                  //Out of the box logo w/ info that crashes the app on click
-                  logoViewMargins: const Point(15000, 15000),
-                  attributionButtonMargins: const Point(15000, 15000),
-                  styleString:
-                      "mapbox://styles/zealbg/cl23l4amx000m14nvowuqneao",
-                  accessToken:
-                      "pk.eyJ1IjoiemVhbGJnIiwiYSI6ImNsMjNsMTFydzFxYngzaW10ZnR6Mmp5cXIifQ.-sw5o3XCLxMoSjUhs3li2A",
-                  onMapCreated: _onMapCreated,
-                  rotateGesturesEnabled: false,
-                  tiltGesturesEnabled: false,
-                  trackCameraPosition: true,
-                  onMapClick: _onMapClickCallback,
-                  initialCameraPosition: const CameraPosition(
-                      target: LatLng(42.5617153, 25.5166978), zoom: 5.4),
-                  minMaxZoomPreference: const MinMaxZoomPreference(5.4, 16),
-                  cameraTargetBounds: CameraTargetBounds(
-                    LatLngBounds(
-                        northeast: const LatLng(44.213, 28.609),
-                        southwest: const LatLng(41.235, 22.36)),
-                  ),
-                  onStyleLoadedCallback: _onStyleLoadedCallback,
-                ),
-                Align(
-                  alignment: FractionalOffset.bottomRight,
-                  child: Container(
-                    color: Colors.red,
-                    margin: const EdgeInsets.only(bottom: 20, right: 10),
-                    width: 100,
-                    child: TextButton(
-                      child: const Text("Избери"),
-                      onPressed: _lockAnswer,
-                    ),
-                  ),
-                )
-              ],
-            ),
-          )
         ],
+        icon: Icons.people,
       ),
     );
   }
@@ -280,7 +309,9 @@ class _GamePageState extends State<GamePage> {
           roundData = roundData,
           if (roundData?['image'] != null)
             {img = Image.memory(base64Decode(roundData?['image']))},
-          for (var p in players) {p['hasAnswered'] = false}
+          for (var p in players) {p['hasAnswered'] = false},
+          mapController.animateCamera(CameraUpdate.newLatLngZoom(
+              initalCameraPosition.target, initalCameraPosition.zoom))
         });
   }
 
