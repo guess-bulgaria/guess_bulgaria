@@ -2,6 +2,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:guess_bulgaria/configs/env_config.dart';
 import 'package:guess_bulgaria/pages/main_page.dart';
 import 'package:guess_bulgaria/services/audio_service.dart';
@@ -22,7 +23,11 @@ void main() async {
 }
 
 void loadLicenses() {
-  const licenses = {'AmaticSC-OFL': 'google_fonts'};
+  const licenses = {
+    'AmaticSC-OFL': 'google_fonts',
+    'Roboto-OFL': 'google_fonts',
+    'Mulish-OFL': 'google_fonts'
+  };
   for (var entry in licenses.entries) {
     LicenseRegistry.addLicense(() async* {
       final license = await rootBundle.loadString('licenses/${entry.key}.txt');

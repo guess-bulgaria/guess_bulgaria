@@ -50,7 +50,7 @@ class LightTheme {
     },
   );
 
-  static const textColor = Colors.white70;
+  static const textColor = Colors.white;
 
   static ThemeData getTheme() {
     return ThemeData(
@@ -58,7 +58,7 @@ class LightTheme {
       primaryColor: mainColor,
       primarySwatch: mainColor,
       backgroundColor: buttonBackground,
-      secondaryHeaderColor: textColor,
+      secondaryHeaderColor: Colors.white70,
       dividerColor: Colors.black,
       colorScheme: ThemeData().colorScheme.copyWith(
           primary: mainColor,
@@ -66,9 +66,8 @@ class LightTheme {
           inversePrimary: buttonBackground.shade50),
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ButtonStyle(
-          textStyle: MaterialStateProperty.all<TextStyle>(GoogleFonts.caveat(
+          textStyle: MaterialStateProperty.all<TextStyle>(GoogleFonts.mulish(
             fontSize: 16,
-            color: textColor,
             height: 1,
           )),
           backgroundColor: MaterialStateProperty.all<Color>(buttonBackground),
@@ -86,7 +85,8 @@ class LightTheme {
         subtitle1: GoogleFonts.roboto(color: textColor),
       ),
       inputDecorationTheme: const InputDecorationTheme(
-          prefixIconColor: textColor, labelStyle: TextStyle(color: textColor)),
+          labelStyle: TextStyle(color: Colors.white70),
+      ),
     );
   }
 }
