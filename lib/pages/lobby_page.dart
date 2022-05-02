@@ -83,7 +83,10 @@ class _LobbyPageState extends State<LobbyPage> {
         break;
       case 'start-round':
         Navigator.push(
-            context, MaterialPageRoute(builder: (context) => GamePage(gameData: message, roomId: message['roomId'])));
+            context,
+            MaterialPageRoute(
+                builder: (context) =>
+                    GamePage(gameData: message, roomId: message['roomId'])));
         break;
       case 'player-join':
       case 'player-leave':
@@ -155,8 +158,7 @@ class _LobbyPageState extends State<LobbyPage> {
 
   void start() {
     _isStarted = true;
-    Navigator.push(context,
-        MaterialPageRoute(builder: (context) => GamePage(roomId: roomId)));
+    WSService.startRound(onMessageReceived, roomId);
   }
 
   @override
@@ -235,7 +237,8 @@ class _LobbyPageState extends State<LobbyPage> {
                                       child: NavigationButton(
                                         text: "Старт",
                                         onPressed:
-                                            players.length > 1 ? start : null,
+                                        //todo > 1
+                                            players.length > 0 ? start : null,
                                       ),
                                     ),
                                   ],
