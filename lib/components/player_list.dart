@@ -28,6 +28,8 @@ class PlayerList extends StatelessWidget {
         return lobby();
       case PlayerListTypes.gameResults:
         return endGameResults();
+      case PlayerListTypes.scoreboard:
+        return scoreboard();
       default:
         return [];
     }
@@ -96,6 +98,36 @@ class PlayerList extends StatelessWidget {
     }
     return rows;
   }
+
+  List<Widget> scoreboard() {
+    List<Widget> rows = [];
+    //players.sort(((a, b) => b["points"] - a["points"]));
+    int index = 1;
+    for (var player in players) {
+      int total = player["points"];
+      //todo get points for current round
+      int points = 1000;
+      rows.add(Row(
+        children: [
+          Icon(Icons.circle,
+              color: PlayerColors.color(player['color']), size: 20),
+          Text('$index.'),
+          Container(
+            constraints: const BoxConstraints(maxWidth: 70),
+            child: Text(
+              '${player['username'] ?? player['id']}',
+              style: const TextStyle(fontSize: 15),
+              overflow: TextOverflow.ellipsis,
+            ),
+          ),
+          Text(' $total'),
+          Text(' (+$points)'),
+        ],
+      ));
+      index++;
+    }
+    return rows;
+  }
 }
 
-enum PlayerListTypes { lobby, gameResults }
+enum PlayerListTypes { lobby, gameResults, scoreboard }
