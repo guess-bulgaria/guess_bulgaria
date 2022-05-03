@@ -44,6 +44,7 @@ class App extends StatelessWidget {
     return MaterialApp(
         title: 'Guess Bulgaria',
         theme: LightTheme.getTheme(),
-        home: const MainPage());
+        home: const MainPage(),
+        initialRoute: '/');
   }
 }

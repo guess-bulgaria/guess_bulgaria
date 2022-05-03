@@ -36,6 +36,7 @@ class _GamePageState extends State<GamePage> {
   List<dynamic> players = [];
   late Image img;
   bool hasRoundEnded = false;
+  bool hasLocked = false;
 
   _onMapCreated(MapboxMapController controller) {
     mapController = controller;
@@ -48,6 +49,7 @@ class _GamePageState extends State<GamePage> {
   }
 
   void _onMapClickCallback(Point<double> point, LatLng coordinates) {
+    if (hasLocked) return;
     mapController.clearSymbols();
     mapController.addSymbol(
       SymbolOptions(
@@ -125,6 +127,9 @@ class _GamePageState extends State<GamePage> {
   void _lockAnswer() {
     WSService.lockAnswer(
         onMessageReceived, widget.roomId, [pin!.latitude, pin!.longitude]);
+    setState(() {
+      hasLocked = true;
+    });
   }
 
   void _nextRound() {
@@ -244,12 +249,12 @@ class _GamePageState extends State<GamePage> {
                   Align(
                     alignment: FractionalOffset.bottomRight,
                     child: Container(
-                      color: Colors.red,
+                      color: hasLocked ? Colors.grey : Colors.red,
                       margin: const EdgeInsets.only(bottom: 20, right: 10),
                       width: 100,
                       child: TextButton(
                         child: const Text("Избери"),
-                        onPressed: _lockAnswer,
+                        onPressed: !hasLocked ? _lockAnswer : null,
                       ),
                     ),
                   )
@@ -313,15 +318,14 @@ class _GamePageState extends State<GamePage> {
             {img = Image.memory(base64Decode(roundData?['image']))},
           for (var p in players) {p['hasAnswered'] = false},
           mapController.animateCamera(CameraUpdate.newLatLngZoom(
-              initalCameraPosition.target, initalCameraPosition.zoom))
+              initalCameraPosition.target, initalCameraPosition.zoom)),
+          hasLocked = false
         });
   }
 
   void endGame() {
-    // Navigator.push(
-    //       context,
-    //       MaterialPageRoute(
-    //           builder: (context) => const MainPage()));
+    // TODO: stats
+    Navigator.of(context).popUntil(ModalRoute.withName('/'));
   }
 }
 
