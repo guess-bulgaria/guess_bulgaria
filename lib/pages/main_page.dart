@@ -9,6 +9,7 @@ import 'package:guess_bulgaria/components/color_picker.dart';
 import 'package:guess_bulgaria/components/drawer.dart';
 import 'package:guess_bulgaria/components/navigation_button.dart';
 import 'package:guess_bulgaria/components/scrolling_background.dart';
+import 'package:guess_bulgaria/components/user_settings_drawer.dart';
 import 'package:guess_bulgaria/pages/lobby_page.dart';
 import 'package:guess_bulgaria/pages/game_page.dart';
 import 'package:guess_bulgaria/pages/public_lobbies_page.dart';
@@ -28,7 +29,6 @@ class MainPage extends StatefulWidget {
 
 class _MainPageState extends State<MainPage> {
   final onlineChecker = OnlineChecker();
-  late TextEditingController _usernameController;
   late TextEditingController _joinCodeController;
   late FocusNode _joinFocusNode;
   late FocusNode _joinTextFocusNode;
@@ -37,7 +37,6 @@ class _MainPageState extends State<MainPage> {
   @override
   void initState() {
     super.initState();
-    _usernameController = TextEditingController(text: UserData.username);
     _joinCodeController = TextEditingController(text: '');
     _joinFocusNode = FocusNode();
     _joinTextFocusNode = FocusNode();
@@ -51,7 +50,6 @@ class _MainPageState extends State<MainPage> {
   @override
   void dispose() {
     _joinCodeController.dispose();
-    _usernameController.dispose();
     _joinFocusNode.dispose();
     _joinTextFocusNode.dispose();
     _keyboardSubscription.cancel();
@@ -301,59 +299,13 @@ class _MainPageState extends State<MainPage> {
               ),
               OpenDrawerButton(
                   clickCallback: () => Scaffold.of(context).openDrawer(),
-                  top: 6)
+              )
             ],
           ),
         ),
       ),
-      onDrawerChanged: (isOpen) {
-        clearFocus();
-        if (isOpen) {
-          _usernameController.text = UserData.username;
-        } else {
-          setUsername();
-        }
-      },
       drawerEnableOpenDragGesture: false,
-      drawer: GbDrawer(
-        children: [
-          const Text(
-            "Потребителско име",
-            textAlign: TextAlign.center,
-          ),
-          TextFormField(
-            decoration: const InputDecoration(
-              prefixIconConstraints:
-                  BoxConstraints(minWidth: 22, maxHeight: 20),
-              prefixIcon: Icon(Icons.edit, size: 16),
-            ),
-            textAlign: TextAlign.left,
-            controller: _usernameController,
-            // style: TextStyle(color: Colors.white70),
-          ),
-          Container(
-            margin: const EdgeInsets.only(top: 10),
-            child: ColorPicker(
-              iconMargin: 3,
-              selectedColor: UserData.defaultColor,
-              title: "Предпочитан цвят",
-              onColorChange: setDefaultColor,
-            ),
-          ),
-          const Divider(thickness: 0.45)
-        ],
-      ),
+      drawer: const UserSettingsDrawer(),
     );
-  }
-
-  void setDefaultColor(int i) async {
-    await UserData().setDefaultColor(i);
-    setState(() => {});
-  }
-
-  void setUsername() {
-    if (_usernameController.text.isNotEmpty) {
-      UserData().setUsername(_usernameController.text);
-    }
   }
 }

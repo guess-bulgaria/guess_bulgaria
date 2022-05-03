@@ -13,7 +13,7 @@ class PlayerList extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    List<Widget> rows = generateRows(type);
+    List<Widget> rows = generateRows(type, context);
 
     return ScrollablePositionedList.builder(
       itemCount: rows.length,
@@ -22,20 +22,20 @@ class PlayerList extends StatelessWidget {
     );
   }
 
-  List<Widget> generateRows(PlayerListTypes type) {
+  List<Widget> generateRows(PlayerListTypes type, BuildContext context) {
     switch (type) {
       case PlayerListTypes.lobby:
-        return lobby();
+        return lobby(context);
       case PlayerListTypes.gameResults:
-        return endGameResults();
+        return endGameResults(context);
       case PlayerListTypes.scoreboard:
-        return scoreboard();
+        return scoreboard(context);
       default:
         return [];
     }
   }
 
-  List<Widget> lobby() {
+  List<Widget> lobby(BuildContext context) {
     List<Widget> rows = [];
     for (var player in players) {
       rows.add(Row(
@@ -58,10 +58,10 @@ class PlayerList extends StatelessWidget {
     return rows;
   }
 
-  List<Widget> endGameResults() {
+  List<Widget> endGameResults(BuildContext context) {
     List<Widget> rows = [];
-
     players.sort(((a, b) => b["points"] - a["points"]));
+
     int index = 1;
     for (var player in players) {
       rows.add(Row(
@@ -99,29 +99,68 @@ class PlayerList extends StatelessWidget {
     return rows;
   }
 
-  List<Widget> scoreboard() {
+  List<Widget> scoreboard(BuildContext context) {
     List<Widget> rows = [];
-    //players.sort(((a, b) => b["points"] - a["points"]));
+    players.sort(((a, b) => b["points"] - a["points"]));
     int index = 1;
     for (var player in players) {
       int total = player["points"];
       int points = player["roundPoints"] ?? 0;
-      rows.add(Row(
-        children: [
-          Icon(Icons.circle,
-              color: PlayerColors.color(player['color']), size: 20),
-          Text('$index.'),
-          Container(
-            constraints: const BoxConstraints(maxWidth: 70),
-            child: Text(
-              '${player['username'] ?? player['id']}',
-              style: const TextStyle(fontSize: 15),
-              overflow: TextOverflow.ellipsis,
+      rows.add(Container(
+        margin: const EdgeInsets.only(bottom: 3.6),
+        height: 20,
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.start,
+          children: [
+            Container(
+              width: 17,
+              height: 17,
+              margin: const EdgeInsets.only(right: 4),
+              decoration: BoxDecoration(
+                color: PlayerColors.color(player['color']),
+                borderRadius: BorderRadius.circular(180.0),
+              ),
+              child: Center(
+                child: Text(
+                  '$index',
+                  style: const TextStyle(fontSize: 12),
+                ),
+              ),
             ),
-          ),
-          Text(' $total'),
-          Text(' (+$points)'),
-        ],
+            Expanded(
+              child: Container(
+                width: 100,
+                child: FittedBox(
+                  alignment: Alignment.bottomLeft,
+                  fit: BoxFit.scaleDown,
+                  child: Text(
+                    '${player['username'] ?? player['id']}',
+                    style: const TextStyle(fontSize: 15),
+                  ),
+                ),
+                margin: const EdgeInsets.only(right: 4),
+              ),
+            ),
+            Expanded(
+                flex: 1,
+                child: Row(
+                  children: [
+                    Icon(Icons.star,
+                        size: 12,
+                        color: Theme.of(context).secondaryHeaderColor),
+                    Text('$total ${points > 0 ? '(+$points)' : ''}',
+                        style: const TextStyle(fontSize: 13)),
+                  ],
+                )),
+            Icon(
+              Icons.check_circle,
+              size: 16,
+              color: player['hasAnswered'] == true
+                  ? Theme.of(context).secondaryHeaderColor
+                  : Theme.of(context).colorScheme.secondary,
+            )
+          ],
+        ),
       ));
       index++;
     }

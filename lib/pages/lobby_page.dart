@@ -4,7 +4,6 @@ import 'package:guess_bulgaria/components/loader.dart';
 import 'package:guess_bulgaria/components/navigation_button.dart';
 import 'package:guess_bulgaria/components/player_list.dart';
 import 'package:guess_bulgaria/pages/game_page.dart';
-import 'package:guess_bulgaria/pages/main_page.dart';
 import 'package:guess_bulgaria/services/ws_service.dart';
 import 'dart:async';
 
@@ -57,6 +56,7 @@ class _LobbyPageState extends State<LobbyPage> {
       WSService.createGame(onMessageReceived);
     } else {
       setupJoinData();
+      _isCreator = false;
     }
   }
 
@@ -95,11 +95,12 @@ class _LobbyPageState extends State<LobbyPage> {
       case 'player-leave':
         setState(() {
           players = message['players'];
+          usedColors = [];
           for (final player in players) {
             if (player['id'] == UserData.userId) {
-              if (player['isCreator']) _isCreator = true;
-              break;
+              _isCreator = player['isCreator'];
             }
+            usedColors.add(player['color']);
           }
         });
         break;
@@ -190,7 +191,6 @@ class _LobbyPageState extends State<LobbyPage> {
             OpenDrawerButton(
               icon: Icons.settings,
               clickCallback: () => Scaffold.of(context).openDrawer(),
-              top: 6,
             ),
             roomId == 0
                 ? const GbLoader()
@@ -278,22 +278,28 @@ class _LobbyPageState extends State<LobbyPage> {
         children: [
           SizedBox(
             height: 20,
-            child: Row(
-              children: [
-                Container(
-                  padding: const EdgeInsets.only(right: 4),
-                  child: const Text(
-                    'Видимост',
-                    style: TextStyle(fontSize: 16),
+            child: FittedBox(
+              fit: BoxFit.fitWidth,
+              child: Row(
+                children: [
+                  Container(
+                    padding: const EdgeInsets.only(right: 4),
+                    child: const FittedBox(
+                      fit: BoxFit.scaleDown,
+                      child: Text(
+                        'Видимост',
+                        style: TextStyle(fontSize: 15),
+                      ),
+                    ),
                   ),
-                ),
-                Switch(
-                  value: _isRoomPublic,
-                  onChanged:
-                      _isCreator ? (val) => changeRoomPrivacy(val) : null,
-                  activeColor: Theme.of(context).colorScheme.tertiary,
-                ),
-              ],
+                  Switch(
+                    value: _isRoomPublic,
+                    onChanged:
+                        _isCreator ? (val) => changeRoomPrivacy(val) : null,
+                    activeColor: Theme.of(context).colorScheme.tertiary,
+                  ),
+                ],
+              ),
             ),
           ),
           const Divider(thickness: 0.45),
@@ -340,12 +346,14 @@ class _LobbyPageState extends State<LobbyPage> {
           ),
           Container(
             margin: const EdgeInsets.only(top: 10),
-            child: ColorPicker(
-              usedColors: usedColors,
-              iconMargin: 3,
-              selectedColor: color,
-              title: "Цвят",
-              onColorChange: (i) => WSService.changeColor(roomId, i),
+            child: FittedBox(
+              fit: BoxFit.scaleDown,
+              child: ColorPicker(
+                usedColors: usedColors,
+                iconMargin: 3,
+                selectedColor: color,
+                onColorChange: (i) => WSService.changeColor(roomId, i),
+              ),
             ),
           ),
           const Divider(thickness: 0.45)

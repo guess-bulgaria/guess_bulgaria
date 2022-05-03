@@ -3,7 +3,6 @@ import 'dart:math';
 import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
-import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:guess_bulgaria/components/drawer.dart';
 import 'package:guess_bulgaria/components/loader.dart';
@@ -169,111 +168,120 @@ class _GamePageState extends State<GamePage> {
     var player =
         players.firstWhere((element) => element["id"] == UserData.userId);
     int totalPoints = player["points"];
+    int points = player["roundPoints"] ?? 0;
     int totalRounds = widget.gameData["settings"]["maxRounds"];
     return Scaffold(
       backgroundColor: Theme.of(context).colorScheme.secondary,
       body: Builder(
-        builder: (context) => Flex(
-          direction: Axis.vertical,
+        builder: (context) => Stack(
+          clipBehavior: Clip.none,
           children: [
-            Expanded(
-              flex: 3,
-              child: roundData?['image'] != null
-                  ? PhotoView(
+            Flex(
+              direction: Axis.vertical,
+              children: [
+                Expanded(
+                  flex: 3,
+                  child: roundData?['image'] != null
+                      ? PhotoView(
                       backgroundDecoration: BoxDecoration(
                           color: Theme.of(context).colorScheme.secondary),
                       basePosition: Alignment.center,
                       imageProvider: img.image,
                       minScale: PhotoViewComputedScale.contained,
+
+                      gaplessPlayback: true,
                       maxScale: 3.5)
-                  : const GbLoader(),
-            ),
-            Expanded(
-              flex: 2,
-              child: Container(
-                  width: double.maxFinite,
-                  color: Theme.of(context).colorScheme.secondary,
-                  height: MediaQuery.of(context).size.height * 0.2,
-                  child: Stack(
-                    clipBehavior: Clip.none,
-                    children: [
-                      Container(
-                        width: double.maxFinite,
-                        height: double.maxFinite,
-                        child: Column(
-                          children: [
-                            Text('Брой точки: $totalPoints'),
-                            Text('Рунд: $currentRound/$totalRounds'),
-                            ElevatedButton(
-                              onPressed:
+                      : const GbLoader(),
+                ),
+                Expanded(
+                  flex: 2,
+                  child: Container(
+                      color: Theme.of(context).colorScheme.secondary,
+                      height: MediaQuery.of(context).size.height * 0.2,
+                      child: SizedBox(
+                            width: double.maxFinite,
+                            height: double.maxFinite,
+                            child: Column(
+                              children: [
+                                Text('Брой точки: $totalPoints ${points > 0 ? '(+$points)' : ''}'),
+                                Text('Рунд: $currentRound/$totalRounds'),
+                                ElevatedButton(
+                                  onPressed:
                                   isNextRoundAllowed() ? _nextRound : null,
-                              child: const Text('Start round'),
+                                  child: const Text('Start round'),
+                                ),
+                              ],
                             ),
-                          ],
-                        ),
-                      ),
-                      OpenDrawerButton(
-                        clickCallback: () => Scaffold.of(context).openDrawer(),
-                        icon: Icons.people,
-                        top: 6,
-                      ),
-                    ],
-                  )),
-            ),
-            Expanded(
-              flex: 4,
-              child: Stack(
-                children: [
-                  MapboxMap(
-                    //Out of the box logo w/ info that crashes the app on click
-                    logoViewMargins: const Point(15000, 15000),
-                    attributionButtonMargins: const Point(15000, 15000),
-                    styleString:
+                          ),),
+                ),
+                Expanded(
+                  flex: 4,
+                  child: Stack(
+                    children: [
+                      MapboxMap(
+                        //Out of the box logo w/ info that crashes the app on click
+                        logoViewMargins: const Point(15000, 15000),
+                        attributionButtonMargins: const Point(15000, 15000),
+                        styleString:
                         "mapbox://styles/zealbg/cl23l4amx000m14nvowuqneao",
-                    accessToken:
+                        accessToken:
                         "pk.eyJ1IjoiemVhbGJnIiwiYSI6ImNsMjNsMTFydzFxYngzaW10ZnR6Mmp5cXIifQ.-sw5o3XCLxMoSjUhs3li2A",
-                    onMapCreated: _onMapCreated,
-                    rotateGesturesEnabled: false,
-                    tiltGesturesEnabled: false,
-                    trackCameraPosition: true,
-                    onMapClick: _onMapClickCallback,
-                    initialCameraPosition: initalCameraPosition,
-                    minMaxZoomPreference: const MinMaxZoomPreference(5.4, 16),
-                    cameraTargetBounds: CameraTargetBounds(
-                      LatLngBounds(
-                          northeast: const LatLng(44.213, 28.609),
-                          southwest: const LatLng(41.235, 22.36)),
-                    ),
-                    onStyleLoadedCallback: _onStyleLoadedCallback,
-                  ),
-                  Align(
-                    alignment: FractionalOffset.bottomRight,
-                    child: Container(
-                      color: hasLocked ? Colors.grey : Colors.red,
-                      margin: const EdgeInsets.only(bottom: 20, right: 10),
-                      width: 100,
-                      child: TextButton(
-                        child: const Text("Избери"),
-                        onPressed: !hasLocked ? _lockAnswer : null,
+                        onMapCreated: _onMapCreated,
+                        rotateGesturesEnabled: false,
+                        tiltGesturesEnabled: false,
+                        trackCameraPosition: true,
+                        onMapClick: _onMapClickCallback,
+                        initialCameraPosition: initalCameraPosition,
+                        minMaxZoomPreference: const MinMaxZoomPreference(5.4, 16),
+                        cameraTargetBounds: CameraTargetBounds(
+                          LatLngBounds(
+                              northeast: const LatLng(44.213, 28.609),
+                              southwest: const LatLng(41.235, 22.36)),
+                        ),
+                        onStyleLoadedCallback: _onStyleLoadedCallback,
                       ),
-                    ),
-                  )
-                ],
-              ),
-            )
+                      Align(
+                        alignment: FractionalOffset.bottomRight,
+                        child: Container(
+                          color: hasLocked ? Colors.grey : Colors.red,
+                          margin: const EdgeInsets.only(bottom: 20, right: 10),
+                          width: 100,
+                          child: TextButton(
+                            child: const Text("Избери"),
+                            onPressed: !hasLocked ? _lockAnswer : null,
+                          ),
+                        ),
+                      )
+                    ],
+                  ),
+                )
+              ],
+            ),
+            OpenDrawerButton(
+                isEnd: true,
+                clickCallback: () => Scaffold.of(context).openEndDrawer(),
+                icon: Icons.people,
+            ),
           ],
-        ),
+        )
       ),
-      onDrawerChanged: (isOpen) {},
-      drawerEnableOpenDragGesture: false,
-      drawer: GbDrawer(
-        width: MediaQuery.of(context).size.width / 1.7,
+      onEndDrawerChanged: (isOpen) {},
+      endDrawerEnableOpenDragGesture: false,
+      endDrawer: GbDrawer(
+        isEnd: true,
+        heightFactor: 1.5,
+        topMarginFactor: 8,
+        width: MediaQuery.of(context).size.width / 1.5,
+        buttonWidthScale: 1.12,
+        buttonTop: 1.936,
         children: [
+          const Text("Играчи", textAlign: TextAlign.center, style: TextStyle(fontSize: 18)),
+          const Divider(thickness: 0.45,),
           SizedBox(
-            height: (MediaQuery.of(context).size.height / 2) - 85.0,
-            width: double.maxFinite,
+            height: (MediaQuery.of(context).size.height / 1.5) - 140,
             child: PlayerList(players, PlayerListTypes.scoreboard),
           ),
+          const Divider(thickness: 0.45,),
         ],
         icon: Icons.people,
       ),

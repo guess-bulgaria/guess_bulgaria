@@ -5,6 +5,7 @@ import 'package:guess_bulgaria/components/drawer.dart';
 import 'package:guess_bulgaria/components/loader.dart';
 import 'package:guess_bulgaria/components/room_row.dart';
 import 'package:guess_bulgaria/components/scrolling_background.dart';
+import 'package:guess_bulgaria/components/user_settings_drawer.dart';
 import 'package:guess_bulgaria/pages/lobby_page.dart';
 import 'package:guess_bulgaria/services/room_service.dart';
 import 'package:guess_bulgaria/services/ws_service.dart';
@@ -23,24 +24,14 @@ class PublicLobbiesPage extends StatefulWidget {
 
 class _PublicLobbiesPageState extends State<PublicLobbiesPage> {
   final onlineChecker = OnlineChecker();
-  late TextEditingController _usernameController;
   List<dynamic>? rooms;
   bool hasLoaded = false;
 
   @override
   void initState() {
     super.initState();
-    _usernameController = TextEditingController(text: UserData.username);
-    RoomService.getPublicRooms().then((value) => setState(() => {
-          rooms = value.data ?? [],
-          hasLoaded = true
-        }));
-  }
-
-  @override
-  void dispose() {
-    _usernameController.dispose();
-    super.dispose();
+    RoomService.getPublicRooms().then((value) =>
+        setState(() => {rooms = value.data ?? [], hasLoaded = true}));
   }
 
   landmarks() {}
@@ -50,12 +41,14 @@ class _PublicLobbiesPageState extends State<PublicLobbiesPage> {
   void onMessageReceived(String type, dynamic message) {
     if (type == 'current-data') {
       Navigator.push(
-          context,
-          MaterialPageRoute(
-              builder: (context) => LobbyPage(joinData: message)));
+        context,
+        MaterialPageRoute(
+          builder: (context) => LobbyPage(joinData: message),
+        ),
+      );
     } else if (type == 'join-failed') {
-      //todo set join field to error
       setState(() {
+        //todo show error on screen
         _hasError = true;
       });
     }
@@ -116,60 +109,14 @@ class _PublicLobbiesPageState extends State<PublicLobbiesPage> {
                       ),
                     ),
                     OpenDrawerButton(
-                        clickCallback: () => Scaffold.of(context).openDrawer(),
-                        top: 6)
+                      clickCallback: () => Scaffold.of(context).openDrawer(),
+                    )
                   ],
                 ),
               ),
             ),
-      onDrawerChanged: (isOpen) {
-        clearFocus();
-        if (isOpen) {
-          _usernameController.text = UserData.username;
-        } else {
-          setUsername();
-        }
-      },
       drawerEnableOpenDragGesture: false,
-      drawer: GbDrawer(
-        children: [
-          const Text(
-            "Потребителско име",
-            textAlign: TextAlign.center,
-          ),
-          TextFormField(
-            decoration: const InputDecoration(
-              prefixIconConstraints:
-                  BoxConstraints(minWidth: 22, maxHeight: 20),
-              prefixIcon: Icon(Icons.edit, size: 16),
-            ),
-            textAlign: TextAlign.left,
-            controller: _usernameController,
-            // style: TextStyle(color: Colors.white70),
-          ),
-          Container(
-            margin: const EdgeInsets.only(top: 10),
-            child: ColorPicker(
-              iconMargin: 3,
-              selectedColor: UserData.defaultColor,
-              title: "Предпочитан цвят",
-              onColorChange: setDefaultColor,
-            ),
-          ),
-          const Divider(thickness: 0.45)
-        ],
-      ),
+      drawer: const UserSettingsDrawer(),
     );
-  }
-
-  void setDefaultColor(int i) async {
-    await UserData().setDefaultColor(i);
-    setState(() => {});
-  }
-
-  void setUsername() {
-    if (_usernameController.text.isNotEmpty) {
-      UserData().setUsername(_usernameController.text);
-    }
   }
 }
