@@ -1,45 +1,66 @@
+import 'dart:convert';
+
 class PlayerStatsModel {
-  _SingleStats single = _SingleStats();
-  _MultiStats multi = _MultiStats();
+  SingleStats single = SingleStats();
+  MultiStats multi = MultiStats();
 
   PlayerStatsModel();
 
   PlayerStatsModel.fromApi(this.single, this.multi);
 }
 
-class _SingleStats {
+class SingleStats {
   int totalPoints = 0;
   int roundsPlayed = 0;
   int perfectAnswers = 0;
 
-  _SingleStats();
+  SingleStats();
 
-  _SingleStats.fromData(this.totalPoints, this.roundsPlayed, this.perfectAnswers);
+  SingleStats.fromData(
+      this.totalPoints, this.roundsPlayed, this.perfectAnswers);
 
-  _SingleStats.fromObject(dynamic object){
+  SingleStats.fromJson(dynamic object) {
     totalPoints = object['totalPoints'];
     roundsPlayed = object['roundsPlayed'];
     perfectAnswers = object['perfectAnswers'];
   }
+
+  String toJson() {
+    dynamic resp = {};
+    resp['totalPoints'] = totalPoints;
+    resp['roundsPlayed'] = roundsPlayed;
+    resp['perfectAnswers'] = perfectAnswers;
+    return jsonEncode(resp);
+  }
 }
 
-class _MultiStats {
+class MultiStats {
   int totalPoints = 0;
   int roundsPlayed = 0;
   int perfectAnswers = 0;
   int gamesPlayed = 0;
   int firstPlaces = 0;
 
-  _MultiStats();
+  MultiStats();
 
-  _MultiStats.fromData(this.totalPoints, this.roundsPlayed, this.perfectAnswers,
+  MultiStats.fromData(this.totalPoints, this.roundsPlayed, this.perfectAnswers,
       this.gamesPlayed, this.firstPlaces);
 
-  _MultiStats.fromObject(dynamic object){
+  MultiStats.fromJson(dynamic object) {
     totalPoints = object['totalPoints'];
     roundsPlayed = object['roundsPlayed'];
     perfectAnswers = object['perfectAnswers'];
     gamesPlayed = object['gamesPlayed'];
     firstPlaces = object['firstPlaces'];
+  }
+
+  String toJson() {
+    dynamic resp = {};
+    resp['totalPoints'] = totalPoints;
+    resp['roundsPlayed'] = roundsPlayed;
+    resp['perfectAnswers'] = perfectAnswers;
+    resp['gamesPlayed'] = gamesPlayed;
+    resp['firstPlaces'] = firstPlaces;
+    return jsonEncode(resp);
   }
 }

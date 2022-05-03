@@ -281,6 +281,7 @@ class _GamePageState extends State<GamePage> {
   }
 
   void showEndGameResults(dynamic message) {
+    UserData().loadStatistics();
     showDialog(
         context: context,
         barrierDismissible: false,

@@ -1,6 +1,8 @@
+import 'dart:convert';
 import 'dart:math';
 import 'package:guess_bulgaria/models/player_stats_model.dart';
 import 'package:guess_bulgaria/services/user_service.dart';
+import 'package:guess_bulgaria/storage/online_checker.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class UserData {
@@ -10,6 +12,8 @@ class UserData {
   static var _username = "";
   static const _defaultColorKey = "defaultColor";
   static var _defaultColor = 0;
+  static const _singleStatsKey = "singleStats";
+  static const _multiStatsKey = "multiStats";
   static PlayerStatsModel stats = PlayerStatsModel();
 
   static String get username => _username;
@@ -68,14 +72,52 @@ class UserData {
     }
   }
 
+  Future<void> loadStatistics() async {
+    if (await OnlineChecker.checkOnlineStat()) {
+      try {
+        var apiStats = await UserService.getStatistics();
+        if (apiStats.statusCode != null && apiStats.statusCode! < 300) {
+          stats = PlayerStatsModel.fromApi(
+              SingleStats.fromJson(apiStats.data['single']),
+              MultiStats.fromJson(apiStats.data['multi']));
+          _storeStats();
+          return;
+        }
+      } catch (_) {}
+    }
+    stats = await loadStoreStats();
+  }
+
+  Future<PlayerStatsModel> loadStoreStats() async {
+    var singleStats = SingleStats();
+    var multiStats = MultiStats();
+    var singleStoreStats = await _getPrefString(_singleStatsKey);
+    var multiStoreStats = await _getPrefString(_multiStatsKey);
+
+    if (singleStoreStats != null && singleStoreStats.isNotEmpty) {
+      singleStats = SingleStats.fromJson(jsonDecode(singleStoreStats));
+    }
+    if (multiStoreStats != null && multiStoreStats.isNotEmpty) {
+      multiStats = MultiStats.fromJson(jsonDecode(multiStoreStats));
+    }
+
+    return PlayerStatsModel.fromApi(singleStats, multiStats);
+  }
+
   String getRandomUsername() {
     return 'Пешо-${Random().nextInt(9000) + 1000}';
+  }
+
+  Future<void> _storeStats() async {
+    await _setPrefString(_singleStatsKey, stats.single.toJson());
+    await _setPrefString(_multiStatsKey, stats.multi.toJson());
   }
 
   Future<void> setupUserData() async {
     await setupUserId();
     await loadUsername();
     await loadDefaultColor();
+    await loadStatistics();
   }
 
   Future<void> _setPrefString(String key, String value) async {

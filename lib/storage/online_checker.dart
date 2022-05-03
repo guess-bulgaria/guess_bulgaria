@@ -46,4 +46,13 @@ class OnlineChecker {
       _atom.reportChanged();
     }
   }
+
+  static Future<bool> checkOnlineStat() async {
+    try {
+      await PingService.ping();
+      return true;
+    } catch (e) {
+      return false;
+    }
+  }
 }
