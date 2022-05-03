@@ -26,6 +26,13 @@ class ColorPicker extends StatefulWidget {
 }
 
 class _ColorPickerState extends State<ColorPicker> {
+
+  void onClick(int i) {
+    setState(() {
+      widget.onColorChange(i);
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     final colors = PlayerColors.colors;
@@ -33,36 +40,38 @@ class _ColorPickerState extends State<ColorPicker> {
       children: [
         Text(widget.title),
         for (int row = 0;
-            row < (colors.length / widget.colorsPerRow).ceil();
-            row++)
+        row < (colors.length / widget.colorsPerRow).ceil();
+        row++)
           Row(
             children: [
               for (int i = 0 + (row * widget.colorsPerRow);
-                  i < ((row + 1) * widget.colorsPerRow) && i < colors.length;
-                  i++)
+              i < ((row + 1) * widget.colorsPerRow) && i < colors.length;
+              i++)
                 Container(
                   padding: EdgeInsets.all(widget.iconMargin),
-                  child: i == widget.selectedColor || (widget.usedColors ?? []).contains(i)
+                  child: i == widget.selectedColor ||
+                      (widget.usedColors ?? []).contains(i)
                       ? Stack(children: [
-                          Center(
-                            child: Icon(Icons.circle,
-                                color: colors[i], size: widget.iconSize),
-                          ),
-                          Container(
-                            margin: const EdgeInsets.only(top: 5, left: 5),
-                            child: Icon(i == widget.selectedColor ? Icons.check : Icons.close,
-                                color: Colors.black,
-                                size: widget.iconSize - 10),
-                          )
-                        ])
+                    Center(
+                      child: Icon(Icons.circle,
+                          color: colors[i], size: widget.iconSize),
+                    ),
+                    Container(
+                      margin: const EdgeInsets.only(top: 5, left: 5),
+                      child: Icon(
+                          i == widget.selectedColor ? Icons.check : Icons.close,
+                          color: Colors.black,
+                          size: widget.iconSize - 10),
+                    )
+                  ])
                       : InkWell(
-                          hoverColor: Colors.transparent,
-                          splashColor: Colors.transparent,
-                          highlightColor: Colors.transparent,
-                          onTap: () => widget.onColorChange(i),
-                          child: Icon(Icons.circle,
-                              color: colors[i], size: widget.iconSize),
-                        ),
+                    hoverColor: Colors.transparent,
+                    splashColor: Colors.transparent,
+                    highlightColor: Colors.transparent,
+                    onTap: () => onClick(i),
+                    child: Icon(Icons.circle,
+                        color: colors[i], size: widget.iconSize),
+                  ),
                 )
             ],
           )

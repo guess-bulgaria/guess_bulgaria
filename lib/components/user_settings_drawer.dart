@@ -12,9 +12,9 @@ class UserSettingsDrawer extends StatefulWidget {
 
 class _UserSettingsDrawerState extends State<UserSettingsDrawer> {
   late TextEditingController _usernameController;
+
   void setDefaultColor(int i) async {
-    await UserData().setDefaultColor(i);
-    setState(() => {});
+    setState(() => {UserData().setDefaultColor(i)});
   }
 
   @override

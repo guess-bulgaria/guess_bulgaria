@@ -57,9 +57,9 @@ class UserData {
     }
   }
 
-  Future<void> setDefaultColor(int color) {
+  void setDefaultColor(int color) {
     _defaultColor = color;
-    return _setPrefInt(_defaultColorKey, _defaultColor);
+    _setPrefInt(_defaultColorKey, _defaultColor);
   }
 
   Future<void> loadDefaultColor() async {
@@ -68,7 +68,7 @@ class UserData {
       _defaultColor = storedDefaultColor;
     } else {
       _defaultColor = 0;
-      await setDefaultColor(_defaultColor);
+      setDefaultColor(_defaultColor);
     }
   }
 

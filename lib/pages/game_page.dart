@@ -161,7 +161,7 @@ class _GamePageState extends State<GamePage> {
         hasRoundEnded;
   }
 
-  int currentRound = 0;
+  int currentRound = 1;
 
   @override
   Widget build(BuildContext context) {
@@ -169,6 +169,8 @@ class _GamePageState extends State<GamePage> {
         players.firstWhere((element) => element["id"] == UserData.userId);
     int totalPoints = player["points"];
     int points = player["roundPoints"] ?? 0;
+    int totalPlayers = players.length;
+    int answeredPlayers = players.where((e) => e['hasAnswered'] == true).length;
     int totalRounds = widget.gameData["settings"]["maxRounds"];
     return Scaffold(
       backgroundColor: Theme.of(context).colorScheme.secondary,
@@ -204,7 +206,8 @@ class _GamePageState extends State<GamePage> {
                             child: Column(
                               children: [
                                 Text('Брой точки: $totalPoints ${points > 0 ? '(+$points)' : ''}'),
-                                Text('Рунд: $currentRound/$totalRounds'),
+                                Text('Рунд: ${currentRound}/$totalRounds'),
+                                Text('Отговорили играчи: $answeredPlayers/$totalPlayers'),
                                 ElevatedButton(
                                   onPressed:
                                   isNextRoundAllowed() ? _nextRound : null,
