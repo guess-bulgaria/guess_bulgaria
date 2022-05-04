@@ -50,19 +50,19 @@ class _LeaveGameConfirmationDialogState
                         child: ElevatedButton(
                           child: Row(
                             mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
+                            children: const [
                               Padding(
-                                padding: const EdgeInsets.only(right: 3),
+                                padding: EdgeInsets.only(right: 3),
                                 child: Icon(
                                   Icons.sensor_door_outlined,
-                                  color: Theme.of(context).colorScheme.primary,
+                                  color: Colors.white,
                                 ),
                               ),
                               Text(
                                 "Да",
                                 textAlign: TextAlign.center,
                                 style: TextStyle(
-                                    color: Theme.of(context).colorScheme.primary),
+                                    color: Colors.white),
                               ),
                             ],
                           ),
@@ -72,11 +72,11 @@ class _LeaveGameConfirmationDialogState
                       const VerticalDivider(),
                       Expanded(
                         child: ElevatedButton(
-                          child: Text(
+                          child: const Text(
                             "Не",
                             textAlign: TextAlign.center,
                             style: TextStyle(
-                                color: Theme.of(context).colorScheme.primary),
+                                color: Colors.white),
                           ),
                           onPressed: leave,
                         ),

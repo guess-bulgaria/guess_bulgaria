@@ -94,8 +94,7 @@ class WSService {
     _sendMessage('start', data: {'roomId': roomId});
   }
 
-  static void lockAnswer(Function callback, int roomId, List<double> answer) {
-    _createChannel(callback);
+  static void lockAnswer(int roomId, List<double> answer) {
     _sendMessage('answer', data: {'answer': answer, 'roomId': roomId});
   }
 

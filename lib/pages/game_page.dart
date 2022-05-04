@@ -6,11 +6,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:guess_bulgaria/components/drawer.dart';
 import 'package:guess_bulgaria/components/loader.dart';
-import 'package:guess_bulgaria/components/navigation_button.dart';
 import 'package:guess_bulgaria/components/open_drawer_button.dart';
 import 'package:guess_bulgaria/configs/player_colors.dart';
 import 'package:guess_bulgaria/dialogs/end_game_dialog.dart';
 import 'package:guess_bulgaria/dialogs/leave_game_confirmation_dialog.dart';
+import 'package:guess_bulgaria/services/game/i_game_service.dart';
 import 'package:guess_bulgaria/services/ws_service.dart';
 import 'package:guess_bulgaria/storage/user_data.dart';
 import 'package:mapbox_gl/mapbox_gl.dart';
@@ -18,19 +18,17 @@ import 'package:guess_bulgaria/components/player_list.dart';
 import 'package:photo_view/photo_view.dart';
 
 class GamePage extends StatefulWidget {
-  final int roomId;
+  final IGameService gameService;
   final dynamic gameData;
 
-  const GamePage({Key? key, this.roomId = 0, this.gameData}) : super(key: key);
+  const GamePage(this.gameService, {Key? key, this.gameData}) : super(key: key);
 
   @override
   State<StatefulWidget> createState() => _GamePageState();
 }
 
 class _GamePageState extends State<GamePage> {
-  final initalCameraPosition =
-      const CameraPosition(target: LatLng(42.5617153, 25.5166978), zoom: 5.4);
-  late MapboxMapController mapController;
+  late MapboxMapController _mapController;
   late Color myColor;
   dynamic roundData;
   LatLng? pin;
@@ -41,19 +39,20 @@ class _GamePageState extends State<GamePage> {
   bool hasEnded = false;
 
   _onMapCreated(MapboxMapController controller) {
-    mapController = controller;
+    widget.gameService.onMapCreated(controller);
+    _mapController = controller;
   }
 
   _onStyleLoadedCallback() async {
     final Uint8List list =
         (await rootBundle.load("assets/icons/marker.png")).buffer.asUint8List();
-    await mapController.addImage("pin", list, true);
+    await _mapController.addImage("pin", list, true);
   }
 
   void _onMapClickCallback(Point<double> point, LatLng coordinates) {
     if (hasLocked) return;
-    mapController.clearSymbols();
-    mapController.addSymbol(
+    _mapController.clearSymbols();
+    _mapController.addSymbol(
       SymbolOptions(
         geometry: coordinates,
         iconImage: "pin",
@@ -66,37 +65,8 @@ class _GamePageState extends State<GamePage> {
     pin = coordinates;
   }
 
-  void _setEndRoundSymbols(List<dynamic> players, List<dynamic> answer) {
-    mapController.clearSymbols();
-    for (var p in players) {
-      mapController.addSymbol(
-        SymbolOptions(
-          geometry: LatLng(p['answer'][0], p['answer'][1]),
-          iconOpacity: 1.0,
-          iconImage: "pin",
-          iconColor: PlayerColors.color(p['color']).toHexStringRGB(),
-          textSize: 20,
-          iconSize: 1.02,
-        ),
-      );
-    }
-    var answerLatLng = LatLng(answer[0], answer[1]);
-    mapController.addSymbol(SymbolOptions(
-      geometry: answerLatLng,
-      iconColor: Colors.black.toHexStringRGB(),
-      textSize: 20,
-      iconImage: "pin",
-      iconOpacity: 1.0,
-      iconSize: 1.02,
-    ));
-    mapController.animateCamera(
-        CameraUpdate.newLatLngZoom(answerLatLng, initalCameraPosition.zoom));
-  }
-
   void onMessageReceived(String type, dynamic message) {
     switch (type) {
-      case 'player-join':
-        break;
       case 'player-leave':
         setState(() {
           players = message['players'];
@@ -119,7 +89,7 @@ class _GamePageState extends State<GamePage> {
         break;
       case "end-round":
         hasRoundEnded = true;
-        _setEndRoundSymbols(
+        widget.gameService.setEndRoundSymbols(
             message['players'], message['currentRound']['coordinates']);
         players = message['players'];
         setState(() {});
@@ -127,26 +97,21 @@ class _GamePageState extends State<GamePage> {
   }
 
   void _lockAnswer() {
-    WSService.lockAnswer(
-        onMessageReceived, widget.roomId, [pin!.latitude, pin!.longitude]);
+    widget.gameService.lockAnswer(pin);
     setState(() {
       hasLocked = true;
     });
   }
 
-  void _nextRound() {
-    WSService.nextRound(widget.roomId);
-  }
-
   @override
   void initState() {
     WSService.changeCallback(onMessageReceived);
-    if (widget.gameData == null && widget.roomId != 0) {
-      WSService.startRound(widget.roomId);
-    } else if (widget.gameData != null) {
+
+    if (widget.gameData != null) {
       roundData = widget.gameData['currentRound'];
       players = widget.gameData['players'];
     }
+
     if (roundData?['image'] != null) {
       img = Image.memory(base64Decode(roundData?['image']));
     }
@@ -159,9 +124,7 @@ class _GamePageState extends State<GamePage> {
   }
 
   bool isNextRoundAllowed() {
-    return players.firstWhere((p) => p['isCreator'] == true)['id'] ==
-            UserData.userId &&
-        hasRoundEnded;
+    return (players.firstWhere((p) => p['isCreator'] == true)['id'] == UserData.userId) && hasRoundEnded;
   }
 
   int currentRound = 1;
@@ -174,7 +137,7 @@ class _GamePageState extends State<GamePage> {
     int points = player["roundPoints"] ?? 0;
     int totalPlayers = players.where((p) => p['isConnected'] == true).length;
     int answeredPlayers = players.where((p) => p['hasAnswered'] == true && p['isConnected'] == true).length;
-    int totalRounds = widget.gameData["settings"]["maxRounds"];
+    int totalRounds = widget.gameData["settings"]?["maxRounds"] ?? 0;
     return WillPopScope(child: Scaffold(
       backgroundColor: Theme.of(context).colorScheme.secondary,
       body: Builder(
@@ -209,11 +172,11 @@ class _GamePageState extends State<GamePage> {
                         child: Column(
                           children: [
                             Text('Брой точки: $totalPoints ${points > 0 ? '(+$points)' : ''}'),
-                            Text('Рунд: ${currentRound}/$totalRounds'),
-                            Text('Отговорили играчи: $answeredPlayers/$totalPlayers'),
+                            if(!widget.gameService.isSingle()) Text('Рунд: $currentRound/$totalRounds'),
+                            if(!widget.gameService.isSingle()) Text('Отговорили играчи: $answeredPlayers/$totalPlayers'),
                             ElevatedButton(
                               onPressed:
-                              isNextRoundAllowed() ? _nextRound : null,
+                              isNextRoundAllowed() ? widget.gameService.nextRound : null,
                               child: const Text('Start round'),
                             ),
                           ],
@@ -237,7 +200,7 @@ class _GamePageState extends State<GamePage> {
                           tiltGesturesEnabled: false,
                           trackCameraPosition: true,
                           onMapClick: _onMapClickCallback,
-                          initialCameraPosition: initalCameraPosition,
+                          initialCameraPosition: widget.gameService.initialCameraPosition,
                           minMaxZoomPreference: const MinMaxZoomPreference(5.4, 16),
                           cameraTargetBounds: CameraTargetBounds(
                             LatLngBounds(
@@ -263,7 +226,7 @@ class _GamePageState extends State<GamePage> {
                   )
                 ],
               ),
-              OpenDrawerButton(
+              if(!widget.gameService.isSingle()) OpenDrawerButton(
                 isEnd: true,
                 clickCallback: () => Scaffold.of(context).openEndDrawer(),
                 icon: Icons.people,
@@ -313,17 +276,18 @@ class _GamePageState extends State<GamePage> {
   }
 
   void loadRound(dynamic roundData) {
-    setState(() => {
-          hasRoundEnded = false,
-          mapController.clearSymbols(),
-          roundData = roundData,
-          currentRound++,
-          if (roundData?['image'] != null)
-            {img = Image.memory(base64Decode(roundData?['image']))},
-          for (var p in players) {p['hasAnswered'] = false},
-          mapController.animateCamera(CameraUpdate.newLatLngZoom(
-              initalCameraPosition.target, initalCameraPosition.zoom)),
-          hasLocked = false
+    setState(() {
+          hasRoundEnded = false;
+          _mapController.clearSymbols();
+          _mapController.clearLines();
+          roundData = roundData;
+          currentRound++;
+          if (roundData?['image'] != null) img = Image.memory(base64Decode(roundData?['image']));
+          for (var p in players) {
+            p['hasAnswered'] = false;
+          }
+          _mapController.animateCamera(CameraUpdate.newCameraPosition(widget.gameService.initialCameraPosition));
+          hasLocked = false;
         });
   }
 }

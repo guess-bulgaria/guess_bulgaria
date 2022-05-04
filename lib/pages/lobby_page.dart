@@ -4,6 +4,7 @@ import 'package:guess_bulgaria/components/loader.dart';
 import 'package:guess_bulgaria/components/navigation_button.dart';
 import 'package:guess_bulgaria/components/player_list.dart';
 import 'package:guess_bulgaria/pages/game_page.dart';
+import 'package:guess_bulgaria/services/game/multiplayer_game_service.dart';
 import 'package:guess_bulgaria/services/ws_service.dart';
 import 'dart:async';
 
@@ -89,7 +90,7 @@ class _LobbyPageState extends State<LobbyPage> {
             context,
             MaterialPageRoute(
                 builder: (context) =>
-                    GamePage(gameData: message, roomId: message['roomId'])));
+                    GamePage(MultiplayerGameService(message['roomId']), gameData: message,)));
         break;
       case 'player-join':
       case 'player-leave':

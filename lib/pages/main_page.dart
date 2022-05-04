@@ -14,6 +14,7 @@ import 'package:guess_bulgaria/pages/lobby_page.dart';
 import 'package:guess_bulgaria/pages/game_page.dart';
 import 'package:guess_bulgaria/pages/public_lobbies_page.dart';
 import 'package:guess_bulgaria/pages/stats_page.dart';
+import 'package:guess_bulgaria/services/game/singleplayer_game_service.dart';
 import 'package:guess_bulgaria/services/ws_service.dart';
 import 'package:guess_bulgaria/storage/online_checker.dart';
 import 'package:guess_bulgaria/storage/user_data.dart';
@@ -59,7 +60,25 @@ class _MainPageState extends State<MainPage> {
   playSingle() {
     _joinCodeController.text = "";
     Navigator.push(
-        context, MaterialPageRoute(builder: (context) => const GamePage()));
+      context,
+      MaterialPageRoute(
+        builder: (context) => GamePage(
+          SinglePlayerGameService(),
+          gameData: {
+            'players': [
+              {
+                "id": UserData.userId,
+                "color": UserData.defaultColor,
+                "username": UserData.username,
+                "points": 0,
+                "isCreator": true,
+                "isConnected": true
+              }
+            ]
+          },
+        ),
+      ),
+    );
   }
 
   createRoom() {
@@ -80,7 +99,8 @@ class _MainPageState extends State<MainPage> {
 
   publicRooms() {
     _joinCodeController.text = "";
-    Navigator.push(context, MaterialPageRoute(builder: (context) => const PublicLobbiesPage()));
+    Navigator.push(context,
+        MaterialPageRoute(builder: (context) => const PublicLobbiesPage()));
   }
 
   bool _hasError = false;
@@ -93,7 +113,6 @@ class _MainPageState extends State<MainPage> {
           MaterialPageRoute(
               builder: (context) => LobbyPage(joinData: message)));
     } else if (type == 'join-failed') {
-      //todo set join field to error
       setState(() {
         _hasError = true;
       });
@@ -298,7 +317,7 @@ class _MainPageState extends State<MainPage> {
                 ),
               ),
               OpenDrawerButton(
-                  clickCallback: () => Scaffold.of(context).openDrawer(),
+                clickCallback: () => Scaffold.of(context).openDrawer(),
               )
             ],
           ),
