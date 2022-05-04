@@ -70,6 +70,9 @@ class _LobbyPageState extends State<LobbyPage> {
       case 'current-data':
         setRoomData(message);
         break;
+      case 'settings-change':
+        setSettings(message['settings']);
+        break;
       case 'room-privacy-notifier':
         setRoomPrivacy(message);
         break;
@@ -117,8 +120,7 @@ class _LobbyPageState extends State<LobbyPage> {
     setState(() {
       roomId = message['roomId'];
       _isRoomPublic = message['isPublic'] ?? true;
-      _sizeController.text = "${message['settings']['maxRounds']}";
-      _timeController.text = "${message['settings']['answerTimeInSeconds']}";
+      setSettings(message['settings']);
       players = message['players'];
       usedColors = [];
       for (var player in players) {
@@ -128,6 +130,11 @@ class _LobbyPageState extends State<LobbyPage> {
         usedColors.add(player['color']);
       }
     });
+  }
+
+  void setSettings(settings){
+    _sizeController.text = "${settings['maxRounds']}";
+    _timeController.text = "${settings['answerTimeInSeconds']}";
   }
 
   void setRoomPrivacy(message) {

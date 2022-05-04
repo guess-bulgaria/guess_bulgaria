@@ -1,56 +1,62 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
+import 'package:guess_bulgaria/components/controllers/timer_controller.dart';
 import 'package:guess_bulgaria/storage/clock.dart';
 
 class Timer extends StatefulWidget {
-  final int startTime;
-  final int maxTime;
+  final TimerController timerController;
 
-  const Timer({Key? key, required this.maxTime, this.startTime = 0})
-      : super(key: key);
+  const Timer(this.timerController, {Key? key}) : super(key: key);
 
   @override
   State<StatefulWidget> createState() => _TimerState();
 }
 
 class _TimerState extends State<Timer> with TickerProviderStateMixin {
-  late Clock clock;
-
   late AnimationController controller;
 
   @override
   void initState() {
-    clock = Clock(widget.maxTime, startTime: widget.startTime);
     controller = AnimationController(
       vsync: this,
       value: 0.0,
     )..addListener(() {
-      setState(() {});
-    });
+        setState(() {});
+      });
+    widget.timerController.animationController = controller;
     super.initState();
   }
 
   @override
   Widget build(BuildContext context) {
-    return Stack(
-      children: [
-        LinearProgressIndicator(
-          value: controller.value,
-          minHeight: 16,
-          valueColor: const AlwaysStoppedAnimation<Color>(Colors.red),
-          semanticsLabel: 'Linear progress indicator',
+    return Container(
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(10.0),
+        border: Border.all(
+          color: Colors.transparent,
+          width: 1,
         ),
-        Observer(
-          builder: (_) {
-            controller.animateTo((clock.seconds + 1) / 10,
-                duration: const Duration(seconds: 1), curve: Curves.ease);
-            return Text(
-              "${clock.seconds}",
-              style: const TextStyle(color: Colors.white),
-            );
-          },
-        )
-      ],
+      ),
+      child: Stack(
+        children: [
+          LinearProgressIndicator(
+              value: controller.value,
+              minHeight: 16,
+              valueColor: const AlwaysStoppedAnimation<Color>(Colors.red)),
+          Center(
+            child: Observer(
+              builder: (_) {
+                return Text(
+                  widget.timerController.clock.seconds == widget.timerController.maxTime ?
+                  "Времето изтече!" :
+                  "${widget.timerController.maxTime - widget.timerController.clock.seconds} секунди...",
+                  style: const TextStyle(color: Colors.white),
+                );
+              },
+            ),
+          )
+        ],
+      ),
     );
   }
 }

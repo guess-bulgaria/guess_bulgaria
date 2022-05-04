@@ -22,6 +22,7 @@ class MultiplayerGameService extends IGameService {
     mapController.clearLines();
     var answerLatLng = LatLng(answer[0], answer[1]);
     for (var p in players) {
+      if(p['answer'] == null) continue;
       var playerAnswerLatLng = LatLng(p['answer'][0], p['answer'][1]);
       var color = PlayerColors.color(p['color']).toHexStringRGB();
       mapController.addSymbol(SymbolOptions(
@@ -55,9 +56,8 @@ class MultiplayerGameService extends IGameService {
   }
 
   @override
-  void lockAnswer(LatLng? pin) {
-    if (pin != null)
-      WSService.lockAnswer(roomId, [pin.latitude, pin.longitude]);
+  void lockAnswer(LatLng selectedLocation) {
+      WSService.lockAnswer(roomId, [selectedLocation.latitude, selectedLocation.longitude]);
   }
 
   @override

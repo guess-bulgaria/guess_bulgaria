@@ -30,7 +30,7 @@ class SinglePlayerGameService extends IGameService {
   }
 
   @override
-  void lockAnswer(LatLng? pin){
+  void lockAnswer(LatLng selectedLocation){
     //todo end round
   }
 

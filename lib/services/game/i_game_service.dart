@@ -10,7 +10,7 @@ abstract class IGameService {
 
   void setEndRoundSymbols(List<dynamic> players, List<dynamic> answer);
 
-  void lockAnswer(LatLng? pin);
+  void lockAnswer(LatLng selectedLocation);
 
   void nextRound();
 

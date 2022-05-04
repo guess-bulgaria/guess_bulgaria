@@ -4,6 +4,7 @@ import 'package:flutter_svg/svg.dart';
 class Badge extends StatelessWidget {
   final String title;
   final String text;
+  final bool center;
   final IconData? icon;
   final String? image;
 
@@ -12,18 +13,21 @@ class Badge extends StatelessWidget {
     required this.title,
     required this.text,
     this.icon,
+    this.center = false,
     this.image,
   }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return Column(
+      mainAxisAlignment: MainAxisAlignment.end,
       children: [
         Container(
+          height: 18,
           margin: const EdgeInsets.symmetric(horizontal: 11),
-          alignment: Alignment.centerLeft,
+          alignment: center ? Alignment.center : Alignment.centerLeft,
           child: FittedBox(
-            fit: BoxFit.scaleDown,
+            fit: BoxFit.cover,
             child: Text(
               title,
               style: const TextStyle(fontSize: 14),
@@ -41,29 +45,33 @@ class Badge extends StatelessWidget {
               width: 4,
             ),
           ),
-          child: Center(
-            child: Row(
-              children: [
-                if (image != null)
-                  Container(
-                    child: SvgPicture.asset(
-                      image!,
-                      height: 20,
-                      color: Theme.of(context).secondaryHeaderColor,
+          child: Align(
+            alignment: Alignment.centerLeft,
+            child: FittedBox(
+              fit: BoxFit.scaleDown,
+              child: Row(
+                children: [
+                  if (image != null)
+                    Container(
+                      child: SvgPicture.asset(
+                        image!,
+                        height: 20,
+                        color: Theme.of(context).secondaryHeaderColor,
+                      ),
+                      margin: const EdgeInsets.symmetric(horizontal: 3),
+                      width: 22,
                     ),
-                    margin: const EdgeInsets.symmetric(horizontal: 3),
-                    width: 22,
-                  ),
-                if (icon != null)
-                  Container(
-                    child: Icon(
-                      icon,
-                      color: Theme.of(context).secondaryHeaderColor,
+                  if (icon != null)
+                    Container(
+                      child: Icon(
+                        icon,
+                        color: Theme.of(context).secondaryHeaderColor,
+                      ),
+                      margin: const EdgeInsets.symmetric(horizontal: 3),
                     ),
-                    margin: const EdgeInsets.symmetric(horizontal: 3),
-                  ),
-                Text(text),
-              ],
+                    Text(text),
+                ],
+              ),
             ),
           ),
         ),
