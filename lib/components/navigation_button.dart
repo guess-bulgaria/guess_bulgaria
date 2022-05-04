@@ -31,7 +31,10 @@ class NavigationButton extends StatelessWidget {
               padding: const EdgeInsets.only(right: 3),
               child: Icon(icon),
             ),
-            Text(text, textAlign: TextAlign.center),
+            FittedBox(
+              fit: BoxFit.scaleDown,
+              child: Text(text, textAlign: TextAlign.center),
+            ),
           ],
         ),
         onPressed: onPressed != null ? onClick : null,

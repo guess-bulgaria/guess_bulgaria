@@ -33,16 +33,17 @@ class GamePage extends StatefulWidget {
 class _GamePageState extends State<GamePage> {
   late MapboxMapController _mapController;
   late TimerController _timerController;
-  late Color myColor;
-  dynamic roundData;
-  LatLng? selectedLocation;
-  List<dynamic> players = [];
-  late Image img;
+  late Color _playerColor;
+  dynamic _roundData;
+  LatLng? _selectedLocation;
+  List<dynamic> _players = [];
+  late Image _image;
   bool _hasRoundEnded = false;
-  bool hasLocked = false;
-  bool hasEnded = false;
+  bool _hasLocked = false;
+  bool _hasEnded = false;
   int _startTime = 0;
   int _endTime = 0;
+  int _currentRound = 1;
 
   _onMapCreated(MapboxMapController controller) {
     widget.gameService.onMapCreated(controller);
@@ -56,26 +57,26 @@ class _GamePageState extends State<GamePage> {
   }
 
   void _onMapClickCallback(Point<double> point, LatLng coordinates) {
-    if (hasLocked) return;
+    if (_hasLocked) return;
     _mapController.clearSymbols();
     _mapController.addSymbol(
       SymbolOptions(
         geometry: coordinates,
         iconImage: "pin",
-        iconColor: myColor.toHexStringRGB(),
+        iconColor: _playerColor.toHexStringRGB(),
         textSize: 20,
         iconOpacity: 1.0,
         iconSize: 1.02,
       ),
     );
-    selectedLocation = coordinates;
+    _selectedLocation = coordinates;
   }
 
   void onMessageReceived(String type, dynamic message) {
     switch (type) {
       case 'player-leave':
         setState(() {
-          players = message['players'];
+          _players = message['players'];
         });
         break;
       case "end-game":
@@ -87,7 +88,7 @@ class _GamePageState extends State<GamePage> {
         break;
       case "player-answer":
         setState(() {
-          for (final player in players) {
+          for (final player in _players) {
             if (player['id'] == message['id']) {
               player['hasAnswered'] = true;
             }
@@ -99,17 +100,17 @@ class _GamePageState extends State<GamePage> {
         _timerController.pause();
         widget.gameService.setEndRoundSymbols(
             message['players'], message['currentRound']['coordinates']);
-        players = message['players'];
+        _players = message['players'];
         setState(() {});
     }
   }
 
   void _lockAnswer() {
-    if (selectedLocation == null) return;
-    widget.gameService.lockAnswer(selectedLocation!);
+    if (_selectedLocation == null) return;
+    widget.gameService.lockAnswer(_selectedLocation!);
 
     setState(() {
-      hasLocked = true;
+      _hasLocked = true;
     });
   }
 
@@ -118,19 +119,20 @@ class _GamePageState extends State<GamePage> {
     WSService.changeCallback(onMessageReceived);
 
     if (widget.gameData != null) {
-      roundData = widget.gameData['currentRound'];
-      players = widget.gameData['players'];
+      _roundData = widget.gameData['currentRound'];
+      _players = widget.gameData['players'];
       _endTime = widget.gameData["settings"]?["answerTimeInSeconds"] ?? 0;
+
+      if (_roundData['image'] != null) {
+        _image = Image.memory(base64Decode(_roundData['image']));
+      }
     }
     print("TIME $_endTime");
     print("TIME2 ${widget.gameData["settings"]?["answerTimeInSeconds"]}");
     _timerController = TimerController(_startTime, _endTime, timerEndCallback);
 
-    if (roundData?['image'] != null) {
-      img = Image.memory(base64Decode(roundData?['image']));
-    }
-    myColor = PlayerColors.color(
-      players.firstWhere((p) => p['id'] == UserData.userId,
+    _playerColor = PlayerColors.color(
+      _players.firstWhere((p) => p['id'] == UserData.userId,
           orElse: () => {'color': UserData.defaultColor})['color'],
     );
 
@@ -144,16 +146,14 @@ class _GamePageState extends State<GamePage> {
   }
 
   void timerEndCallback() {
-    selectedLocation ??= const LatLng(0, 0);
+    _selectedLocation ??= const LatLng(0, 0);
     _lockAnswer();
   }
 
   bool isCreator() {
-    return players.firstWhere((p) => p['isCreator'] == true)['id'] ==
+    return _players.firstWhere((p) => p['isCreator'] == true)['id'] ==
         UserData.userId;
   }
-
-  int _currentRound = 1;
 
   final _buttonStyle = ButtonStyle(
     foregroundColor: MaterialStateProperty.resolveWith<Color>(
@@ -168,14 +168,52 @@ class _GamePageState extends State<GamePage> {
     ),
   );
 
+  Future<bool> onBackButton() async {
+    if (_hasEnded) return true;
+    showDialog(
+        context: context, builder: (_) => const LeaveGameConfirmationDialog());
+    return false;
+  }
+
+  void showEndGameResults(dynamic players) {
+    _hasEnded = true;
+    UserData().loadStatistics();
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext context) => EndGameDialog(players),
+    );
+  }
+
+  void loadRound(dynamic roundData) {
+    setState(() {
+      _hasRoundEnded = false;
+      _mapController.clearSymbols();
+      _mapController.clearLines();
+      _roundData = roundData;
+      _currentRound++;
+      if (roundData?['image'] != null) {
+        _image = Image.memory(base64Decode(roundData?['image']));
+      }
+      for (var p in _players) {
+        p['hasAnswered'] = false;
+      }
+      _mapController.animateCamera(CameraUpdate.newCameraPosition(
+          widget.gameService.initialCameraPosition));
+      _selectedLocation = null;
+      _hasLocked = false;
+      _startTime = 0;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     var player =
-        players.firstWhere((element) => element["id"] == UserData.userId);
+        _players.firstWhere((element) => element["id"] == UserData.userId);
     int totalPoints = player["points"];
     int points = player["roundPoints"] ?? 0;
-    int totalPlayers = players.where((p) => p['isConnected'] == true).length;
-    int answeredPlayers = players
+    int totalPlayers = _players.where((p) => p['isConnected'] == true).length;
+    int answeredPlayers = _players
         .where((p) => p['hasAnswered'] == true && p['isConnected'] == true)
         .length;
     int totalRounds = widget.gameData["settings"]?["maxRounds"] ?? 0;
@@ -191,14 +229,14 @@ class _GamePageState extends State<GamePage> {
                         children: [
                           Expanded(
                             flex: 3,
-                            child: roundData?['image'] != null
+                            child: _roundData?['image'] != null
                                 ? PhotoView(
                                     backgroundDecoration: BoxDecoration(
                                         color: Theme.of(context)
                                             .colorScheme
                                             .secondary),
                                     basePosition: Alignment.center,
-                                    imageProvider: img.image,
+                                    imageProvider: _image.image,
                                     minScale: PhotoViewComputedScale.contained,
                                     gaplessPlayback: true,
                                     maxScale: 3.5)
@@ -218,8 +256,15 @@ class _GamePageState extends State<GamePage> {
                                 )),
                               ),
                               child: Column(
-                                mainAxisAlignment: MainAxisAlignment.end,
                                 children: [
+                                  Expanded(
+                                    child: Align(
+                                      child: Badge(
+                                        text: _roundData['name'] ?? '',
+                                      ),
+                                      alignment: Alignment.topCenter,
+                                    ),
+                                  ),
                                   Row(
                                     mainAxisAlignment: MainAxisAlignment.end,
                                     children: [
@@ -244,14 +289,94 @@ class _GamePageState extends State<GamePage> {
                                           ),
                                         ),
                                       Expanded(
-                                        child: Badge(
-                                          title: 'Точки',
-                                          text:
-                                              '$totalPoints ${points > 0 ? '(+$points)' : ''}',
-                                          icon: Icons.star,
-                                          center: true,
+                                        child: Column(
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.end,
+                                          children: [
+                                            Container(
+                                              height: 18,
+                                              margin:
+                                                  const EdgeInsets.symmetric(
+                                                      horizontal: 11),
+                                              alignment: Alignment.center,
+                                              child: const FittedBox(
+                                                fit: BoxFit.cover,
+                                                child: Text(
+                                                  'Точки',
+                                                  style:
+                                                      TextStyle(fontSize: 14),
+                                                ),
+                                              ),
+                                            ),
+                                            Container(
+                                              margin:
+                                                  const EdgeInsets.symmetric(
+                                                      vertical: 5,
+                                                      horizontal: 10),
+                                              height: 30,
+                                              decoration: BoxDecoration(
+                                                color: Theme.of(context)
+                                                    .colorScheme
+                                                    .secondary,
+                                                borderRadius:
+                                                    BorderRadius.circular(10.0),
+                                                border: Border.all(
+                                                  color: Theme.of(context)
+                                                      .colorScheme
+                                                      .secondary,
+                                                  width: 4,
+                                                ),
+                                              ),
+                                              child: Align(
+                                                alignment: Alignment.centerLeft,
+                                                child: FittedBox(
+                                                  fit: BoxFit.scaleDown,
+                                                  child: Row(
+                                                    children: [
+                                                      Container(
+                                                        child: Icon(
+                                                          Icons.star,
+                                                          color: Theme.of(
+                                                                  context)
+                                                              .secondaryHeaderColor,
+                                                        ),
+                                                        margin: const EdgeInsets
+                                                                .symmetric(
+                                                            horizontal: 3),
+                                                      ),
+                                                      TweenAnimationBuilder<
+                                                          double>(
+                                                        tween: Tween<double>(
+                                                            begin: 0,
+                                                            end: totalPoints
+                                                                .toDouble()),
+                                                        duration:
+                                                            const Duration(
+                                                                milliseconds:
+                                                                    750),
+                                                        builder: (BuildContext
+                                                                context,
+                                                            double value,
+                                                            Widget? child) {
+                                                          return Text(
+                                                              '${value.toInt()}');
+                                                        },
+                                                      ),
+                                                      Text(
+                                                        points > 0
+                                                            ? ' +$points'
+                                                            : '',
+                                                        style: const TextStyle(
+                                                            fontSize: 10),
+                                                      )
+                                                    ],
+                                                  ),
+                                                ),
+                                              ),
+                                            ),
+                                          ],
                                         ),
-                                      )
+                                      ),
                                     ],
                                   ),
                                   if (_endTime > 0)
@@ -259,7 +384,7 @@ class _GamePageState extends State<GamePage> {
                                       margin: const EdgeInsets.symmetric(
                                           horizontal: 12, vertical: 4),
                                       child: Timer(_timerController),
-                                    )
+                                    ),
                                 ],
                               ),
                             ),
@@ -353,7 +478,7 @@ class _GamePageState extends State<GamePage> {
                                               ),
                                             ),
                                             onPressed:
-                                                !hasLocked ? _lockAnswer : null,
+                                                !_hasLocked ? _lockAnswer : null,
                                           ),
                                         ),
                                       ],
@@ -391,7 +516,7 @@ class _GamePageState extends State<GamePage> {
               ),
               SizedBox(
                 height: (MediaQuery.of(context).size.height / 1.5) - 140,
-                child: PlayerList(players, PlayerListTypes.scoreboard),
+                child: PlayerList(_players, PlayerListTypes.scoreboard),
               ),
               const Divider(
                 thickness: 0.45,
@@ -402,58 +527,4 @@ class _GamePageState extends State<GamePage> {
         ),
         onWillPop: onBackButton);
   }
-
-  Future<bool> onBackButton() async {
-    if (hasEnded) return true;
-    showDialog(
-        context: context, builder: (_) => const LeaveGameConfirmationDialog());
-    return false;
-  }
-
-  void showEndGameResults(dynamic players) {
-    hasEnded = true;
-    UserData().loadStatistics();
-    showDialog(
-      context: context,
-      barrierDismissible: false,
-      builder: (BuildContext context) => EndGameDialog(players),
-    );
-  }
-
-  void loadRound(dynamic roundData) {
-    setState(() {
-      _hasRoundEnded = false;
-      _mapController.clearSymbols();
-      _mapController.clearLines();
-      roundData = roundData;
-      _currentRound++;
-      if (roundData?['image'] != null) {
-        img = Image.memory(base64Decode(roundData?['image']));
-      }
-      for (var p in players) {
-        p['hasAnswered'] = false;
-      }
-      _mapController.animateCamera(CameraUpdate.newCameraPosition(
-          widget.gameService.initialCameraPosition));
-      selectedLocation = null;
-      hasLocked = false;
-      _startTime = 0;
-    });
-  }
 }
-
-// Column(children: [
-//   if (players.isNotEmpty)
-//     ...players
-//         .map((p) => Text(
-//               p['username'],
-//               style: TextStyle(
-//                   color: p['hasAnswered'] != null &&
-//                           p['hasAnswered']
-//                       ? Colors.blue
-//                       : Colors.red),
-//             ))
-//         .toList()
-//   else
-//     const Text('No players'),
-// ]),

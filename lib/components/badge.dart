@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 
 class Badge extends StatelessWidget {
-  final String title;
+  final String? title;
   final String text;
   final bool center;
   final IconData? icon;
@@ -10,8 +10,8 @@ class Badge extends StatelessWidget {
 
   const Badge({
     Key? key,
-    required this.title,
     required this.text,
+    this.title,
     this.icon,
     this.center = false,
     this.image,
@@ -22,14 +22,14 @@ class Badge extends StatelessWidget {
     return Column(
       mainAxisAlignment: MainAxisAlignment.end,
       children: [
-        Container(
+        if(title != null) Container(
           height: 18,
           margin: const EdgeInsets.symmetric(horizontal: 11),
           alignment: center ? Alignment.center : Alignment.centerLeft,
           child: FittedBox(
             fit: BoxFit.cover,
             child: Text(
-              title,
+              title ?? '',
               style: const TextStyle(fontSize: 14),
             ),
           ),

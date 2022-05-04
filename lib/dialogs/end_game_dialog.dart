@@ -21,9 +21,12 @@ class _EndGameDialogState extends State<EndGameDialog> {
           Radius.circular(40.0),
         ),
       ),
-      title: const Align(
+      title: Align(
         alignment: Alignment.center,
-        child: Text("Резултати"),
+        child: Text(
+          "Резултати",
+          style: TextStyle(color: Theme.of(context).secondaryHeaderColor),
+        ),
       ),
       content: SizedBox(
         height: double.maxFinite,
@@ -31,12 +34,26 @@ class _EndGameDialogState extends State<EndGameDialog> {
         child: PlayerList(widget.players, PlayerListTypes.gameResults),
       ),
       actions: [
-        Align(
-          alignment: Alignment.center,
-          child: NavigationButton(
-            text: "Начална страница",
-            onPressed: endGame,
-            width: double.maxFinite,
+        Container(
+          margin: const EdgeInsets.symmetric(horizontal: 4),
+          child: Row(
+            children: [
+              Expanded(
+                child: NavigationButton(
+                  text: "Начална\nстраница",
+                  icon: Icons.home,
+                  onPressed: endGame,
+                ),
+              ),
+              const VerticalDivider(width: 8),
+              Expanded(
+                child: NavigationButton(
+                  text: "Върни се\nв лобито",
+                  icon: Icons.subdirectory_arrow_left,
+                  onPressed: toLobby,
+                ),
+              )
+            ],
           ),
         )
       ],

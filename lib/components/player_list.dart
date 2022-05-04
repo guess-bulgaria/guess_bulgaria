@@ -148,8 +148,12 @@ class PlayerList extends StatelessWidget {
                     Icon(Icons.star,
                         size: 12,
                         color: Theme.of(context).secondaryHeaderColor),
-                    Text('$total ${points > 0 ? '(+$points)' : ''}',
+                    Text('$total',
                         style: const TextStyle(fontSize: 13)),
+                    Text(
+                      points > 0 ? ' +$points' : '',
+                      style: const TextStyle(fontSize: 10),
+                    )
                   ],
                 )),
             Icon(
