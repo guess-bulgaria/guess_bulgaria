@@ -9,6 +9,7 @@ import 'package:guess_bulgaria/components/loader.dart';
 import 'package:guess_bulgaria/components/navigation_button.dart';
 import 'package:guess_bulgaria/components/open_drawer_button.dart';
 import 'package:guess_bulgaria/configs/player_colors.dart';
+import 'package:guess_bulgaria/dialogs/end_game_dialog.dart';
 import 'package:guess_bulgaria/dialogs/leave_game_confirmation_dialog.dart';
 import 'package:guess_bulgaria/services/ws_service.dart';
 import 'package:guess_bulgaria/storage/user_data.dart';
@@ -102,7 +103,7 @@ class _GamePageState extends State<GamePage> {
         });
         break;
       case "end-game":
-        showEndGameResults(message);
+        showEndGameResults(message['players']);
         break;
       case "start-round":
         loadRound(message['currentRound']);
@@ -301,34 +302,14 @@ class _GamePageState extends State<GamePage> {
     return false;
   }
 
-  void showEndGameResults(dynamic message) {
+  void showEndGameResults(dynamic players) {
     hasEnded = true;
     UserData().loadStatistics();
     showDialog(
         context: context,
         barrierDismissible: false,
-        builder: (BuildContext context) => AlertDialog(
-              title: const Align(
-                alignment: Alignment.center,
-                child: Text("Резултати"),
-              ),
-              content: SizedBox(
-                height: double.maxFinite,
-                width: double.maxFinite,
-                child:
-                    PlayerList(message["players"], PlayerListTypes.gameResults),
-              ),
-              actions: [
-                Align(
-                  alignment: Alignment.center,
-                  child: NavigationButton(
-                    text: "Начална страница",
-                    onPressed: endGame,
-                    width: double.maxFinite,
-                  ),
-                )
-              ],
-            ));
+        builder: (BuildContext context) => EndGameDialog(players),
+    );
   }
 
   void loadRound(dynamic roundData) {
@@ -344,11 +325,6 @@ class _GamePageState extends State<GamePage> {
               initalCameraPosition.target, initalCameraPosition.zoom)),
           hasLocked = false
         });
-  }
-
-  void endGame() {
-    // TODO: stats
-    Navigator.of(context).popUntil(ModalRoute.withName('/'));
   }
 }
 

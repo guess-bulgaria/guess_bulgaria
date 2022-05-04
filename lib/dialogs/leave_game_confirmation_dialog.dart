@@ -27,7 +27,7 @@ class _LeaveGameConfirmationDialogState
           Radius.circular(40.0),
         ),
       ),
-      content: Container(
+      content: SizedBox(
         width: 100,
         child: Wrap(
           children: [

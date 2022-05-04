@@ -19,16 +19,79 @@ class RoomRow extends StatelessWidget {
     var answerTime = room['settings']['answerTimeInSeconds'];
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-      height: 30,
+      height: 60,
       child: ElevatedButton(
         onPressed: () => clickCallback(roomId),
         child: Row(
           children: [
             Expanded(
-              flex: 15,
-              child: FittedBox(
-                fit: BoxFit.scaleDown,
-                child: Text(creatorName),
+              flex: 14,
+              child: Container(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    FittedBox(
+                      fit: BoxFit.scaleDown,
+                      child: Container(
+                        margin: EdgeInsets.only(bottom: 4),
+                        child: Text(creatorName, textAlign: TextAlign.left),
+                      ),
+                    ),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      children: [
+                        Expanded(
+                          child: Row(
+                            children: [
+                              const Icon(Icons.people),
+                              FittedBox(
+                                fit: BoxFit.scaleDown,
+                                child: Text("$playerCount"),
+                              )
+                            ],
+                          ),
+                        ),
+                        Expanded(
+                          child: Row(
+                            children: [
+                              const Icon(Icons.gamepad_outlined),
+                              maxRounds == 0
+                                  ? SvgPicture.asset(
+                                      "assets/icons/infinity.svg",
+                                      height: 20,
+                                      color: Theme.of(context)
+                                          .secondaryHeaderColor,
+                                    )
+                                  : FittedBox(
+                                      fit: BoxFit.scaleDown,
+                                      child: Text("$maxRounds"),
+                                    )
+                            ],
+                          ),
+                        ),
+                        Expanded(
+                          child: Row(
+                            children: [
+                              const Icon(Icons.timer),
+                              answerTime == 0
+                                  ? SvgPicture.asset(
+                                      "assets/icons/infinity.svg",
+                                      height: 20,
+                                      color: Theme.of(context)
+                                          .secondaryHeaderColor,
+                                    )
+                                  : FittedBox(
+                                      fit: BoxFit.scaleDown,
+                                      child: Text("$answerTime"),
+                                    )
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
               ),
             ),
             VerticalDivider(
@@ -36,52 +99,6 @@ class RoomRow extends StatelessWidget {
               color: Theme.of(context).primaryColor,
             ),
             const Expanded(
-              flex: 6,
-              child: Icon(Icons.people),
-            ),
-            Expanded(
-              flex: 5,
-              child: FittedBox(
-                fit: BoxFit.scaleDown,
-                child: Text("$playerCount"),
-              ),
-            ),
-            const Expanded(
-              flex: 6,
-              child: Icon(Icons.gamepad_outlined),
-            ),
-            Expanded(
-              flex: 5,
-              child: maxRounds == 0 ? SvgPicture.asset(
-                "assets/icons/infinity.svg",
-                height: 20,
-                color: Theme.of(context).secondaryHeaderColor,
-              ) : FittedBox(
-                fit: BoxFit.scaleDown,
-                child: Text("$maxRounds"),
-              ),
-            ),
-            const Expanded(
-              flex: 6,
-              child: Icon(Icons.timer),
-            ),
-            Expanded(
-              flex: 5,
-              child: answerTime == 0 ? SvgPicture.asset(
-                "assets/icons/infinity.svg",
-                height: 20,
-                color: Theme.of(context).secondaryHeaderColor,
-              ) : FittedBox(
-                fit: BoxFit.scaleDown,
-                child: Text("$answerTime"),
-              ),
-            ),
-            VerticalDivider(
-              thickness: 1,
-              color: Theme.of(context).primaryColor,
-            ),
-            const Expanded(
-              flex: 4,
               child: Icon(Icons.play_circle_outline),
             ),
           ],
