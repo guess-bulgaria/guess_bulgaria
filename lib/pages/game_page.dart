@@ -9,6 +9,7 @@ import 'package:guess_bulgaria/components/loader.dart';
 import 'package:guess_bulgaria/components/navigation_button.dart';
 import 'package:guess_bulgaria/components/open_drawer_button.dart';
 import 'package:guess_bulgaria/configs/player_colors.dart';
+import 'package:guess_bulgaria/dialogs/leave_game_confirmation_dialog.dart';
 import 'package:guess_bulgaria/services/ws_service.dart';
 import 'package:guess_bulgaria/storage/user_data.dart';
 import 'package:mapbox_gl/mapbox_gl.dart';
@@ -36,6 +37,7 @@ class _GamePageState extends State<GamePage> {
   late Image img;
   bool hasRoundEnded = false;
   bool hasLocked = false;
+  bool hasEnded = false;
 
   _onMapCreated(MapboxMapController controller) {
     mapController = controller;
@@ -169,104 +171,104 @@ class _GamePageState extends State<GamePage> {
         players.firstWhere((element) => element["id"] == UserData.userId);
     int totalPoints = player["points"];
     int points = player["roundPoints"] ?? 0;
-    int totalPlayers = players.length;
-    int answeredPlayers = players.where((e) => e['hasAnswered'] == true).length;
+    int totalPlayers = players.where((p) => p['isConnected'] == true).length;
+    int answeredPlayers = players.where((p) => p['hasAnswered'] == true && p['isConnected'] == true).length;
     int totalRounds = widget.gameData["settings"]["maxRounds"];
-    return Scaffold(
+    return WillPopScope(child: Scaffold(
       backgroundColor: Theme.of(context).colorScheme.secondary,
       body: Builder(
-        builder: (context) => Stack(
-          clipBehavior: Clip.none,
-          children: [
-            Flex(
-              direction: Axis.vertical,
-              children: [
-                Expanded(
-                  flex: 3,
-                  child: roundData?['image'] != null
-                      ? PhotoView(
-                      backgroundDecoration: BoxDecoration(
-                          color: Theme.of(context).colorScheme.secondary),
-                      basePosition: Alignment.center,
-                      imageProvider: img.image,
-                      minScale: PhotoViewComputedScale.contained,
+          builder: (context) => Stack(
+            clipBehavior: Clip.none,
+            children: [
+              Flex(
+                direction: Axis.vertical,
+                children: [
+                  Expanded(
+                    flex: 3,
+                    child: roundData?['image'] != null
+                        ? PhotoView(
+                        backgroundDecoration: BoxDecoration(
+                            color: Theme.of(context).colorScheme.secondary),
+                        basePosition: Alignment.center,
+                        imageProvider: img.image,
+                        minScale: PhotoViewComputedScale.contained,
 
-                      gaplessPlayback: true,
-                      maxScale: 3.5)
-                      : const GbLoader(),
-                ),
-                Expanded(
-                  flex: 2,
-                  child: Container(
+                        gaplessPlayback: true,
+                        maxScale: 3.5)
+                        : const GbLoader(),
+                  ),
+                  Expanded(
+                    flex: 2,
+                    child: Container(
                       color: Theme.of(context).colorScheme.secondary,
                       height: MediaQuery.of(context).size.height * 0.2,
                       child: SizedBox(
-                            width: double.maxFinite,
-                            height: double.maxFinite,
-                            child: Column(
-                              children: [
-                                Text('Брой точки: $totalPoints ${points > 0 ? '(+$points)' : ''}'),
-                                Text('Рунд: ${currentRound}/$totalRounds'),
-                                Text('Отговорили играчи: $answeredPlayers/$totalPlayers'),
-                                ElevatedButton(
-                                  onPressed:
-                                  isNextRoundAllowed() ? _nextRound : null,
-                                  child: const Text('Start round'),
-                                ),
-                              ],
+                        width: double.maxFinite,
+                        height: double.maxFinite,
+                        child: Column(
+                          children: [
+                            Text('Брой точки: $totalPoints ${points > 0 ? '(+$points)' : ''}'),
+                            Text('Рунд: ${currentRound}/$totalRounds'),
+                            Text('Отговорили играчи: $answeredPlayers/$totalPlayers'),
+                            ElevatedButton(
+                              onPressed:
+                              isNextRoundAllowed() ? _nextRound : null,
+                              child: const Text('Start round'),
                             ),
-                          ),),
-                ),
-                Expanded(
-                  flex: 4,
-                  child: Stack(
-                    children: [
-                      MapboxMap(
-                        //Out of the box logo w/ info that crashes the app on click
-                        logoViewMargins: const Point(15000, 15000),
-                        attributionButtonMargins: const Point(15000, 15000),
-                        styleString:
-                        "mapbox://styles/zealbg/cl23l4amx000m14nvowuqneao",
-                        accessToken:
-                        "pk.eyJ1IjoiemVhbGJnIiwiYSI6ImNsMjNsMTFydzFxYngzaW10ZnR6Mmp5cXIifQ.-sw5o3XCLxMoSjUhs3li2A",
-                        onMapCreated: _onMapCreated,
-                        rotateGesturesEnabled: false,
-                        tiltGesturesEnabled: false,
-                        trackCameraPosition: true,
-                        onMapClick: _onMapClickCallback,
-                        initialCameraPosition: initalCameraPosition,
-                        minMaxZoomPreference: const MinMaxZoomPreference(5.4, 16),
-                        cameraTargetBounds: CameraTargetBounds(
-                          LatLngBounds(
-                              northeast: const LatLng(44.213, 28.609),
-                              southwest: const LatLng(41.235, 22.36)),
+                          ],
                         ),
-                        onStyleLoadedCallback: _onStyleLoadedCallback,
-                      ),
-                      Align(
-                        alignment: FractionalOffset.bottomRight,
-                        child: Container(
-                          color: hasLocked ? Colors.grey : Colors.red,
-                          margin: const EdgeInsets.only(bottom: 20, right: 10),
-                          width: 100,
-                          child: TextButton(
-                            child: const Text("Избери"),
-                            onPressed: !hasLocked ? _lockAnswer : null,
-                          ),
-                        ),
-                      )
-                    ],
+                      ),),
                   ),
-                )
-              ],
-            ),
-            OpenDrawerButton(
+                  Expanded(
+                    flex: 4,
+                    child: Stack(
+                      children: [
+                        MapboxMap(
+                          //Out of the box logo w/ info that crashes the app on click
+                          logoViewMargins: const Point(15000, 15000),
+                          attributionButtonMargins: const Point(15000, 15000),
+                          styleString:
+                          "mapbox://styles/zealbg/cl23l4amx000m14nvowuqneao",
+                          accessToken:
+                          "pk.eyJ1IjoiemVhbGJnIiwiYSI6ImNsMjNsMTFydzFxYngzaW10ZnR6Mmp5cXIifQ.-sw5o3XCLxMoSjUhs3li2A",
+                          onMapCreated: _onMapCreated,
+                          rotateGesturesEnabled: false,
+                          tiltGesturesEnabled: false,
+                          trackCameraPosition: true,
+                          onMapClick: _onMapClickCallback,
+                          initialCameraPosition: initalCameraPosition,
+                          minMaxZoomPreference: const MinMaxZoomPreference(5.4, 16),
+                          cameraTargetBounds: CameraTargetBounds(
+                            LatLngBounds(
+                                northeast: const LatLng(44.213, 28.609),
+                                southwest: const LatLng(41.235, 22.36)),
+                          ),
+                          onStyleLoadedCallback: _onStyleLoadedCallback,
+                        ),
+                        Align(
+                          alignment: FractionalOffset.bottomRight,
+                          child: Container(
+                            color: hasLocked ? Colors.grey : Colors.red,
+                            margin: const EdgeInsets.only(bottom: 20, right: 10),
+                            width: 100,
+                            child: TextButton(
+                              child: const Text("Избери"),
+                              onPressed: !hasLocked ? _lockAnswer : null,
+                            ),
+                          ),
+                        )
+                      ],
+                    ),
+                  )
+                ],
+              ),
+              OpenDrawerButton(
                 isEnd: true,
                 clickCallback: () => Scaffold.of(context).openEndDrawer(),
                 icon: Icons.people,
-            ),
-          ],
-        )
+              ),
+            ],
+          )
       ),
       onEndDrawerChanged: (isOpen) {},
       endDrawerEnableOpenDragGesture: false,
@@ -288,10 +290,19 @@ class _GamePageState extends State<GamePage> {
         ],
         icon: Icons.people,
       ),
-    );
+    ), onWillPop: onBackButton);
+  }
+
+  Future<bool> onBackButton() async{
+    if(hasEnded) return true;
+    showDialog(
+        context: context,
+        builder: (_) => const LeaveGameConfirmationDialog());
+    return false;
   }
 
   void showEndGameResults(dynamic message) {
+    hasEnded = true;
     UserData().loadStatistics();
     showDialog(
         context: context,

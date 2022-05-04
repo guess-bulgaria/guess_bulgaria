@@ -205,7 +205,7 @@ class _LobbyPageState extends State<LobbyPage> {
                         child: Column(
                           mainAxisAlignment: MainAxisAlignment.start,
                           crossAxisAlignment: CrossAxisAlignment.start,
-                          children: <Widget>[
+                          children: [
                             Expanded(
                               flex: 10,
                               child: Column(
