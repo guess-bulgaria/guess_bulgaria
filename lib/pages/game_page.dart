@@ -184,9 +184,9 @@ class _GamePageState extends State<GamePage> {
   Future<bool> onBackButton() async {
     if (_hasEnded) return true;
     showDialog(
-        context: context, builder: (_) => const LeaveGameConfirmationDialog())
-    .then((value) {
-      if(value == true) {
+        context: context,
+        builder: (_) => const LeaveGameConfirmationDialog()).then((value) {
+      if (value == true) {
         Navigator.of(context).pop(true);
       }
     });
@@ -265,127 +265,118 @@ class _GamePageState extends State<GamePage> {
                               ),
                               child: Column(
                                 children: [
-                                  Expanded(
-                                    child: Align(
-                                      child: Badge(
-                                        text: _roundData['name'] ?? '',
-                                      ),
-                                      alignment: Alignment.topCenter,
+                                    Badge(
+                                      textCenter: true,
+                                      text: _roundData['name'] ?? '',
                                     ),
-                                  ),
-                                  Row(
-                                    mainAxisAlignment: MainAxisAlignment.end,
-                                    children: [
-                                      Expanded(
-                                        child: Badge(
-                                          title: 'Рунд',
-                                          text:
-                                              '$_currentRound${totalRounds > 0 ? '/$totalRounds' : ''}',
-                                          icon: Icons.gamepad_outlined,
-                                          center: true,
-                                        ),
-                                      ),
-                                      if (!widget.gameService.isSingle())
+                                  Expanded(
+                                    child: Row(
+                                      children: [
                                         Expanded(
                                           child: Badge(
-                                            title: 'Отговорили играчи',
+                                            title: 'Рунд',
                                             text:
-                                                '$answeredPlayers/$totalPlayers',
-                                            icon: Icons
-                                                .person_pin_circle_outlined,
+                                            '$_currentRound${totalRounds > 0 ? '/$totalRounds' : ''}',
+                                            icon: Icons.gamepad_outlined,
                                             center: true,
                                           ),
                                         ),
-                                      Expanded(
-                                        child: Column(
-                                          mainAxisAlignment:
-                                              MainAxisAlignment.end,
-                                          children: [
-                                            Container(
-                                              height: 18,
-                                              margin:
-                                                  const EdgeInsets.symmetric(
-                                                      horizontal: 11),
-                                              alignment: Alignment.center,
-                                              child: const FittedBox(
-                                                fit: BoxFit.cover,
-                                                child: Text(
-                                                  'Точки',
-                                                  style:
-                                                      TextStyle(fontSize: 14),
-                                                ),
-                                              ),
+                                        if (!widget.gameService.isSingle())
+                                          Expanded(
+                                            child: Badge(
+                                              title: 'Отговорили играчи',
+                                              text:
+                                              '$answeredPlayers/$totalPlayers',
+                                              icon: Icons
+                                                  .person_pin_circle_outlined,
+                                              center: true,
                                             ),
-                                            Container(
-                                              margin:
-                                                  const EdgeInsets.symmetric(
-                                                      vertical: 5,
-                                                      horizontal: 10),
-                                              height: 30,
-                                              decoration: BoxDecoration(
-                                                color: Theme.of(context)
-                                                    .colorScheme
-                                                    .secondary,
-                                                borderRadius:
-                                                    BorderRadius.circular(10.0),
-                                                border: Border.all(
-                                                  color: Theme.of(context)
-                                                      .colorScheme
-                                                      .secondary,
-                                                  width: 4,
-                                                ),
-                                              ),
-                                              child: Align(
-                                                alignment: Alignment.centerLeft,
-                                                child: FittedBox(
-                                                  fit: BoxFit.scaleDown,
-                                                  child: Row(
-                                                    children: [
-                                                      Container(
-                                                        child: Icon(
-                                                          Icons.star,
-                                                          color: Theme.of(
-                                                                  context)
-                                                              .secondaryHeaderColor,
-                                                        ),
-                                                        margin: const EdgeInsets
-                                                                .symmetric(
-                                                            horizontal: 3),
-                                                      ),
-                                                      TweenAnimationBuilder<
-                                                          double>(
-                                                        tween: Tween<double>(
-                                                            begin: 0,
-                                                            end: totalPoints
-                                                                .toDouble()),
-                                                        duration:
-                                                            const Duration(
-                                                                milliseconds:
-                                                                    750),
-                                                        builder: (BuildContext
-                                                                context,
-                                                            double value,
-                                                            Widget? child) {
-                                                          return Text(
-                                                              '${value.toInt()}');
-                                                        },
-                                                      ),
-                                                      Text(
-                                                        points > 0
-                                                            ? ' +$points'
-                                                            : '',
-                                                        style: const TextStyle(
-                                                            fontSize: 10),
-                                                      )
-                                                    ],
+                                          ),
+                                        Expanded(
+                                          child: Column(mainAxisAlignment: MainAxisAlignment.end,
+                                            children: [
+                                              Container(
+                                                alignment: Alignment.bottomCenter,
+                                                child: const FittedBox(
+                                                  fit: BoxFit.cover,
+                                                  child: Text(
+                                                    'Точки',
+                                                    style:
+                                                    TextStyle(fontSize: 14),
                                                   ),
                                                 ),
                                               ),
-                                            ),
-                                          ],
+                                              Container(
+                                                margin:
+                                                const EdgeInsets.symmetric(
+                                                    vertical: 5,
+                                                    horizontal: 10),
+                                                height: 30,
+                                                decoration: BoxDecoration(
+                                                  color: Theme.of(context)
+                                                      .colorScheme
+                                                      .secondary,
+                                                  borderRadius:
+                                                  BorderRadius.circular(10.0),
+                                                  border: Border.all(
+                                                    color: Theme.of(context)
+                                                        .colorScheme
+                                                        .secondary,
+                                                    width: 4,
+                                                  ),
+                                                ),
+                                                child: Align(
+                                                  alignment: Alignment.centerLeft,
+                                                  child: FittedBox(
+                                                    fit: BoxFit.scaleDown,
+                                                    child: Row(
+                                                      children: [
+                                                        Container(
+                                                          child: Icon(
+                                                            Icons.star,
+                                                            color: Theme.of(
+                                                                context)
+                                                                .secondaryHeaderColor,
+                                                          ),
+                                                          margin: const EdgeInsets
+                                                              .symmetric(
+                                                              horizontal: 3),
+                                                        ),
+                                                        TweenAnimationBuilder<
+                                                            double>(
+                                                          tween: Tween<double>(
+                                                              begin: 0,
+                                                              end: totalPoints
+                                                                  .toDouble()),
+                                                          duration:
+                                                          const Duration(
+                                                              milliseconds:
+                                                              750),
+                                                          builder: (BuildContext
+                                                          context,
+                                                              double value,
+                                                              Widget? child) {
+                                                            return Text(
+                                                                '${value.toInt()}');
+                                                          },
+                                                        ),
+                                                        Text(
+                                                          points > 0
+                                                              ? ' +$points'
+                                                              : '',
+                                                          style: const TextStyle(
+                                                              fontSize: 10),
+                                                        )
+                                                      ],
+                                                    ),
+                                                  ),
+                                                ),
+                                              ),
+                                            ],
+                                          ),
                                         ),
-                                      ),
-                                    ],
+                                      ],
+                                    ),
                                   ),
                                   if (_endTime > 0)
                                     Container(

@@ -7,6 +7,7 @@ class Badge extends StatelessWidget {
   final int? value;
   final int? plus;
   final bool center;
+  final bool textCenter;
   final bool startAnimation;
   final IconData? icon;
   final String? image;
@@ -21,6 +22,7 @@ class Badge extends StatelessWidget {
     this.startAnimation = false,
     this.center = false,
     this.image,
+    this.textCenter = false,
   }) : super(key: key);
 
   @override
@@ -53,7 +55,7 @@ class Badge extends StatelessWidget {
             ),
           ),
           child: Align(
-            alignment: Alignment.centerLeft,
+            alignment: textCenter ? Alignment.center : Alignment.centerLeft,
             child: FittedBox(
               fit: BoxFit.scaleDown,
               child: Row(
@@ -81,7 +83,9 @@ class Badge extends StatelessWidget {
                     TweenAnimationBuilder<double>(
                       tween: Tween<double>(
                           begin: value!.toDouble(),
-                          end: startAnimation ? (value! + (plus ?? 0)).toDouble() : value!.toDouble()),
+                          end: startAnimation
+                              ? (value! + (plus ?? 0)).toDouble()
+                              : value!.toDouble()),
                       duration: const Duration(milliseconds: 750),
                       builder:
                           (BuildContext context, double value, Widget? child) {

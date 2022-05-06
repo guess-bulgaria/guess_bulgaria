@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:guess_bulgaria/components/controllers/timer_controller.dart';
-import 'package:guess_bulgaria/storage/clock.dart';
 
 class Timer extends StatefulWidget {
   final TimerController timerController;
@@ -40,16 +39,19 @@ class _TimerState extends State<Timer> with TickerProviderStateMixin {
       child: Stack(
         children: [
           LinearProgressIndicator(
-              value: controller.value,
-              minHeight: 16,
-              valueColor: const AlwaysStoppedAnimation<Color>(Colors.red)),
+            backgroundColor: Theme.of(context).colorScheme.secondary,
+            value: controller.value,
+            minHeight: 16,
+            valueColor: const AlwaysStoppedAnimation<Color>(Colors.red),
+          ),
           Center(
             child: Observer(
               builder: (_) {
                 return Text(
-                  widget.timerController.clock.seconds == widget.timerController.maxTime ?
-                  "Времето изтече!" :
-                  "${widget.timerController.maxTime - widget.timerController.clock.seconds} секунди...",
+                  widget.timerController.clock.seconds ==
+                          widget.timerController.maxTime
+                      ? "Времето изтече!"
+                      : "${widget.timerController.maxTime - widget.timerController.clock.seconds} секунди...",
                   style: const TextStyle(color: Colors.white),
                 );
               },
