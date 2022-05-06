@@ -19,51 +19,60 @@ class EndGameDialog extends StatefulWidget {
 class _EndGameDialogState extends State<EndGameDialog> {
   final List<double> opacities = [0, 0, 0];
 
-
   @override
   void initState() {
     super.initState();
-    Future.delayed(const Duration(milliseconds: 150)).then((value) => setState(() => opacities[0] = 1));
-    Future.delayed(const Duration(milliseconds: 550)).then((value) => setState(() => opacities[1] = 1));
-    Future.delayed(const Duration(milliseconds: 950)).then((value) => setState(() => opacities[2] = 1));
+    Future.delayed(const Duration(milliseconds: 150))
+        .then((value) => setState(() => opacities[0] = 1));
+    Future.delayed(const Duration(milliseconds: 550))
+        .then((value) => setState(() => opacities[1] = 1));
+    Future.delayed(const Duration(milliseconds: 950))
+        .then((value) => setState(() => opacities[2] = 1));
   }
 
   @override
   Widget build(BuildContext context) {
-    final List<dynamic> multiStatsData = widget.endGameStats == null ? [] :
-      [
-        {
-          'title': 'Изиграни рундове',
-          'value': widget.endGameStats['roundsPlayed'][0],
-          'plus': widget.endGameStats['roundsPlayed'][1],
-          'image': "assets/icons/gamepad.svg"
-        },
-        {
-          'title': 'Перфектни отговорени',
-          'value': widget.endGameStats['perfectAnswers'][0],
-          'plus': widget.endGameStats['perfectAnswers'][1],
-          'icon': Icons.star
-        },
-        {
-          'title': 'Общо спечелени точки',
-          'value': widget.endGameStats['totalPoints'][0],
-          'plus': widget.endGameStats['totalPoints'][1],
-          'image': "assets/icons/location-dot.svg"
-        },
-        {
-          'title': 'Изиграни игри',
-          'value': widget.endGameStats['gamesPlayed'][0],
-          'plus': widget.endGameStats['gamesPlayed'][1],
-          'icon': Icons.play_circle_outline
-        },
-        {
-          'title': 'Победи',
-          'value': widget.endGameStats['firstPlaces'][0],
-          'plus': widget.endGameStats['firstPlaces'][1],
-          'image': "assets/icons/ranking-star.svg"
-        },
-        {'title': 'Процент спечелени игри', 'value': 0, 'icon': Icons.percent},
-      ];
+    final List<dynamic> multiStatsData = widget.endGameStats == null
+        ? []
+        : [
+            {
+              'title': 'Изиграни рундове',
+              'value': widget.endGameStats['roundsPlayed'][0],
+              'plus': widget.endGameStats['roundsPlayed'][1],
+              'image': "assets/icons/gamepad.svg"
+            },
+            {
+              'title': 'Перфектни отговорени',
+              'value': widget.endGameStats['perfectAnswers'][0],
+              'plus': widget.endGameStats['perfectAnswers'][1],
+              'icon': Icons.star
+            },
+            {
+              'title': 'Общо спечелени точки',
+              'value': widget.endGameStats['totalPoints'][0],
+              'plus': widget.endGameStats['totalPoints'][1],
+              'image': "assets/icons/location-dot.svg"
+            },
+            {
+              'title': 'Изиграни игри',
+              'value': widget.endGameStats['gamesPlayed'][0],
+              'plus': 1,
+              'icon': Icons.play_circle_outline
+            },
+            {
+              'title': 'Победи',
+              'value': widget.endGameStats['firstPlaces'][0],
+              'plus': widget.endGameStats['firstPlaces'][1],
+              'image': "assets/icons/ranking-star.svg"
+            },
+            {
+              'title': 'Процент спечелени игри',
+              'value': (((widget.endGameStats['firstPlaces'][0] +
+                  widget.endGameStats['firstPlaces'][1]) /
+                  (widget.endGameStats['gamesPlayed'][0] + 1) * 100) as double).floor(),
+              'icon': Icons.percent
+            },
+          ];
 
     return AlertDialog(
       contentPadding: const EdgeInsets.all(4),
@@ -90,42 +99,44 @@ class _EndGameDialogState extends State<EndGameDialog> {
             width: double.maxFinite,
             child: PlayerList(widget.players, PlayerListTypes.gameResults),
           )),
-          if(multiStatsData.isNotEmpty) Container(
-            margin: const EdgeInsets.symmetric(vertical: 6),
-            child: Text(
-              "Статистики",
-              style: TextStyle(
-                  fontSize: 20, color: Theme.of(context).secondaryHeaderColor),
+          if (multiStatsData.isNotEmpty)
+            Container(
+              margin: const EdgeInsets.symmetric(vertical: 6),
+              child: Text(
+                "Статистики",
+                style: TextStyle(
+                    fontSize: 20,
+                    color: Theme.of(context).secondaryHeaderColor),
+              ),
             ),
-          ),
-          if(multiStatsData.isNotEmpty) Column(
-            children: [
-              for (int i = 0; i < 3; i++)
-                AnimatedOpacity(
-                  // If the widget is visible, animate to 0.0 (invisible).
-                  // If the widget is hidden, animate to 1.0 (fully visible).
-                  opacity: opacities[i],
-                  duration: const Duration(milliseconds: 300),
-                  // The green box must be a child of the AnimatedOpacity widget.
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      for (int j = 0; j < 2; j++)
-                        Expanded(
-                          child: Badge(
-                            title: multiStatsData[(i + i) + j]['title'],
-                            value: multiStatsData[(i + i) + j]['value'],
-                            plus: multiStatsData[(i + i) + j]['plus'],
-                            icon: multiStatsData[(i + i) + j]['icon'],
-                            image: multiStatsData[(i + i) + j]['image'],
-                            startAnimation: opacities[i] == 1
-                          ),
-                        )
-                    ],
-                  ),
-                )
-            ],
-          ),
+          if (multiStatsData.isNotEmpty)
+            Column(
+              children: [
+                for (int i = 0; i < 3; i++)
+                  AnimatedOpacity(
+                    // If the widget is visible, animate to 0.0 (invisible).
+                    // If the widget is hidden, animate to 1.0 (fully visible).
+                    opacity: opacities[i],
+                    duration: const Duration(milliseconds: 300),
+                    // The green box must be a child of the AnimatedOpacity widget.
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        for (int j = 0; j < 2; j++)
+                          Expanded(
+                            child: Badge(
+                                title: multiStatsData[(i + i) + j]['title'],
+                                value: multiStatsData[(i + i) + j]['value'],
+                                plus: multiStatsData[(i + i) + j]['plus'],
+                                icon: multiStatsData[(i + i) + j]['icon'],
+                                image: multiStatsData[(i + i) + j]['image'],
+                                startAnimation: opacities[i] == 1),
+                          )
+                      ],
+                    ),
+                  )
+              ],
+            ),
         ],
       ),
       actions: [
