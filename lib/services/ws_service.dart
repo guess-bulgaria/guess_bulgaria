@@ -42,7 +42,7 @@ class WSService {
     _channel = null;
   }
 
-  static void changeCallback(Function callback) {
+  static void changeCallback(Function? callback) {
     _messageCallback = callback;
   }
 

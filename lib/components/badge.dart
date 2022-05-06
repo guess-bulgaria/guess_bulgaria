@@ -3,16 +3,22 @@ import 'package:flutter_svg/svg.dart';
 
 class Badge extends StatelessWidget {
   final String? title;
-  final String text;
+  final String? text;
+  final int? value;
+  final int? plus;
   final bool center;
+  final bool startAnimation;
   final IconData? icon;
   final String? image;
 
   const Badge({
     Key? key,
-    required this.text,
+    this.text,
+    this.value,
+    this.plus,
     this.title,
     this.icon,
+    this.startAnimation = false,
     this.center = false,
     this.image,
   }) : super(key: key);
@@ -22,18 +28,19 @@ class Badge extends StatelessWidget {
     return Column(
       mainAxisAlignment: MainAxisAlignment.end,
       children: [
-        if(title != null) Container(
-          height: 18,
-          margin: const EdgeInsets.symmetric(horizontal: 11),
-          alignment: center ? Alignment.center : Alignment.centerLeft,
-          child: FittedBox(
-            fit: BoxFit.cover,
-            child: Text(
-              title ?? '',
-              style: const TextStyle(fontSize: 14),
+        if (title != null)
+          Container(
+            height: 18,
+            margin: const EdgeInsets.symmetric(horizontal: 11),
+            alignment: center ? Alignment.center : Alignment.centerLeft,
+            child: FittedBox(
+              fit: BoxFit.cover,
+              child: Text(
+                title ?? '',
+                style: const TextStyle(fontSize: 14),
+              ),
             ),
           ),
-        ),
         Container(
           margin: const EdgeInsets.symmetric(vertical: 5, horizontal: 10),
           height: 30,
@@ -69,7 +76,20 @@ class Badge extends StatelessWidget {
                       ),
                       margin: const EdgeInsets.symmetric(horizontal: 3),
                     ),
-                    Text(text),
+                  if (text != null) Text(text!),
+                  if (value != null)
+                    TweenAnimationBuilder<double>(
+                      tween: Tween<double>(
+                          begin: value!.toDouble(),
+                          end: startAnimation ? (value! + (plus ?? 0)).toDouble() : value!.toDouble()),
+                      duration: const Duration(milliseconds: 750),
+                      builder:
+                          (BuildContext context, double value, Widget? child) {
+                        return Text('${value.toInt()}');
+                      },
+                    ),
+                  if (plus != null && plus != 0)
+                    Text(' +$plus', style: const TextStyle(fontSize: 10))
                 ],
               ),
             ),

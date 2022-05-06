@@ -11,7 +11,7 @@ class LeaveGameConfirmationDialog extends StatefulWidget {
 class _LeaveGameConfirmationDialogState
     extends State<LeaveGameConfirmationDialog> {
   leave() {
-    Navigator.of(context).popUntil(ModalRoute.withName('/'));
+    Navigator.of(context).pop(true);
   }
 
   cancel() {

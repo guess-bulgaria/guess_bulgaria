@@ -33,14 +33,15 @@ class Clock {
 
   void stopTimer() {
     _timer?.cancel();
+    _endCallback = null;
   }
 
   void _onTick(_) {
     if (_isPaused) return;
     _time++;
     if (_time == _maxTime) {
-      stopTimer();
       if (_endCallback != null) _endCallback!();
+      stopTimer();
     }
     _atom.reportChanged();
   }

@@ -72,7 +72,7 @@ class _GamePageState extends State<GamePage> {
     _selectedLocation = coordinates;
   }
 
-  void onMessageReceived(String type, dynamic message) {
+  void onMessageReceived(String type, dynamic message) async {
     switch (type) {
       case 'player-leave':
         setState(() {
@@ -80,11 +80,26 @@ class _GamePageState extends State<GamePage> {
         });
         break;
       case "end-game":
-        showEndGameResults(message['players']);
+        _players = message['players'];
+        _hasEnded = true;
         break;
       case "start-round":
         _timerController.reset();
         loadRound(message['currentRound']);
+        break;
+      case "stats-update":
+        showDialog(
+          context: context,
+          barrierDismissible: false,
+          builder: (BuildContext context) => EndGameDialog(_players, message),
+        ).then((value) {
+          print("ASDDSA $value");
+          value == true
+              ? Navigator.of(context).pop(true)
+              : Navigator.of(context).pop();
+        });
+        //todo we can simply update the stats from the message, but I am too lazy to do it now :)
+        UserData().loadStatistics();
         break;
       case "player-answer":
         setState(() {
@@ -127,8 +142,6 @@ class _GamePageState extends State<GamePage> {
         _image = Image.memory(base64Decode(_roundData['image']));
       }
     }
-    print("TIME $_endTime");
-    print("TIME2 ${widget.gameData["settings"]?["answerTimeInSeconds"]}");
     _timerController = TimerController(_startTime, _endTime, timerEndCallback);
 
     _playerColor = PlayerColors.color(
@@ -171,18 +184,13 @@ class _GamePageState extends State<GamePage> {
   Future<bool> onBackButton() async {
     if (_hasEnded) return true;
     showDialog(
-        context: context, builder: (_) => const LeaveGameConfirmationDialog());
+        context: context, builder: (_) => const LeaveGameConfirmationDialog())
+    .then((value) {
+      if(value == true) {
+        Navigator.of(context).pop(true);
+      }
+    });
     return false;
-  }
-
-  void showEndGameResults(dynamic players) {
-    _hasEnded = true;
-    UserData().loadStatistics();
-    showDialog(
-      context: context,
-      barrierDismissible: false,
-      builder: (BuildContext context) => EndGameDialog(players),
-    );
   }
 
   void loadRound(dynamic roundData) {
@@ -477,8 +485,9 @@ class _GamePageState extends State<GamePage> {
                                                 ),
                                               ),
                                             ),
-                                            onPressed:
-                                                !_hasLocked ? _lockAnswer : null,
+                                            onPressed: !_hasLocked
+                                                ? _lockAnswer
+                                                : null,
                                           ),
                                         ),
                                       ],
