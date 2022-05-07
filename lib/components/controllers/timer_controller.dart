@@ -40,10 +40,11 @@ class TimerController {
     _clock.stopTimer();
   }
 
-  void reset() async {
+  void reset(Function endCallback) async {
     if(_maxTime == 0) return;
     _animationController.stop(canceled: true);
     clock.seconds = _startTime;
+    clock.callback = endCallback;
     _animationController.reset();
     await Future.delayed(const Duration(milliseconds: 1));
     _animationController.stop(canceled: true);

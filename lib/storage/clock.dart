@@ -25,6 +25,10 @@ class Clock {
     _startTimer();
   }
 
+  set callback(Function callback) {
+    _endCallback = callback;
+  }
+
   void _startTimer() {
     _timer?.cancel();
     _isPaused = false;
