@@ -12,8 +12,6 @@ class TimerController {
 
   set animationController(AnimationController value) {
     _animationController = value;
-    if(_maxTime == 0) return;
-    start();
   }
 
   int get maxTime => _maxTime;
@@ -24,8 +22,10 @@ class TimerController {
 
   void start(){
     if(_maxTime == 0) return;
+    _clock.seconds = 0;
     _animationController.animateTo(1,
         duration: Duration(seconds: _maxTime));
+    _clock.unpause();
   }
 
   void pause(){
@@ -34,10 +34,8 @@ class TimerController {
     _clock.pause();
   }
 
-  void stop(){
-    if(_maxTime == 0) return;
-    _animationController.stop(canceled: true);
-    _clock.stopTimer();
+  void dispose(){
+    _animationController.dispose();
   }
 
   void reset(Function endCallback) async {

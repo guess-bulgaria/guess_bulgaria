@@ -7,7 +7,7 @@ class Clock {
   Function? _endCallback;
   late int _time;
   Timer? _timer;
-  bool _isPaused = false;
+  bool _isPaused = true;
 
   Clock(this._maxTime, {startTime = 0, endCallback}) {
     _time = startTime;
@@ -31,7 +31,6 @@ class Clock {
 
   void _startTimer() {
     _timer?.cancel();
-    _isPaused = false;
     _timer = Timer.periodic(const Duration(seconds: 1), _onTick);
   }
 

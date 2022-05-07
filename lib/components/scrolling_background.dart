@@ -14,6 +14,12 @@ class _ScrollingBackgroundState extends State<ScrollingBackground>{
   static Clock clock = Clock(100000, startTime: 0);
 
   @override
+  void initState() {
+    clock.unpause();
+    super.initState();
+  }
+
+  @override
   Widget build(BuildContext context) {
     if(widget.isPaused) {
       clock.pause();

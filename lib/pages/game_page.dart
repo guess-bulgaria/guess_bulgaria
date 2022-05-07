@@ -13,6 +13,7 @@ import 'package:guess_bulgaria/components/open_drawer_button.dart';
 import 'package:guess_bulgaria/components/timer.dart';
 import 'package:guess_bulgaria/configs/player_colors.dart';
 import 'package:guess_bulgaria/dialogs/end_game_dialog.dart';
+import 'package:guess_bulgaria/dialogs/game_starting_dialog.dart';
 import 'package:guess_bulgaria/dialogs/leave_game_confirmation_dialog.dart';
 import 'package:guess_bulgaria/services/game/i_game_service.dart';
 import 'package:guess_bulgaria/services/ws_service.dart';
@@ -41,7 +42,7 @@ class _GamePageState extends State<GamePage> with SingleTickerProviderStateMixin
   dynamic _roundData;
   LatLng? _selectedLocation;
   List<dynamic> _players = [];
-  late Image _image;
+  Image? _image;
   bool _hasRoundEnded = false;
   bool _hasLocked = false;
   bool _hasGameEnded = false;
@@ -60,29 +61,39 @@ class _GamePageState extends State<GamePage> with SingleTickerProviderStateMixin
       vsync: this,
     );
 
-    if (widget.gameData != null) {
-      _roundData = widget.gameData['currentRound'];
-      _players = widget.gameData['players'];
-      _endTime = widget.gameData['settings']?['answerTimeInSeconds'] ?? 0;
-      setHiddenName();
-
-      if (_roundData['image'] != null) {
-        _image = Image.memory(base64Decode(_roundData['image']));
-      }
-    }
-    _timerController = TimerController(_startTime, _endTime, timerEndCallback);
-
     _playerColor = PlayerColors.color(
       _players.firstWhere((p) => p['id'] == UserData.userId,
           orElse: () => {'color': UserData.defaultColor})['color'],
     );
 
+    if (widget.gameData != null) {
+      _roundData = widget.gameData['currentRound'];
+      _players = widget.gameData['players'];
+      _endTime = widget.gameData['settings']?['answerTimeInSeconds'] ?? 0;
+    }
+    _timerController = TimerController(_startTime, _endTime, timerEndCallback);
+
+    Future.delayed(Duration.zero).then((value) {
+      showDialog(context: context,
+          builder: (BuildContext context) =>
+              GameStartingDialog(widget.gameData['roundStartTime']),
+          barrierDismissible: false)
+          .then((value) {
+        setState(() {
+          _timerController.start();
+          if (_roundData['image'] != null) {
+            _image = Image.memory(base64Decode(_roundData['image']));
+          }
+          setHiddenName();
+        });
+      });
+    });
     super.initState();
   }
 
   @override
   void dispose() {
-    _timerController.stop();
+    _timerController.dispose();
     _mapController.dispose();
     _expandableController.dispose();
     _descriptionScrollController.dispose();
@@ -131,12 +142,15 @@ class _GamePageState extends State<GamePage> with SingleTickerProviderStateMixin
         _hasGameEnded = true;
         break;
       case "start-round":
-        _timerController.reset(timerEndCallback);
-        _expandableController.value = false;
-        _rotationController.animateTo(_expandableController.expanded ? 1 : 0);
-        loadRound(message['currentRound']);
-        setState(() {
-          _description = null;
+        showDialog(context: context, builder: (BuildContext context) => GameStartingDialog(message['roundStartTime']), barrierDismissible: false)
+        .then((value) {
+          _timerController.reset(timerEndCallback);
+          _expandableController.value = false;
+          _rotationController.animateTo(_expandableController.expanded ? 1 : 0);
+          loadRound(message['currentRound']);
+          setState(() {
+            _description = null;
+          });
         });
         break;
       case "stats-update":
@@ -297,14 +311,14 @@ class _GamePageState extends State<GamePage> with SingleTickerProviderStateMixin
                             flex: 3,
                             child: Stack(
                               children: [
-                                _roundData?['image'] != null
+                                _image != null
                                     ? PhotoView(
                                         backgroundDecoration: BoxDecoration(
                                             color: Theme.of(context)
                                                 .colorScheme
                                                 .secondary),
                                         basePosition: Alignment.center,
-                                        imageProvider: _image.image,
+                                        imageProvider: _image!.image,
                                         minScale:
                                             PhotoViewComputedScale.contained,
                                         gaplessPlayback: true,
@@ -556,7 +570,7 @@ class _GamePageState extends State<GamePage> with SingleTickerProviderStateMixin
                           )
                         ],
                       ),
-                      Container(
+                      SizedBox(
                         width: double.infinity,
                         child: LayoutBuilder(builder: (context, BoxConstraints constraints) {
                           return ExpandableNotifier(
