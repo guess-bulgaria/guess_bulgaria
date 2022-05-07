@@ -250,7 +250,7 @@ class _LobbyPageState extends State<LobbyPage> {
                                     Expanded(
                                       child: PlayerList(
                                         players,
-                                        PlayerListTypes.lobby,
+                                        PlayerListType.lobby,
                                       ),
                                     ),
                                     const Divider(thickness: 0.7),

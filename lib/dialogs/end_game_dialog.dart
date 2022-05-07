@@ -6,7 +6,7 @@ import 'package:guess_bulgaria/components/navigation_button.dart';
 import 'package:guess_bulgaria/components/player_list.dart';
 
 class EndGameDialog extends StatefulWidget {
-  final dynamic players;
+  final List<dynamic> players;
   final dynamic endGameStats;
 
   const EndGameDialog(this.players, this.endGameStats, {Key? key})
@@ -17,17 +17,22 @@ class EndGameDialog extends StatefulWidget {
 }
 
 class _EndGameDialogState extends State<EndGameDialog> {
+  double titleOpacity = 0;
   final List<double> opacities = [0, 0, 0];
 
   @override
   void initState() {
     super.initState();
-    Future.delayed(const Duration(milliseconds: 150))
-        .then((value) => setState(() => opacities[0] = 1));
-    Future.delayed(const Duration(milliseconds: 550))
-        .then((value) => setState(() => opacities[1] = 1));
-    Future.delayed(const Duration(milliseconds: 950))
-        .then((value) => setState(() => opacities[2] = 1));
+    var dur = 300 + (widget.players.length * 250);
+    Future.delayed(Duration(milliseconds: dur))
+        .then((value) => setState(() => titleOpacity = 1));
+
+    dur += 350;
+    for (int i = 0; i < 3; i++) {
+      Future.delayed(Duration(milliseconds: dur))
+          .then((value) => setState(() => opacities[i] = 1));
+      dur += 400;
+    }
   }
 
   @override
@@ -68,8 +73,10 @@ class _EndGameDialogState extends State<EndGameDialog> {
             {
               'title': 'Процент спечелени игри',
               'value': (((widget.endGameStats['firstPlaces'][0] +
-                  widget.endGameStats['firstPlaces'][1]) /
-                  (widget.endGameStats['gamesPlayed'][0] + 1) * 100) as double).floor(),
+                          widget.endGameStats['firstPlaces'][1]) /
+                      (widget.endGameStats['gamesPlayed'][0] + 1) *
+                      100) as double)
+                  .floor(),
               'icon': Icons.percent
             },
           ];
@@ -94,19 +101,27 @@ class _EndGameDialogState extends State<EndGameDialog> {
         mainAxisAlignment: MainAxisAlignment.start,
         children: [
           Expanded(
-              child: SizedBox(
-            height: double.maxFinite,
-            width: double.maxFinite,
-            child: PlayerList(widget.players, PlayerListTypes.gameResults),
-          )),
+            child: Container(
+              margin: const EdgeInsets.symmetric(horizontal: 6),
+              width: double.maxFinite,
+              child: PlayerList(widget.players, PlayerListType.gameResults),
+            ),
+          ),
           if (multiStatsData.isNotEmpty)
             Container(
               margin: const EdgeInsets.symmetric(vertical: 6),
-              child: Text(
-                "Статистики",
-                style: TextStyle(
-                    fontSize: 20,
-                    color: Theme.of(context).secondaryHeaderColor),
+              child: AnimatedOpacity(
+                // If the widget is visible, animate to 0.0 (invisible).
+                // If the widget is hidden, animate to 1.0 (fully visible).
+                opacity: titleOpacity,
+                duration: const Duration(milliseconds: 300),
+                // The green box must be a child of the AnimatedOpacity widget.
+                child: Text(
+                  "Статистики",
+                  style: TextStyle(
+                      fontSize: 20,
+                      color: Theme.of(context).secondaryHeaderColor),
+                ),
               ),
             ),
           if (multiStatsData.isNotEmpty)

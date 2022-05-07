@@ -7,9 +7,7 @@ import 'package:mapbox_gl/mapbox_gl.dart';
 class MultiplayerGameService extends IGameService {
   final int roomId;
 
-  MultiplayerGameService(this.roomId) {
-    WSService.startRound(roomId);
-  }
+  MultiplayerGameService(this.roomId);
 
   @override
   void onMapCreated(MapboxMapController controller) {

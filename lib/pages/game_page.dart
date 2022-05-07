@@ -516,7 +516,7 @@ class _GamePageState extends State<GamePage> {
               ),
               SizedBox(
                 height: (MediaQuery.of(context).size.height / 1.5) - 140,
-                child: PlayerList(_players, PlayerListTypes.scoreboard),
+                child: PlayerList(_players, PlayerListType.scoreboard),
               ),
               const Divider(
                 thickness: 0.45,
