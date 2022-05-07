@@ -6,6 +6,7 @@ class Badge extends StatelessWidget {
   final String? text;
   final int? value;
   final int? plus;
+  final double? letterSpacing;
   final bool center;
   final bool textCenter;
   final bool startAnimation;
@@ -17,6 +18,7 @@ class Badge extends StatelessWidget {
     this.text,
     this.value,
     this.plus,
+    this.letterSpacing,
     this.title,
     this.icon,
     this.startAnimation = false,
@@ -78,7 +80,7 @@ class Badge extends StatelessWidget {
                       ),
                       margin: const EdgeInsets.symmetric(horizontal: 3),
                     ),
-                  if (text != null) Text(text!),
+                  if (text != null) Text(text!, style: TextStyle(letterSpacing: letterSpacing),),
                   if (value != null)
                     TweenAnimationBuilder<double>(
                       tween: Tween<double>(

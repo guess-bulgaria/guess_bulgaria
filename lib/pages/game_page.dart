@@ -44,11 +44,13 @@ class _GamePageState extends State<GamePage> with SingleTickerProviderStateMixin
   late Image _image;
   bool _hasRoundEnded = false;
   bool _hasLocked = false;
-  bool _hasEnded = false;
+  bool _hasGameEnded = false;
   int _startTime = 0;
   int _endTime = 0;
   int _currentRound = 1;
   String? _description;
+  String? _hiddenName;
+  List<int?>? _hiddenNameIndexes;
 
   @override
   void initState() {
@@ -61,7 +63,8 @@ class _GamePageState extends State<GamePage> with SingleTickerProviderStateMixin
     if (widget.gameData != null) {
       _roundData = widget.gameData['currentRound'];
       _players = widget.gameData['players'];
-      _endTime = widget.gameData["settings"]?["answerTimeInSeconds"] ?? 0;
+      _endTime = widget.gameData['settings']?['answerTimeInSeconds'] ?? 0;
+      setHiddenName();
 
       if (_roundData['image'] != null) {
         _image = Image.memory(base64Decode(_roundData['image']));
@@ -125,7 +128,7 @@ class _GamePageState extends State<GamePage> with SingleTickerProviderStateMixin
         break;
       case "end-game":
         _players = message['players'];
-        _hasEnded = true;
+        _hasGameEnded = true;
         break;
       case "start-round":
         _timerController.reset();
@@ -168,6 +171,7 @@ class _GamePageState extends State<GamePage> with SingleTickerProviderStateMixin
 
           _description = message['currentRound']['description'];
           _players = message['players'];
+          _hiddenName = _roundData['name'];
         });
     }
   }
@@ -205,7 +209,7 @@ class _GamePageState extends State<GamePage> with SingleTickerProviderStateMixin
   );
 
   Future<bool> onBackButton() async {
-    if (_hasEnded) return true;
+    if (_hasGameEnded) return true;
     showDialog(
         context: context,
         builder: (_) => const LeaveGameConfirmationDialog()).then((value) {
@@ -216,12 +220,42 @@ class _GamePageState extends State<GamePage> with SingleTickerProviderStateMixin
     return false;
   }
 
+  void setHiddenName() async {
+    setState(() {
+      _hiddenName = _roundData['name'];
+      if(_endTime == 0) return;
+      _hiddenName = _hiddenName!.replaceAll(RegExp(r'\S'), '_');
+      _hiddenNameIndexes = [];
+      for(int i = 0; i < _hiddenName!.length; i++){
+        if(_hiddenName![i] != ' ') _hiddenNameIndexes!.add(i);
+      }
+    });
+
+    if(_endTime == 0) return;
+    var endInMillis = _endTime * 1000;
+    int duration = ((endInMillis) / _hiddenNameIndexes!.length).floor();
+    while(_hiddenNameIndexes!.isNotEmpty){
+      await Future.delayed(Duration(milliseconds: duration));
+      if(_hasRoundEnded) return;
+      showLetter();
+    }
+  }
+
+  void showLetter(){
+    setState(() {
+      var index = (_roundData['image'].codeUnitAt(_currentRound * _endTime + _hiddenNameIndexes!.length) as int) % _hiddenNameIndexes!.length;
+      var letterIndex = _hiddenNameIndexes!.removeAt(index);
+      _hiddenName = _hiddenName!.replaceRange(letterIndex ?? 0, (letterIndex ?? 0) + 1, _roundData['name'][letterIndex]);
+    });
+  }
+
   void loadRound(dynamic roundData) {
     setState(() {
       _hasRoundEnded = false;
       _mapController.clearSymbols();
       _mapController.clearLines();
       _roundData = roundData;
+      setHiddenName();
       _currentRound++;
       if (roundData?['image'] != null) {
         _image = Image.memory(base64Decode(roundData?['image']));
@@ -295,7 +329,8 @@ class _GamePageState extends State<GamePage> with SingleTickerProviderStateMixin
                                 children: [
                                   Badge(
                                     textCenter: true,
-                                    text: _roundData['name'] ?? '',
+                                    text: _hiddenName ?? '',
+                                    letterSpacing: 1.2,
                                   ),
                                   Expanded(
                                     child: Row(
