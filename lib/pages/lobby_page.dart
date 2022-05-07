@@ -31,6 +31,7 @@ class _LobbyPageState extends State<LobbyPage> {
   int color = UserData.defaultColor;
   List<dynamic> players = [];
   List<int> usedColors = [];
+  bool isBackgroundPaused = false;
 
   bool _isRoomPublic = false;
 
@@ -92,6 +93,9 @@ class _LobbyPageState extends State<LobbyPage> {
         });
         break;
       case 'start-round':
+        setState(() {
+          isBackgroundPaused = true;
+        });
         Navigator.push(
             context,
             MaterialPageRoute(
@@ -100,6 +104,9 @@ class _LobbyPageState extends State<LobbyPage> {
                       gameData: message,
                     ))).then(
           (value) {
+            setState(() {
+              isBackgroundPaused = false;
+            });
             if (value == true) leave();
           },
         );
@@ -208,7 +215,7 @@ class _LobbyPageState extends State<LobbyPage> {
           builder: (c) => Stack(
             clipBehavior: Clip.antiAlias,
             children: [
-              const ScrollingBackground(),
+              ScrollingBackground(isPaused: isBackgroundPaused),
               OpenDrawerButton(
                 icon: Icons.settings,
                 clickCallback: openDrawer,

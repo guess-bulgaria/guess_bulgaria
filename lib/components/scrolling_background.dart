@@ -3,7 +3,8 @@ import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:guess_bulgaria/storage/clock.dart';
 
 class ScrollingBackground extends StatefulWidget {
-  const ScrollingBackground({Key? key}) : super(key: key);
+  final bool isPaused;
+  const ScrollingBackground({Key? key, this.isPaused = false}) : super(key: key);
 
   @override
   State<StatefulWidget> createState() => _ScrollingBackgroundState();
@@ -14,6 +15,11 @@ class _ScrollingBackgroundState extends State<ScrollingBackground>{
 
   @override
   Widget build(BuildContext context) {
+    if(widget.isPaused) {
+      clock.pause();
+    } else {
+      clock.unpause();
+    }
     final backgroundHeight = MediaQuery.of(context).size.height;
     return Observer(builder: (_) {
       double offset =
