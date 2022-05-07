@@ -345,6 +345,16 @@ class _LobbyPageState extends State<LobbyPage> {
                   prefixStyle: TextStyle(fontSize: 16),
                 ),
                 enabled: _isCreator,
+                autovalidateMode: AutovalidateMode.always,
+                validator: (value) {
+                  int rounds = int.tryParse(value!) ?? 0;
+                  if (rounds > 30) {
+                    _roundsController.text = "30";
+                  }else if(rounds <= 0){
+                    _roundsController.text = "1";
+                  }
+                  return null;
+                },
                 textAlign: TextAlign.end,
                 controller: _roundsController,
                 onChanged: (rounds) => onRoundsChange(rounds),
@@ -369,6 +379,16 @@ class _LobbyPageState extends State<LobbyPage> {
                 textAlign: TextAlign.end,
                 enabled: _isCreator,
                 controller: _timeController,
+                autovalidateMode: AutovalidateMode.always,
+                validator: (value) {
+                  int time = int.tryParse(value!) ?? 0;
+                  if (time > 120) {
+                    _timeController.text = "120";
+                  }else if(time < 5){
+                    _timeController.text = "5";
+                  }
+                  return null;
+                },
                 onChanged: (rounds) => onTimeChange(rounds),
                 inputFormatters: <TextInputFormatter>[
                   FilteringTextInputFormatter.allow(RegExp(r'[0-9]')),
