@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:math';
 import 'dart:typed_data';
 
+import 'package:expandable/expandable.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:guess_bulgaria/components/badge.dart';
@@ -30,9 +31,12 @@ class GamePage extends StatefulWidget {
   State<StatefulWidget> createState() => _GamePageState();
 }
 
-class _GamePageState extends State<GamePage> {
+class _GamePageState extends State<GamePage> with SingleTickerProviderStateMixin  {
   late MapboxMapController _mapController;
   late TimerController _timerController;
+  final ExpandableController _expandableController = ExpandableController();
+  final ScrollController _descriptionScrollController = ScrollController();
+  late AnimationController _rotationController;
   late Color _playerColor;
   dynamic _roundData;
   LatLng? _selectedLocation;
@@ -44,6 +48,44 @@ class _GamePageState extends State<GamePage> {
   int _startTime = 0;
   int _endTime = 0;
   int _currentRound = 1;
+  String? _description;
+
+  @override
+  void initState() {
+    WSService.changeCallback(onMessageReceived);
+    _rotationController = AnimationController(
+      duration: const Duration(milliseconds: 300),
+      vsync: this,
+    );
+
+    if (widget.gameData != null) {
+      _roundData = widget.gameData['currentRound'];
+      _players = widget.gameData['players'];
+      _endTime = widget.gameData["settings"]?["answerTimeInSeconds"] ?? 0;
+
+      if (_roundData['image'] != null) {
+        _image = Image.memory(base64Decode(_roundData['image']));
+      }
+    }
+    _timerController = TimerController(_startTime, _endTime, timerEndCallback);
+
+    _playerColor = PlayerColors.color(
+      _players.firstWhere((p) => p['id'] == UserData.userId,
+          orElse: () => {'color': UserData.defaultColor})['color'],
+    );
+
+    super.initState();
+  }
+
+  @override
+  void dispose() {
+    _timerController.stop();
+    _mapController.dispose();
+    _expandableController.dispose();
+    _descriptionScrollController.dispose();
+    _rotationController.dispose();
+    super.dispose();
+  }
 
   _onMapCreated(MapboxMapController controller) {
     widget.gameService.onMapCreated(controller);
@@ -69,7 +111,9 @@ class _GamePageState extends State<GamePage> {
         iconSize: 1.02,
       ),
     );
-    _selectedLocation = coordinates;
+    setState(() {
+      _selectedLocation = coordinates;
+    });
   }
 
   void onMessageReceived(String type, dynamic message) async {
@@ -85,7 +129,12 @@ class _GamePageState extends State<GamePage> {
         break;
       case "start-round":
         _timerController.reset();
+        _expandableController.value = false;
+        _rotationController.animateTo(_expandableController.expanded ? 1 : 0);
         loadRound(message['currentRound']);
+        setState(() {
+          _description = null;
+        });
         break;
       case "stats-update":
         showDialog(
@@ -93,7 +142,6 @@ class _GamePageState extends State<GamePage> {
           barrierDismissible: false,
           builder: (BuildContext context) => EndGameDialog(_players, message),
         ).then((value) {
-          print("ASDDSA $value");
           value == true
               ? Navigator.of(context).pop(true)
               : Navigator.of(context).pop();
@@ -111,12 +159,16 @@ class _GamePageState extends State<GamePage> {
         });
         break;
       case "end-round":
-        _hasRoundEnded = true;
-        _timerController.pause();
-        widget.gameService.setEndRoundSymbols(
-            message['players'], message['currentRound']['coordinates']);
-        _players = message['players'];
-        setState(() {});
+        setState(() {
+          _hasRoundEnded = true;
+          _timerController.pause();
+          _descriptionScrollController.animateTo(0, duration: const Duration(milliseconds: 1), curve: Curves.linear);
+          widget.gameService.setEndRoundSymbols(
+              message['players'], message['currentRound']['coordinates']);
+
+          _description = message['currentRound']['description'];
+          _players = message['players'];
+        });
     }
   }
 
@@ -127,35 +179,6 @@ class _GamePageState extends State<GamePage> {
     setState(() {
       _hasLocked = true;
     });
-  }
-
-  @override
-  void initState() {
-    WSService.changeCallback(onMessageReceived);
-
-    if (widget.gameData != null) {
-      _roundData = widget.gameData['currentRound'];
-      _players = widget.gameData['players'];
-      _endTime = widget.gameData["settings"]?["answerTimeInSeconds"] ?? 0;
-
-      if (_roundData['image'] != null) {
-        _image = Image.memory(base64Decode(_roundData['image']));
-      }
-    }
-    _timerController = TimerController(_startTime, _endTime, timerEndCallback);
-
-    _playerColor = PlayerColors.color(
-      _players.firstWhere((p) => p['id'] == UserData.userId,
-          orElse: () => {'color': UserData.defaultColor})['color'],
-    );
-
-    super.initState();
-  }
-
-  @override
-  void dispose() {
-    _timerController.stop();
-    super.dispose();
   }
 
   void timerEndCallback() {
@@ -237,18 +260,23 @@ class _GamePageState extends State<GamePage> {
                         children: [
                           Expanded(
                             flex: 3,
-                            child: _roundData?['image'] != null
-                                ? PhotoView(
-                                    backgroundDecoration: BoxDecoration(
-                                        color: Theme.of(context)
-                                            .colorScheme
-                                            .secondary),
-                                    basePosition: Alignment.center,
-                                    imageProvider: _image.image,
-                                    minScale: PhotoViewComputedScale.contained,
-                                    gaplessPlayback: true,
-                                    maxScale: 3.5)
-                                : const GbLoader(),
+                            child: Stack(
+                              children: [
+                                _roundData?['image'] != null
+                                    ? PhotoView(
+                                        backgroundDecoration: BoxDecoration(
+                                            color: Theme.of(context)
+                                                .colorScheme
+                                                .secondary),
+                                        basePosition: Alignment.center,
+                                        imageProvider: _image.image,
+                                        minScale:
+                                            PhotoViewComputedScale.contained,
+                                        gaplessPlayback: true,
+                                        maxScale: 3.5)
+                                    : const GbLoader(),
+                              ],
+                            ),
                           ),
                           Expanded(
                             flex: 2,
@@ -265,10 +293,10 @@ class _GamePageState extends State<GamePage> {
                               ),
                               child: Column(
                                 children: [
-                                    Badge(
-                                      textCenter: true,
-                                      text: _roundData['name'] ?? '',
-                                    ),
+                                  Badge(
+                                    textCenter: true,
+                                    text: _roundData['name'] ?? '',
+                                  ),
                                   Expanded(
                                     child: Row(
                                       children: [
@@ -276,7 +304,7 @@ class _GamePageState extends State<GamePage> {
                                           child: Badge(
                                             title: 'Рунд',
                                             text:
-                                            '$_currentRound${totalRounds > 0 ? '/$totalRounds' : ''}',
+                                                '$_currentRound${totalRounds > 0 ? '/$totalRounds' : ''}',
                                             icon: Icons.gamepad_outlined,
                                             center: true,
                                           ),
@@ -286,38 +314,42 @@ class _GamePageState extends State<GamePage> {
                                             child: Badge(
                                               title: 'Отговорили играчи',
                                               text:
-                                              '$answeredPlayers/$totalPlayers',
+                                                  '$answeredPlayers/$totalPlayers',
                                               icon: Icons
                                                   .person_pin_circle_outlined,
                                               center: true,
                                             ),
                                           ),
                                         Expanded(
-                                          child: Column(mainAxisAlignment: MainAxisAlignment.end,
+                                          child: Column(
+                                            mainAxisAlignment:
+                                                MainAxisAlignment.end,
                                             children: [
                                               Container(
-                                                alignment: Alignment.bottomCenter,
+                                                alignment:
+                                                    Alignment.bottomCenter,
                                                 child: const FittedBox(
                                                   fit: BoxFit.cover,
                                                   child: Text(
                                                     'Точки',
                                                     style:
-                                                    TextStyle(fontSize: 14),
+                                                        TextStyle(fontSize: 14),
                                                   ),
                                                 ),
                                               ),
                                               Container(
                                                 margin:
-                                                const EdgeInsets.symmetric(
-                                                    vertical: 5,
-                                                    horizontal: 10),
+                                                    const EdgeInsets.symmetric(
+                                                        vertical: 5,
+                                                        horizontal: 10),
                                                 height: 30,
                                                 decoration: BoxDecoration(
                                                   color: Theme.of(context)
                                                       .colorScheme
                                                       .secondary,
                                                   borderRadius:
-                                                  BorderRadius.circular(10.0),
+                                                      BorderRadius.circular(
+                                                          10.0),
                                                   border: Border.all(
                                                     color: Theme.of(context)
                                                         .colorScheme
@@ -326,7 +358,8 @@ class _GamePageState extends State<GamePage> {
                                                   ),
                                                 ),
                                                 child: Align(
-                                                  alignment: Alignment.centerLeft,
+                                                  alignment:
+                                                      Alignment.centerLeft,
                                                   child: FittedBox(
                                                     fit: BoxFit.scaleDown,
                                                     child: Row(
@@ -335,12 +368,14 @@ class _GamePageState extends State<GamePage> {
                                                           child: Icon(
                                                             Icons.star,
                                                             color: Theme.of(
-                                                                context)
+                                                                    context)
                                                                 .secondaryHeaderColor,
                                                           ),
-                                                          margin: const EdgeInsets
-                                                              .symmetric(
-                                                              horizontal: 3),
+                                                          margin:
+                                                              const EdgeInsets
+                                                                      .symmetric(
+                                                                  horizontal:
+                                                                      3),
                                                         ),
                                                         TweenAnimationBuilder<
                                                             double>(
@@ -349,11 +384,11 @@ class _GamePageState extends State<GamePage> {
                                                               end: totalPoints
                                                                   .toDouble()),
                                                           duration:
-                                                          const Duration(
-                                                              milliseconds:
-                                                              750),
+                                                              const Duration(
+                                                                  milliseconds:
+                                                                      750),
                                                           builder: (BuildContext
-                                                          context,
+                                                                  context,
                                                               double value,
                                                               Widget? child) {
                                                             return Text(
@@ -364,8 +399,9 @@ class _GamePageState extends State<GamePage> {
                                                           points > 0
                                                               ? ' +$points'
                                                               : '',
-                                                          style: const TextStyle(
-                                                              fontSize: 10),
+                                                          style:
+                                                              const TextStyle(
+                                                                  fontSize: 10),
                                                         )
                                                       ],
                                                     ),
@@ -413,7 +449,8 @@ class _GamePageState extends State<GamePage> {
                                   cameraTargetBounds: CameraTargetBounds(
                                     LatLngBounds(
                                         northeast: const LatLng(44.213, 28.609),
-                                        southwest: const LatLng(41.235, 22.36)),
+                                        southwest: const LatLng(41.235, 22.36),
+                                    ),
                                   ),
                                   onStyleLoadedCallback: _onStyleLoadedCallback,
                                 ),
@@ -437,16 +474,13 @@ class _GamePageState extends State<GamePage> {
                                                     height: 45,
                                                     child: Row(
                                                       children: const [
-                                                        Text(
-                                                          "Следващ рунд",
-                                                        ),
+                                                        Text("Следващ рунд"),
                                                         Padding(
                                                           padding:
                                                               EdgeInsets.only(
                                                                   left: 4),
                                                           child: Icon(
-                                                              Icons
-                                                                  .arrow_circle_right_outlined,
+                                                              Icons.arrow_circle_right_outlined,
                                                               size: 20),
                                                         ),
                                                       ],
@@ -463,20 +497,16 @@ class _GamePageState extends State<GamePage> {
                                                 height: 45,
                                                 child: Row(
                                                   children: const [
-                                                    Text(
-                                                      "Избери",
-                                                    ),
+                                                    Text("Избери"),
                                                     Padding(
-                                                      padding: EdgeInsets.only(
-                                                          left: 4),
-                                                      child: Icon(Icons.lock,
-                                                          size: 17),
+                                                      padding: EdgeInsets.only(left: 4),
+                                                      child: Icon(Icons.lock, size: 17),
                                                     ),
                                                   ],
                                                 ),
                                               ),
                                             ),
-                                            onPressed: !_hasLocked
+                                            onPressed: !_hasLocked && _selectedLocation != null
                                                 ? _lockAnswer
                                                 : null,
                                           ),
@@ -489,6 +519,84 @@ class _GamePageState extends State<GamePage> {
                             ),
                           )
                         ],
+                      ),
+                      Container(
+                        width: double.infinity,
+                        child: LayoutBuilder(builder: (context, BoxConstraints constraints) {
+                          return ExpandableNotifier(
+                            controller: _expandableController,
+                            child: ScrollOnExpand(
+                              child: Column(
+                                children: [
+                                  Expandable(
+                                    collapsed: Container(width: double.infinity),
+                                    expanded: Container(
+                                      padding: const EdgeInsets.all(10),
+                                      width: double.infinity,
+                                      height: MediaQuery.of(context).size.height / 3.4,
+                                      decoration: BoxDecoration(
+                                        color: Theme.of(context).colorScheme.secondary,
+                                        borderRadius: const BorderRadius.only(
+                                          bottomLeft: Radius.circular(20.0),
+                                          bottomRight: Radius.circular(20.0),
+                                        ),
+                                      ),
+                                      child: SingleChildScrollView(
+                                        controller: _descriptionScrollController,
+                                          scrollDirection: Axis.vertical,//.horizontal
+                                          child: Column(
+                                            children: [
+                                              Text(
+                                                _roundData['name'] ?? '',
+                                                textAlign: TextAlign.center,
+                                                style: TextStyle(color: Theme.of(context).secondaryHeaderColor, fontSize: 20),
+                                              ),
+                                              const Divider(),
+                                              Text(
+                                                _description ?? '',
+                                              ),
+                                            ],
+                                          ),
+                                      ),
+                                    ),
+                                  ),
+                                  Row(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      Container(
+                                        padding: EdgeInsets.zero,
+                                        height: 30,
+                                        decoration: BoxDecoration(
+                                          color: Theme.of(context).colorScheme.secondary,
+                                          borderRadius: const BorderRadius.only(
+                                            bottomLeft: Radius.circular(40.0),
+                                            bottomRight: Radius.circular(40.0),
+                                          ),
+                                        ),
+                                        child: RotationTransition(
+                                        turns: Tween(begin: 1.0, end: 0.5).animate(_rotationController),
+                                        child: IconButton(
+                                              padding: EdgeInsets.zero,
+                                              constraints: const BoxConstraints(),
+                                              color: Theme.of(context).primaryColor,
+                                              iconSize: 30,
+                                              icon: const Icon(Icons.arrow_drop_down_circle_outlined),
+                                              onPressed: _description == null ? null : () {
+                                                _expandableController.toggle();
+                                                _rotationController.animateTo(_expandableController.expanded ? 1 : 0);
+                                              }
+                                          ),
+                                        ),
+                                      )
+
+                                    ]
+                                  ),
+                                ],
+                              ),
+                            ),
+                          );
+                        },
+                        ),
                       ),
                       if (!widget.gameService.isSingle())
                         OpenDrawerButton(

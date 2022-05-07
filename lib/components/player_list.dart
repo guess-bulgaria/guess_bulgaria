@@ -24,7 +24,6 @@ class _PlayerListState extends State<PlayerList> {
     super.initState();
     int dur = 150;
     for (int i = 0; i < widget.players.length; i++) {
-      opacities.add(0);
       if (widget.type == PlayerListType.gameResults) {
         opacities.add(0);
         Future.delayed(Duration(milliseconds: dur))
