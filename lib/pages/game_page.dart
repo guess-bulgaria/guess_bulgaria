@@ -224,7 +224,7 @@ class _GamePageState extends State<GamePage> with SingleTickerProviderStateMixin
     setState(() {
       _hiddenName = _roundData['name'];
       if(_endTime == 0) return;
-      _hiddenName = _hiddenName!.replaceAll(RegExp(r'\S'), '_');
+      _hiddenName = _hiddenName!.replaceAll(RegExp(r'[АБВГДЕЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЬЮЯабвгдежзийклмнопрстуфхцчшщъьюяA-Za-z0-9]'), '_');
       _hiddenNameIndexes = [];
       for(int i = 0; i < _hiddenName!.length; i++){
         if(_hiddenName![i] != ' ') _hiddenNameIndexes!.add(i);
