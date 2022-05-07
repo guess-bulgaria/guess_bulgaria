@@ -350,8 +350,6 @@ class _LobbyPageState extends State<LobbyPage> {
                   int rounds = int.tryParse(value!) ?? 0;
                   if (rounds > 30) {
                     _roundsController.text = "30";
-                  }else if(rounds <= 0){
-                    _roundsController.text = "1";
                   }
                   return null;
                 },
