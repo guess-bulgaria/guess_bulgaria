@@ -382,7 +382,8 @@ class _LobbyPageState extends State<LobbyPage> {
                   int time = int.tryParse(value!) ?? 0;
                   if (time > 120) {
                     _timeController.text = "120";
-                  }else if(time < 5){
+                  }
+                  if (time > 0 && time < 5) {
                     _timeController.text = "5";
                   }
                   return null;
