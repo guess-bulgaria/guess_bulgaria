@@ -33,6 +33,9 @@ class _LobbyPageState extends State<LobbyPage> {
   List<int> usedColors = [];
   bool isBackgroundPaused = false;
 
+  int rounds = 10;
+  int roundTime = 30;
+
   bool _isRoomPublic = false;
 
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
@@ -46,12 +49,11 @@ class _LobbyPageState extends State<LobbyPage> {
     _debounce = Timer(const Duration(milliseconds: 700), () {
       WSService.changeSettings(
           roomId,
-          int.tryParse(_roundsController.text) ?? 0,
-          int.tryParse(_timeController.text) ?? 0,
+          rounds,
+          roundTime,
           _isRoomPublic, []);
     });
-    await UserData().setLobbySettings(int.tryParse(_roundsController.text) ?? 0,
-        int.tryParse(_timeController.text) ?? 0, _isRoomPublic);
+    await UserData().setLobbySettings(rounds, roundTime, _isRoomPublic);
   }
 
   @override
@@ -149,30 +151,50 @@ class _LobbyPageState extends State<LobbyPage> {
   }
 
   void setSettings(settings) {
-    _roundsController.text = "${settings['maxRounds']}";
-    _timeController.text = "${settings['answerTimeInSeconds']}";
+    if (_isCreator) return;
+    rounds = settings['maxRounds'];
+    roundTime = settings['maxRounds'];
+    _roundsController.text = "$rounds";
+    _timeController.text = "$roundTime";
     _isRoomPublic = settings['isPublic'];
     setState(() => {});
   }
 
   void onRoundsChange(String r) {
-    int rounds = int.tryParse(r) ?? 0;
+    rounds = int.tryParse(r) ?? 0;
+    bool hasChanged = false;
     if (rounds == 0) {
-      _roundsController.text = '0';
+      hasChanged = true;
+    } else if (rounds > 30) {
+      rounds = 30;
+      hasChanged = true;
+    }
+    if(hasChanged){
+      _roundsController.text = "$rounds";
       _roundsController.selection =
           TextSelection.fromPosition(const TextPosition(offset: 0))
-              .extendTo(const TextPosition(offset: 1));
+              .extendTo(TextPosition(offset: _roundsController.text.length));
     }
     _sendSettings();
   }
 
   void onTimeChange(String r) {
-    int roundTime = int.tryParse(r) ?? 0;
+    roundTime = int.tryParse(r) ?? 0;
+    bool hasChanged = false;
     if (roundTime == 0) {
-      _timeController.text = '0';
+      hasChanged = true;
+    } else if (roundTime > 120) {
+      hasChanged = true;
+      roundTime = 120;
+    } else if (roundTime > 0 && roundTime < 5) {
+      hasChanged = true;
+      roundTime = 5;
+    }
+    if(hasChanged){
+      _timeController.text = "$roundTime";
       _timeController.selection =
           TextSelection.fromPosition(const TextPosition(offset: 0))
-              .extendTo(const TextPosition(offset: 1));
+              .extendTo(TextPosition(offset: _timeController.text.length));
     }
     _sendSettings();
   }
@@ -339,13 +361,6 @@ class _LobbyPageState extends State<LobbyPage> {
                 ),
                 enabled: _isCreator,
                 autovalidateMode: AutovalidateMode.always,
-                validator: (value) {
-                  int rounds = int.tryParse(value!) ?? 0;
-                  if (rounds > 30) {
-                    _roundsController.text = "30";
-                  }
-                  return null;
-                },
                 textAlign: TextAlign.end,
                 controller: _roundsController,
                 onChanged: (rounds) => onRoundsChange(rounds),
@@ -371,15 +386,6 @@ class _LobbyPageState extends State<LobbyPage> {
                 enabled: _isCreator,
                 controller: _timeController,
                 autovalidateMode: AutovalidateMode.always,
-                validator: (value) {
-                  int time = int.tryParse(value!) ?? 0;
-                  if (time > 120) {
-                    _timeController.text = "120";
-                  } else if (time > 0 && time < 5) {
-                    _timeController.text = "5";
-                  }
-                  return null;
-                },
                 onChanged: (rounds) => onTimeChange(rounds),
                 inputFormatters: <TextInputFormatter>[
                   FilteringTextInputFormatter.allow(RegExp(r'[0-9]')),
