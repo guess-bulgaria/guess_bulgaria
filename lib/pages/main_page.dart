@@ -5,8 +5,6 @@ import 'package:flutter/services.dart';
 import 'package:flutter_keyboard_visibility/flutter_keyboard_visibility.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:guess_bulgaria/components/color_picker.dart';
-import 'package:guess_bulgaria/components/drawer.dart';
 import 'package:guess_bulgaria/components/navigation_button.dart';
 import 'package:guess_bulgaria/components/scrolling_background.dart';
 import 'package:guess_bulgaria/components/user_settings_drawer.dart';

@@ -39,7 +39,7 @@ class _LobbyPageState extends State<LobbyPage> {
   final TextEditingController _roundsController = TextEditingController();
   final TextEditingController _timeController = TextEditingController();
 
-  void _sendSettings() {
+  void _sendSettings() async {
     if (!_isCreator) return;
     // debounce so it won't activate on each number type
     if (_debounce?.isActive ?? false) _debounce!.cancel();
@@ -49,13 +49,15 @@ class _LobbyPageState extends State<LobbyPage> {
           int.tryParse(_roundsController.text) ?? 0,
           int.tryParse(_timeController.text) ?? 0, []);
     });
+    await UserData().setLobbySettings(int.tryParse(_roundsController.text) ?? 0,
+        int.tryParse(_timeController.text) ?? 0);
   }
 
   @override
   void initState() {
     super.initState();
     if (widget.joinData == null) {
-      WSService.createGame(onMessageReceived);
+      WSService.createGame(onMessageReceived, settings: UserData.lobbySettings);
     } else {
       setupJoinData();
       _isCreator = false;

@@ -2,7 +2,6 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:guess_bulgaria/configs/env_config.dart';
 import 'package:guess_bulgaria/pages/main_page.dart';
 import 'package:guess_bulgaria/services/audio_service.dart';

@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'dart:math';
+import 'package:guess_bulgaria/models/lobby_settings_model.dart';
 import 'package:guess_bulgaria/models/player_stats_model.dart';
 import 'package:guess_bulgaria/services/user_service.dart';
 import 'package:guess_bulgaria/storage/online_checker.dart';
@@ -14,7 +15,9 @@ class UserData {
   static var _defaultColor = 0;
   static const _singleStatsKey = "singleStats";
   static const _multiStatsKey = "multiStats";
+  static const _lobbySettingsKey = "lobbySettings";
   static PlayerStatsModel stats = PlayerStatsModel();
+  static LobbySettings lobbySettings = LobbySettings();
 
   static String get username => _username;
 
@@ -104,6 +107,20 @@ class UserData {
     return PlayerStatsModel.fromApi(singleStats, multiStats);
   }
 
+  Future<void> loadLobbySettings() async {
+    var storeSettings = await _getPrefString(_lobbySettingsKey);
+
+    if (storeSettings != null && storeSettings.isNotEmpty) {
+      lobbySettings = LobbySettings.fromJson(jsonDecode(storeSettings));
+    }
+  }
+
+  Future<void> setLobbySettings(int maxRounds, int answerTimeInSeconds) async {
+    lobbySettings.maxRounds = maxRounds;
+    lobbySettings.answerTimeInSeconds = answerTimeInSeconds;
+    await _setPrefString(_lobbySettingsKey, jsonEncode(lobbySettings.toJson()));
+  }
+
   String getRandomUsername() {
     return 'Пешо-${Random().nextInt(9000) + 1000}';
   }
@@ -118,6 +135,7 @@ class UserData {
     await loadUsername();
     await loadDefaultColor();
     await loadStatistics();
+    await loadLobbySettings();
   }
 
   Future<void> _setPrefString(String key, String value) async {

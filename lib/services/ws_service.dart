@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:guess_bulgaria/configs/env_config.dart';
+import 'package:guess_bulgaria/models/lobby_settings_model.dart';
 import 'package:guess_bulgaria/storage/user_data.dart';
 import 'package:web_socket_channel/io.dart';
 
@@ -46,9 +47,9 @@ class WSService {
     _messageCallback = callback;
   }
 
-  static void createGame(Function callback) {
+  static void createGame(Function callback, {LobbySettings? settings}) {
     _createChannel(callback);
-    _sendMessage('create');
+    _sendMessage('create', data: settings?.maxRounds != null ? settings!.toJson() : {});
   }
 
   static void joinGame(Function callback, int roomId) {
@@ -90,7 +91,7 @@ class WSService {
   }
 
   static void startRound(int roomId, {Function? callback}) {
-    if(callback != null) _createChannel(callback);
+    if (callback != null) _createChannel(callback);
     _sendMessage('start', data: {'roomId': roomId});
   }
 
@@ -101,7 +102,9 @@ class WSService {
   static void nextRound(int roomId) {
     _sendMessage('next-round', data: {'roomId': roomId});
   }
+
   static void roomPrivacy(int roomId, bool isPublic) {
-    _sendMessage('room-privacy', data: {'roomId': roomId, 'isPublic': isPublic});
+    _sendMessage('room-privacy',
+        data: {'roomId': roomId, 'isPublic': isPublic});
   }
 }
