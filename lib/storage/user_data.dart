@@ -115,9 +115,10 @@ class UserData {
     }
   }
 
-  Future<void> setLobbySettings(int maxRounds, int answerTimeInSeconds) async {
+  Future<void> setLobbySettings(int maxRounds, int answerTimeInSeconds, bool isPublic) async {
     lobbySettings.maxRounds = maxRounds;
     lobbySettings.answerTimeInSeconds = answerTimeInSeconds;
+    lobbySettings.isPublic = isPublic;
     await _setPrefString(_lobbySettingsKey, jsonEncode(lobbySettings.toJson()));
   }
 

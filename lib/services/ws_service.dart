@@ -58,12 +58,13 @@ class WSService {
   }
 
   static void changeSettings(
-      int roomId, int maxRounds, int answerTimeInSeconds, List<int>? regions) {
+      int roomId, int maxRounds, int answerTimeInSeconds, bool isPublic, List<int>? regions) {
     _sendMessage('change-settings', data: {
       'roomId': roomId,
       'maxRounds': maxRounds,
       'answerTimeInSeconds': answerTimeInSeconds,
-      'regions': regions
+      'regions': regions,
+      'isPublic': isPublic
     });
   }
 

@@ -47,10 +47,11 @@ class _LobbyPageState extends State<LobbyPage> {
       WSService.changeSettings(
           roomId,
           int.tryParse(_roundsController.text) ?? 0,
-          int.tryParse(_timeController.text) ?? 0, []);
+          int.tryParse(_timeController.text) ?? 0,
+          _isRoomPublic, []);
     });
     await UserData().setLobbySettings(int.tryParse(_roundsController.text) ?? 0,
-        int.tryParse(_timeController.text) ?? 0);
+        int.tryParse(_timeController.text) ?? 0, _isRoomPublic);
   }
 
   @override
@@ -78,9 +79,6 @@ class _LobbyPageState extends State<LobbyPage> {
         break;
       case 'settings-change':
         setSettings(message);
-        break;
-      case 'room-privacy-notifier':
-        setRoomPrivacy(message);
         break;
       case 'color-change':
         setState(() {
@@ -137,7 +135,7 @@ class _LobbyPageState extends State<LobbyPage> {
   void setRoomData(message) {
     setState(() {
       roomId = message['roomId'];
-      _isRoomPublic = message['isPublic'] ?? true;
+      _isRoomPublic = message['settings']['isPublic'] ?? true;
       setSettings(message['settings']);
       players = message['players'];
       usedColors = [];
@@ -153,12 +151,8 @@ class _LobbyPageState extends State<LobbyPage> {
   void setSettings(settings) {
     _roundsController.text = "${settings['maxRounds']}";
     _timeController.text = "${settings['answerTimeInSeconds']}";
-  }
-
-  void setRoomPrivacy(message) {
-    setState(() {
-      _isRoomPublic = message['isPublic'];
-    });
+    _isRoomPublic = settings['isPublic'];
+    setState(() => {});
   }
 
   void onRoundsChange(String r) {
@@ -181,13 +175,6 @@ class _LobbyPageState extends State<LobbyPage> {
               .extendTo(const TextPosition(offset: 1));
     }
     _sendSettings();
-  }
-
-  void changeRoomPrivacy(bool value) {
-    WSService.roomPrivacy(roomId, value);
-    setState(() {
-      _isRoomPublic = value;
-    });
   }
 
   @override
@@ -327,8 +314,12 @@ class _LobbyPageState extends State<LobbyPage> {
                     ),
                     Switch(
                       value: _isRoomPublic,
-                      onChanged:
-                          _isCreator ? (val) => changeRoomPrivacy(val) : null,
+                      onChanged: _isCreator
+                          ? (val) => {
+                                setState(() => _isRoomPublic = val),
+                                _sendSettings()
+                              }
+                          : null,
                       activeColor: Theme.of(context).colorScheme.tertiary,
                     ),
                   ],
