@@ -96,7 +96,7 @@ class Badge extends StatelessWidget {
                   if (plus != null && plus != 0)
                     Text(' +$plus', style: const TextStyle(fontSize: 10)),
                   //don't remove the whitespace, used to fix a problem when this is missing
-                  Text('$text ', style: TextStyle(letterSpacing: letterSpacing),),
+                  Text('${text ?? ''} ', style: TextStyle(letterSpacing: letterSpacing),),
                 ],
               ),
             ),

@@ -55,7 +55,7 @@ class _GameStartingDialogState extends State<GameStartingDialog> {
                   fontSize: 64,
                   color: Theme.of(context).primaryColor,
                   decoration: TextDecoration.none,
-                shadows: [
+                shadows: const [
                   Shadow(
                     offset: Offset(5.0, 5.0),
                     blurRadius: 3.0,
