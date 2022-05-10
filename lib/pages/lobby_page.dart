@@ -80,6 +80,7 @@ class _LobbyPageState extends State<LobbyPage> {
         setRoomData(message);
         break;
       case 'settings-change':
+        if(_isCreator) break;
         setSettings(message);
         break;
       case 'color-change':
@@ -151,9 +152,8 @@ class _LobbyPageState extends State<LobbyPage> {
   }
 
   void setSettings(settings) {
-    if (_isCreator) return;
     rounds = settings['maxRounds'];
-    roundTime = settings['maxRounds'];
+    roundTime = settings['answerTimeInSeconds'];
     _roundsController.text = "$rounds";
     _timeController.text = "$roundTime";
     _isRoomPublic = settings['isPublic'];

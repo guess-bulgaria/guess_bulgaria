@@ -6,6 +6,7 @@ import 'package:flutter_keyboard_visibility/flutter_keyboard_visibility.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:guess_bulgaria/components/navigation_button.dart';
+import 'package:guess_bulgaria/components/open_drawer_button.dart';
 import 'package:guess_bulgaria/components/scrolling_background.dart';
 import 'package:guess_bulgaria/components/user_settings_drawer.dart';
 import 'package:guess_bulgaria/pages/lobby_page.dart';
@@ -16,8 +17,6 @@ import 'package:guess_bulgaria/services/game/singleplayer_game_service.dart';
 import 'package:guess_bulgaria/services/ws_service.dart';
 import 'package:guess_bulgaria/storage/online_checker.dart';
 import 'package:guess_bulgaria/storage/user_data.dart';
-
-import '../components/open_drawer_button.dart';
 
 class MainPage extends StatefulWidget {
   const MainPage({Key? key}) : super(key: key);

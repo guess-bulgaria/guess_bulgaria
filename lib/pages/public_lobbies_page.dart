@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:guess_bulgaria/components/board.dart';
-import 'package:guess_bulgaria/components/color_picker.dart';
-import 'package:guess_bulgaria/components/drawer.dart';
 import 'package:guess_bulgaria/components/loader.dart';
 import 'package:guess_bulgaria/components/room_row.dart';
 import 'package:guess_bulgaria/components/scrolling_background.dart';
@@ -10,7 +8,6 @@ import 'package:guess_bulgaria/pages/lobby_page.dart';
 import 'package:guess_bulgaria/services/room_service.dart';
 import 'package:guess_bulgaria/services/ws_service.dart';
 import 'package:guess_bulgaria/storage/online_checker.dart';
-import 'package:guess_bulgaria/storage/user_data.dart';
 import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
 
 import '../components/open_drawer_button.dart';
