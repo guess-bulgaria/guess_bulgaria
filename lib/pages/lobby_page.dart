@@ -47,11 +47,7 @@ class _LobbyPageState extends State<LobbyPage> {
     // debounce so it won't activate on each number type
     if (_debounce?.isActive ?? false) _debounce!.cancel();
     _debounce = Timer(const Duration(milliseconds: 700), () {
-      WSService.changeSettings(
-          roomId,
-          rounds,
-          roundTime,
-          _isRoomPublic, []);
+      WSService.changeSettings(roomId, rounds, roundTime, _isRoomPublic, []);
     });
     await UserData().setLobbySettings(rounds, roundTime, _isRoomPublic);
   }
@@ -80,7 +76,7 @@ class _LobbyPageState extends State<LobbyPage> {
         setRoomData(message);
         break;
       case 'settings-change':
-        if(_isCreator) break;
+        if (_isCreator) break;
         setSettings(message);
         break;
       case 'color-change':
@@ -169,7 +165,7 @@ class _LobbyPageState extends State<LobbyPage> {
       rounds = 30;
       hasChanged = true;
     }
-    if(hasChanged){
+    if (hasChanged) {
       _roundsController.text = "$rounds";
       _roundsController.selection =
           TextSelection.fromPosition(const TextPosition(offset: 0))
@@ -190,7 +186,7 @@ class _LobbyPageState extends State<LobbyPage> {
       hasChanged = true;
       roundTime = 5;
     }
-    if(hasChanged){
+    if (hasChanged) {
       _timeController.text = "$roundTime";
       _timeController.selection =
           TextSelection.fromPosition(const TextPosition(offset: 0))
@@ -295,10 +291,9 @@ class _LobbyPageState extends State<LobbyPage> {
                                           flex: 10,
                                           child: NavigationButton(
                                             text: "Старт",
-                                            onPressed:
-                                                players.length > 1
-                                                    ? start
-                                                    : null,
+                                            onPressed: players.length > 1
+                                                ? start
+                                                : null,
                                           ),
                                         ),
                                     ],
