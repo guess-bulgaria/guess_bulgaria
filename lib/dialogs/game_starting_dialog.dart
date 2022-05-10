@@ -20,7 +20,9 @@ class _GameStartingDialogState extends State<GameStartingDialog> {
   @override
   void initState() {
     super.initState();
-    setTime(widget.startAt - DateTime.now().millisecondsSinceEpoch);
+    var i = widget.startAt - DateTime.now().toUtc().millisecondsSinceEpoch;
+    if(i >= 3300 || i <= 0) i = 3300;
+    setTime(i);
   }
 
   void setTime(int millis) async {
