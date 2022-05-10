@@ -296,8 +296,7 @@ class _LobbyPageState extends State<LobbyPage> {
                                           child: NavigationButton(
                                             text: "Старт",
                                             onPressed:
-                                                //todo > 1
-                                                players.length > 0
+                                                players.length > 1
                                                     ? start
                                                     : null,
                                           ),

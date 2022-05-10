@@ -1,9 +1,9 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.example.guess_bulgaria">
    <application
-        android:label="guess_bulgaria"
+        android:label="Обиколи България"
         android:name="${applicationName}"
-        android:icon="@mipmap/ic_launcher">
+        android:icon="@mipmap/icon">
 
        <meta-data android:name="com.mapbox.token"
                   android:value="sk.eyJ1IjoiemVhbGJnIiwiYSI6ImNsMjNsaHdpaDFxeXQzbXFvMzB5ZTEyOW8ifQ.8PjI-6zsGnxmrccgcpSeXQ" />

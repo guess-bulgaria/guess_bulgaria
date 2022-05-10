@@ -193,11 +193,11 @@ class _MainPageState extends State<MainPage> {
                         ],
                       ),
                     ),
-                    NavigationButton(
-                      icon: Icons.person,
-                      text: 'Самостоятелна игра',
-                      onPressed: playSingle,
-                    ),
+                    // NavigationButton(
+                    //   icon: Icons.person,
+                    //   text: 'Самостоятелна игра',
+                    //   onPressed: playSingle,
+                    // ),
                     Observer(builder: (_) {
                       return NavigationButton(
                         icon: Icons.people,
@@ -301,11 +301,11 @@ class _MainPageState extends State<MainPage> {
                         );
                       }),
                     ),
-                    NavigationButton(
-                      icon: Icons.landscape,
-                      text: 'Забележителности',
-                      onPressed: landmarks,
-                    ),
+                    // NavigationButton(
+                    //   icon: Icons.landscape,
+                    //   text: 'Забележителности',
+                    //   onPressed: landmarks,
+                    // ),
                     NavigationButton(
                       icon: Icons.account_box,
                       text: 'Моите статистики',

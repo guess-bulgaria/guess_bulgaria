@@ -82,38 +82,38 @@ class _StatsPageState extends State<StatsPage> {
               crossAxisAlignment: CrossAxisAlignment.center,
               mainAxisAlignment: MainAxisAlignment.start,
               children: [
-                Padding(
-                  padding: const EdgeInsets.only(top: 4),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Icon(Icons.person,
-                          color: Theme.of(context).secondaryHeaderColor),
-                      const Text("Самостоятелна игра")
-                    ],
-                  ),
-                ),
-                const Divider(thickness: 0.7),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    for (int j = 0; j < 2; j++)
-                      Expanded(
-                        child: Badge(
-                          title: singleStatsData[j]['title'],
-                          text: '${singleStatsData[j]['value']}',
-                          icon: singleStatsData[j]['icon'],
-                          image: singleStatsData[j]['image'],
-                        ),
-                      )
-                  ],
-                ),
-                Badge(
-                  title: singleStatsData[2]['title'],
-                  text: '${singleStatsData[2]['value']}',
-                  icon: singleStatsData[2]['icon'],
-                  image: singleStatsData[2]['image'],
-                ),
+                // Padding(
+                //   padding: const EdgeInsets.only(top: 4),
+                //   child: Row(
+                //     mainAxisAlignment: MainAxisAlignment.center,
+                //     children: [
+                //       Icon(Icons.person,
+                //           color: Theme.of(context).secondaryHeaderColor),
+                //       const Text("Самостоятелна игра")
+                //     ],
+                //   ),
+                // ),
+                // const Divider(thickness: 0.7),
+                // Row(
+                //   mainAxisAlignment: MainAxisAlignment.center,
+                //   children: [
+                //     for (int j = 0; j < 2; j++)
+                //       Expanded(
+                //         child: Badge(
+                //           title: singleStatsData[j]['title'],
+                //           text: '${singleStatsData[j]['value']}',
+                //           icon: singleStatsData[j]['icon'],
+                //           image: singleStatsData[j]['image'],
+                //         ),
+                //       )
+                //   ],
+                // ),
+                // Badge(
+                //   title: singleStatsData[2]['title'],
+                //   text: '${singleStatsData[2]['value']}',
+                //   icon: singleStatsData[2]['icon'],
+                //   image: singleStatsData[2]['image'],
+                // ),
                 Padding(
                   padding: const EdgeInsets.only(top: 4),
                   child: Row(
