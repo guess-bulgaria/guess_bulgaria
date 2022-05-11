@@ -47,7 +47,7 @@ class _EndGameDialogState extends State<EndGameDialog> {
               'image': "assets/icons/gamepad.svg"
             },
             {
-              'title': 'Перфектни отговорени',
+              'title': 'Перфектни отговора',
               'value': widget.endGameStats['perfectAnswers'][0],
               'plus': widget.endGameStats['perfectAnswers'][1],
               'icon': Icons.star

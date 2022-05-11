@@ -24,7 +24,7 @@ class _StatsPageState extends State<StatsPage> {
         'image': "assets/icons/gamepad.svg"
       },
       {
-        'title': 'Перфектни отговорени',
+        'title': 'Перфектни отговора',
         'value': UserData.stats.single.perfectAnswers,
         'icon': Icons.star
       },
@@ -45,7 +45,7 @@ class _StatsPageState extends State<StatsPage> {
         'image': "assets/icons/gamepad.svg"
       },
       {
-        'title': 'Перфектни отговорени',
+        'title': 'Перфектни отговора',
         'value': UserData.stats.multi.perfectAnswers,
         'icon': Icons.star
       },

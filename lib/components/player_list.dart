@@ -107,7 +107,7 @@ class _PlayerListState extends State<PlayerList> {
                   borderRadius: BorderRadius.circular(180.0),
                 ),
                 child: Center(
-                  child: widget.type == PlayerListType.gameResults
+                  child: widget.type == PlayerListType.gameResults && index == 1
                       ? SvgPicture.asset(
                           'assets/icons/crown.svg',
                           height: 11,
