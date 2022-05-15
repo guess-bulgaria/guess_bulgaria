@@ -245,10 +245,11 @@ class _GamePageState extends State<GamePage>
 
   void setHiddenName() async {
     setState(() {
+      _hasRoundEnded = false;
       _hiddenName = _roundData['name'];
       if (_endTime == 0) return;
       _hiddenName = _hiddenName!.replaceAll(
-          RegExp(
+          RegExp( 
               r'[АБВГДЕЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЬЮЯабвгдежзийклмнопрстуфхцчшщъьюяA-Za-z0-9]'),
           '_');
       _hiddenNameIndexes = [];
@@ -282,7 +283,6 @@ class _GamePageState extends State<GamePage>
 
   void loadRound(dynamic roundData) {
     setState(() {
-      _hasRoundEnded = false;
       _mapController.clearSymbols();
       _mapController.clearLines();
       _roundData = roundData;
