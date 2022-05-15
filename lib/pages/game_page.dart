@@ -186,6 +186,7 @@ class _GamePageState extends State<GamePage>
       case "end-round":
         setState(() {
           _hasRoundEnded = true;
+          _hiddenNameIndexes = [];
           _timerController.pause();
           _descriptionScrollController.animateTo(0,
               duration: const Duration(milliseconds: 1), curve: Curves.linear);
