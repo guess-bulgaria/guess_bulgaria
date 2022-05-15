@@ -160,11 +160,12 @@ class _GamePageState extends State<GamePage>
         });
         break;
       case "stats-update":
-        await UserData().loadStatisticsFromGame(message['overall']);
+        await UserData().loadStatistics(endGameStats: message['overall']);
         showDialog(
           context: context,
           barrierDismissible: false,
-          builder: (BuildContext context) => EndGameDialog(_players, message['statsChanges']),
+          builder: (BuildContext context) =>
+              EndGameDialog(_players, message['statsChanges']),
         ).then((value) => Navigator.of(context).pop(value));
         break;
       case "player-answer":

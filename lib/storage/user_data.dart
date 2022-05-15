@@ -3,7 +3,6 @@ import 'dart:math';
 import 'package:guess_bulgaria/models/lobby_settings_model.dart';
 import 'package:guess_bulgaria/models/player_stats_model.dart';
 import 'package:guess_bulgaria/services/user_service.dart';
-import 'package:guess_bulgaria/storage/online_checker.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class UserData {
@@ -75,7 +74,12 @@ class UserData {
     }
   }
 
-  Future<void> loadStatistics() async {
+  Future<void> loadStatistics({dynamic endGameStats}) async {
+    if (endGameStats != null) {
+      stats = PlayerStatsModel.fromApi(SingleStats.fromJson(endGameStats),
+          MultiStats.fromJson(endGameStats));
+      return _storeStats();
+    }
     try {
       var apiStats = await UserService.getStatistics();
       if (apiStats.statusCode != null && apiStats.statusCode! < 300) {
@@ -89,12 +93,6 @@ class UserData {
       await loadStoreStats();
     }
     await loadStoreStats();
-  }
-
-  Future<void> loadStatisticsFromGame(dynamic overallStats) {
-    stats = PlayerStatsModel.fromApi(
-        SingleStats.fromJson(overallStats), MultiStats.fromJson(overallStats));
-    return _storeStats();
   }
 
   Future<void> loadStoreStats() async {
