@@ -42,7 +42,8 @@ class _PublicLobbiesPageState extends State<PublicLobbiesPage> {
         MaterialPageRoute(
           builder: (context) => LobbyPage(joinData: message),
         ),
-      );
+      ).then((_) => RoomService.getPublicRooms().then((value) =>
+          setState(() => {rooms = value.data ?? [], hasLoaded = true})));
     } else if (type == 'join-failed') {
       setState(() {
         //todo show error on screen

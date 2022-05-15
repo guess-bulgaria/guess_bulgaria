@@ -105,6 +105,7 @@ class _LobbyPageState extends State<LobbyPage> {
           (value) {
             setState(() {
               isBackgroundPaused = false;
+              WSService.changeCallback(onMessageReceived);
             });
             if (value == true) leave();
           },

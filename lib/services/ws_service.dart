@@ -49,7 +49,8 @@ class WSService {
 
   static void createGame(Function callback, {LobbySettings? settings}) {
     _createChannel(callback);
-    _sendMessage('create', data: settings?.maxRounds != null ? settings!.toJson() : {});
+    _sendMessage('create',
+        data: settings?.maxRounds != null ? settings!.toJson() : {});
   }
 
   static void joinGame(Function callback, int roomId) {
@@ -57,8 +58,8 @@ class WSService {
     _sendMessage('join', data: {'roomId': roomId});
   }
 
-  static void changeSettings(
-      int roomId, int maxRounds, int answerTimeInSeconds, bool isPublic, List<int>? regions) {
+  static void changeSettings(int roomId, int maxRounds, int answerTimeInSeconds,
+      bool isPublic, List<int>? regions) {
     _sendMessage('change-settings', data: {
       'roomId': roomId,
       'maxRounds': maxRounds,
@@ -104,8 +105,8 @@ class WSService {
     _sendMessage('next-round', data: {'roomId': roomId});
   }
 
-  static void roomPrivacy(int roomId, bool isPublic) {
-    _sendMessage('room-privacy',
-        data: {'roomId': roomId, 'isPublic': isPublic});
+  static void roundLoaded(int roomId) {
+    _sendMessage('round-loaded',
+        data: {'roomId': roomId});
   }
 }

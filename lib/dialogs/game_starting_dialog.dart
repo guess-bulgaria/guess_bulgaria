@@ -1,41 +1,31 @@
-import 'dart:convert';
-
 import 'package:flutter/material.dart';
-import 'package:guess_bulgaria/components/badge.dart';
-import 'package:guess_bulgaria/components/navigation_button.dart';
-import 'package:guess_bulgaria/components/player_list.dart';
 
 class GameStartingDialog extends StatefulWidget {
-  final int startAt;
+  final int? timer;
 
-  const GameStartingDialog(this.startAt, {Key? key}) : super(key: key);
+  const GameStartingDialog({Key? key, this.timer}) : super(key: key);
 
   @override
   State<StatefulWidget> createState() => _GameStartingDialogState();
 }
 
 class _GameStartingDialogState extends State<GameStartingDialog> {
-  int time = 1;
+  int time = 0;
 
   @override
   void initState() {
     super.initState();
-    var i = widget.startAt - DateTime.now().toUtc().millisecondsSinceEpoch;
-    if(i >= 3300 || i <= 0) i = 3300;
-    setTime(i);
+    if (widget.timer != null) setTime(widget.timer!);
   }
 
   void setTime(int millis) async {
     time += (millis / 1000).floor();
-    while (time > 1) {
+    while (time > 0) {
       await Future.delayed(const Duration(seconds: 1));
       setState(() {
         --time;
       });
     }
-
-    Future.delayed(Duration(milliseconds: millis % 1000))
-        .then((value) => Navigator.pop(context));
   }
 
   @override
@@ -51,23 +41,37 @@ class _GameStartingDialogState extends State<GameStartingDialog> {
             color: Theme.of(context).colorScheme.secondary,
           ),
           child: Center(
-            child: Text(
-              '$time',
-              style: TextStyle(
-                  fontSize: 64,
-                  color: Theme.of(context).primaryColor,
-                  decoration: TextDecoration.none,
-                shadows: const [
-                  Shadow(
-                    offset: Offset(5.0, 5.0),
-                    blurRadius: 3.0,
-                    color: Color.fromARGB(255, 0, 0, 0),
-                  ),
-                ],
-              ),
-            ),
+            child: _getLoaderText(),
           ),
         ),
+      ),
+    );
+  }
+
+  Widget _getLoaderText() {
+    if (widget.timer != null) {
+      return Text(
+        '$time',
+        style: TextStyle(
+          fontSize: 64,
+          color: Theme.of(context).primaryColor,
+          decoration: TextDecoration.none,
+          shadows: const [
+            Shadow(
+              offset: Offset(5.0, 5.0),
+              blurRadius: 3.0,
+              color: Color.fromARGB(255, 0, 0, 0),
+            ),
+          ],
+        ),
+      );
+    }
+    return Text(
+      'В изчакване...',
+      style: TextStyle(
+        fontSize: 14,
+        color: Theme.of(context).primaryColor,
+        decoration: TextDecoration.none,
       ),
     );
   }

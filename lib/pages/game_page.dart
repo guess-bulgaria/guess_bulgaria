@@ -44,6 +44,7 @@ class _GamePageState extends State<GamePage>
   LatLng? _selectedLocation;
   List<dynamic> _players = [];
   Image? _image;
+  Image? _cachedImage;
   bool _hasRoundEnded = false;
   bool _hasLocked = false;
   bool _hasGameEnded = false;
@@ -53,6 +54,7 @@ class _GamePageState extends State<GamePage>
   String? _description;
   String? _hiddenName;
   List<int?>? _hiddenNameIndexes;
+  int? _timer;
 
   @override
   void initState() {
@@ -74,22 +76,14 @@ class _GamePageState extends State<GamePage>
     }
     _timerController = TimerController(_startTime, _endTime, timerEndCallback);
 
-    Future.delayed(Duration.zero).then((value) {
-      showDialog(
-              context: context,
-              builder: (BuildContext context) =>
-                  GameStartingDialog(widget.gameData['roundStartTime']),
-              barrierDismissible: false)
-          .then((value) {
-        setState(() {
-          _timerController.start();
-          if (_roundData['image'] != null) {
-            _image = Image.memory(base64Decode(_roundData['image']));
-          }
-          setHiddenName();
-        });
-      });
-    });
+    if (_roundData['image'] != null) {
+      _cachedImage = Image.memory(base64Decode(_roundData['image']));
+    }
+    WSService.roundLoaded(widget.gameData['roomId']);
+    Future.delayed(Duration.zero).then((_) => showDialog(
+        context: context,
+        builder: (BuildContext context) => GameStartingDialog(timer: _timer),
+        barrierDismissible: false));
     super.initState();
   }
 
@@ -144,20 +138,32 @@ class _GamePageState extends State<GamePage>
         _hasGameEnded = true;
         break;
       case "start-round":
-        showDialog(
-                context: context,
-                builder: (BuildContext context) =>
-                    GameStartingDialog(message['roundStartTime']),
-                barrierDismissible: false)
-            .then((value) {
-          _timerController.reset(timerEndCallback);
-          _expandableController.value = false;
-          _rotationController.animateTo(_expandableController.expanded ? 1 : 0);
-          loadRound(message['currentRound']);
-          setState(() {
-            _description = null;
-          });
+        loadRound(message['currentRound']);
+        setState(() {
+          _description = null;
         });
+        showDialog(
+            context: context,
+            builder: (BuildContext context) =>
+                GameStartingDialog(timer: _timer),
+            barrierDismissible: false);
+        WSService.roundLoaded(message['roomId']);
+        break;
+      case "timer-start":
+        setState(() {
+          _image = null;
+          _timer = message['timer'];
+        });
+        break;
+      case "timer-end":
+        if (ModalRoute.of(context)?.isCurrent != true) {
+          Navigator.of(context).pop();
+        }
+        setHiddenName();
+        _timerController.reset(timerEndCallback);
+        _expandableController.value = false;
+        _rotationController.animateTo(_expandableController.expanded ? 1 : 0);
+        _showImage();
         break;
       case "stats-update":
         await UserData().loadStatistics(endGameStats: message['overall']);
@@ -262,6 +268,7 @@ class _GamePageState extends State<GamePage>
   }
 
   void showLetter() {
+    if (_hiddenNameIndexes?.isEmpty ?? true) return;
     setState(() {
       //use the image for a random letter to ensure everyone gets the same letter at the same time
       var index = (_roundData['image'].codeUnitAt(
@@ -279,10 +286,9 @@ class _GamePageState extends State<GamePage>
       _mapController.clearSymbols();
       _mapController.clearLines();
       _roundData = roundData;
-      setHiddenName();
       _currentRound++;
       if (roundData?['image'] != null) {
-        _image = Image.memory(base64Decode(roundData?['image']));
+        _cachedImage = Image.memory(base64Decode(roundData?['image']));
       }
       for (var p in _players) {
         p['hasAnswered'] = false;
@@ -293,6 +299,10 @@ class _GamePageState extends State<GamePage>
       _hasLocked = false;
       _startTime = 0;
     });
+  }
+
+  _showImage() {
+    setState(() => _image = _cachedImage);
   }
 
   @override
