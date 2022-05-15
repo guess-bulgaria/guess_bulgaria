@@ -16,8 +16,8 @@ class UserData {
   static const _singleStatsKey = "singleStats";
   static const _multiStatsKey = "multiStats";
   static const _lobbySettingsKey = "lobbySettings";
-  static PlayerStatsModel stats = PlayerStatsModel();
-  static LobbySettings lobbySettings = LobbySettings();
+  static var stats = PlayerStatsModel();
+  static var lobbySettings = LobbySettings();
 
   static String get username => _username;
 
@@ -76,22 +76,28 @@ class UserData {
   }
 
   Future<void> loadStatistics() async {
-    if (await OnlineChecker.checkOnlineStat()) {
-      try {
-        var apiStats = await UserService.getStatistics();
-        if (apiStats.statusCode != null && apiStats.statusCode! < 300) {
-          stats = PlayerStatsModel.fromApi(
-              SingleStats.fromJson(apiStats.data['single']),
-              MultiStats.fromJson(apiStats.data['multi']));
-          _storeStats();
-          return;
-        }
-      } catch (_) {}
+    try {
+      var apiStats = await UserService.getStatistics();
+      if (apiStats.statusCode != null && apiStats.statusCode! < 300) {
+        stats = PlayerStatsModel.fromApi(
+            SingleStats.fromJson(apiStats.data['single']),
+            MultiStats.fromJson(apiStats.data['multi']));
+        _storeStats();
+        return;
+      }
+    } catch (_) {
+      await loadStoreStats();
     }
-    stats = await loadStoreStats();
+    await loadStoreStats();
   }
 
-  Future<PlayerStatsModel> loadStoreStats() async {
+  Future<void> loadStatisticsFromGame(dynamic overallStats) {
+    stats = PlayerStatsModel.fromApi(
+        SingleStats.fromJson(overallStats), MultiStats.fromJson(overallStats));
+    return _storeStats();
+  }
+
+  Future<void> loadStoreStats() async {
     var singleStats = SingleStats();
     var multiStats = MultiStats();
     var singleStoreStats = await _getPrefString(_singleStatsKey);
@@ -104,7 +110,7 @@ class UserData {
       multiStats = MultiStats.fromJson(jsonDecode(multiStoreStats));
     }
 
-    return PlayerStatsModel.fromApi(singleStats, multiStats);
+    stats = PlayerStatsModel.fromApi(singleStats, multiStats);
   }
 
   Future<void> loadLobbySettings() async {
@@ -115,7 +121,8 @@ class UserData {
     }
   }
 
-  Future<void> setLobbySettings(int maxRounds, int answerTimeInSeconds, bool isPublic) async {
+  Future<void> setLobbySettings(
+      int maxRounds, int answerTimeInSeconds, bool isPublic) async {
     lobbySettings.maxRounds = maxRounds;
     lobbySettings.answerTimeInSeconds = answerTimeInSeconds;
     lobbySettings.isPublic = isPublic;

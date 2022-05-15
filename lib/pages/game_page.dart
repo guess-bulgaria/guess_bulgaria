@@ -32,7 +32,8 @@ class GamePage extends StatefulWidget {
   State<StatefulWidget> createState() => _GamePageState();
 }
 
-class _GamePageState extends State<GamePage> with SingleTickerProviderStateMixin  {
+class _GamePageState extends State<GamePage>
+    with SingleTickerProviderStateMixin {
   late MapboxMapController _mapController;
   late TimerController _timerController;
   final ExpandableController _expandableController = ExpandableController();
@@ -74,10 +75,11 @@ class _GamePageState extends State<GamePage> with SingleTickerProviderStateMixin
     _timerController = TimerController(_startTime, _endTime, timerEndCallback);
 
     Future.delayed(Duration.zero).then((value) {
-      showDialog(context: context,
-          builder: (BuildContext context) =>
-              GameStartingDialog(widget.gameData['roundStartTime']),
-          barrierDismissible: false)
+      showDialog(
+              context: context,
+              builder: (BuildContext context) =>
+                  GameStartingDialog(widget.gameData['roundStartTime']),
+              barrierDismissible: false)
           .then((value) {
         setState(() {
           _timerController.start();
@@ -142,8 +144,12 @@ class _GamePageState extends State<GamePage> with SingleTickerProviderStateMixin
         _hasGameEnded = true;
         break;
       case "start-round":
-        showDialog(context: context, builder: (BuildContext context) => GameStartingDialog(message['roundStartTime']), barrierDismissible: false)
-        .then((value) {
+        showDialog(
+                context: context,
+                builder: (BuildContext context) =>
+                    GameStartingDialog(message['roundStartTime']),
+                barrierDismissible: false)
+            .then((value) {
           _timerController.reset(timerEndCallback);
           _expandableController.value = false;
           _rotationController.animateTo(_expandableController.expanded ? 1 : 0);
@@ -154,17 +160,12 @@ class _GamePageState extends State<GamePage> with SingleTickerProviderStateMixin
         });
         break;
       case "stats-update":
+        await UserData().loadStatisticsFromGame(message['overall']);
         showDialog(
           context: context,
           barrierDismissible: false,
-          builder: (BuildContext context) => EndGameDialog(_players, message),
-        ).then((value) {
-          value == true
-              ? Navigator.of(context).pop(true)
-              : Navigator.of(context).pop();
-        });
-        //todo we can simply update the stats from the message, but I am too lazy to do it now :)
-        UserData().loadStatistics();
+          builder: (BuildContext context) => EndGameDialog(_players, message['statsChanges']),
+        ).then((value) => Navigator.of(context).pop(value));
         break;
       case "player-answer":
         setState(() {
@@ -179,7 +180,8 @@ class _GamePageState extends State<GamePage> with SingleTickerProviderStateMixin
         setState(() {
           _hasRoundEnded = true;
           _timerController.pause();
-          _descriptionScrollController.animateTo(0, duration: const Duration(milliseconds: 1), curve: Curves.linear);
+          _descriptionScrollController.animateTo(0,
+              duration: const Duration(milliseconds: 1), curve: Curves.linear);
           widget.gameService.setEndRoundSymbols(
               message['players'], message['currentRound']['coordinates']);
 
@@ -237,30 +239,36 @@ class _GamePageState extends State<GamePage> with SingleTickerProviderStateMixin
   void setHiddenName() async {
     setState(() {
       _hiddenName = _roundData['name'];
-      if(_endTime == 0) return;
-      _hiddenName = _hiddenName!.replaceAll(RegExp(r'[АБВГДЕЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЬЮЯабвгдежзийклмнопрстуфхцчшщъьюяA-Za-z0-9]'), '_');
+      if (_endTime == 0) return;
+      _hiddenName = _hiddenName!.replaceAll(
+          RegExp(
+              r'[АБВГДЕЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЬЮЯабвгдежзийклмнопрстуфхцчшщъьюяA-Za-z0-9]'),
+          '_');
       _hiddenNameIndexes = [];
-      for(int i = 0; i < _hiddenName!.length; i++){
-        if(_hiddenName![i] != ' ') _hiddenNameIndexes!.add(i);
+      for (int i = 0; i < _hiddenName!.length; i++) {
+        if (_hiddenName![i] != ' ') _hiddenNameIndexes!.add(i);
       }
     });
 
-    if(_endTime == 0) return;
+    if (_endTime == 0) return;
     var endInMillis = _endTime * 1000;
     int duration = ((endInMillis) / _hiddenNameIndexes!.length).floor();
-    while(_hiddenNameIndexes!.isNotEmpty){
+    while (_hiddenNameIndexes!.isNotEmpty) {
       await Future.delayed(Duration(milliseconds: duration));
-      if(_hasRoundEnded) return;
+      if (_hasRoundEnded) return;
       showLetter();
     }
   }
 
-  void showLetter(){
+  void showLetter() {
     setState(() {
       //use the image for a random letter to ensure everyone gets the same letter at the same time
-      var index = (_roundData['image'].codeUnitAt(_currentRound * _endTime + _hiddenNameIndexes!.length) as int) % _hiddenNameIndexes!.length;
+      var index = (_roundData['image'].codeUnitAt(
+              _currentRound * _endTime + _hiddenNameIndexes!.length) as int) %
+          _hiddenNameIndexes!.length;
       var letterIndex = _hiddenNameIndexes!.removeAt(index);
-      _hiddenName = _hiddenName!.replaceRange(letterIndex ?? 0, (letterIndex ?? 0) + 1, _roundData['name'][letterIndex]);
+      _hiddenName = _hiddenName!.replaceRange(letterIndex ?? 0,
+          (letterIndex ?? 0) + 1, _roundData['name'][letterIndex]);
     });
   }
 
@@ -498,8 +506,8 @@ class _GamePageState extends State<GamePage> with SingleTickerProviderStateMixin
                                       const MinMaxZoomPreference(5.4, 16),
                                   cameraTargetBounds: CameraTargetBounds(
                                     LatLngBounds(
-                                        northeast: const LatLng(44.213, 28.609),
-                                        southwest: const LatLng(41.235, 22.36),
+                                      northeast: const LatLng(44.213, 28.609),
+                                      southwest: const LatLng(41.235, 22.36),
                                     ),
                                   ),
                                   onStyleLoadedCallback: _onStyleLoadedCallback,
@@ -530,7 +538,8 @@ class _GamePageState extends State<GamePage> with SingleTickerProviderStateMixin
                                                               EdgeInsets.only(
                                                                   left: 4),
                                                           child: Icon(
-                                                              Icons.arrow_circle_right_outlined,
+                                                              Icons
+                                                                  .arrow_circle_right_outlined,
                                                               size: 20),
                                                         ),
                                                       ],
@@ -549,14 +558,17 @@ class _GamePageState extends State<GamePage> with SingleTickerProviderStateMixin
                                                   children: const [
                                                     Text("Избери"),
                                                     Padding(
-                                                      padding: EdgeInsets.only(left: 4),
-                                                      child: Icon(Icons.lock, size: 17),
+                                                      padding: EdgeInsets.only(
+                                                          left: 4),
+                                                      child: Icon(Icons.lock,
+                                                          size: 17),
                                                     ),
                                                   ],
                                                 ),
                                               ),
                                             ),
-                                            onPressed: !_hasLocked && _selectedLocation != null
+                                            onPressed: !_hasLocked &&
+                                                    _selectedLocation != null
                                                 ? _lockAnswer
                                                 : null,
                                           ),
@@ -572,34 +584,45 @@ class _GamePageState extends State<GamePage> with SingleTickerProviderStateMixin
                       ),
                       SizedBox(
                         width: double.infinity,
-                        child: LayoutBuilder(builder: (context, BoxConstraints constraints) {
-                          return ExpandableNotifier(
-                            controller: _expandableController,
-                            child: ScrollOnExpand(
-                              child: Column(
-                                children: [
-                                  Expandable(
-                                    collapsed: Container(width: double.infinity),
-                                    expanded: Container(
-                                      padding: const EdgeInsets.all(10),
-                                      width: double.infinity,
-                                      height: MediaQuery.of(context).size.height / 3.4,
-                                      decoration: BoxDecoration(
-                                        color: Theme.of(context).colorScheme.secondary,
-                                        borderRadius: const BorderRadius.only(
-                                          bottomLeft: Radius.circular(20.0),
-                                          bottomRight: Radius.circular(20.0),
+                        child: LayoutBuilder(
+                          builder: (context, BoxConstraints constraints) {
+                            return ExpandableNotifier(
+                              controller: _expandableController,
+                              child: ScrollOnExpand(
+                                child: Column(
+                                  children: [
+                                    Expandable(
+                                      collapsed:
+                                          Container(width: double.infinity),
+                                      expanded: Container(
+                                        padding: const EdgeInsets.all(10),
+                                        width: double.infinity,
+                                        height:
+                                            MediaQuery.of(context).size.height /
+                                                3.4,
+                                        decoration: BoxDecoration(
+                                          color: Theme.of(context)
+                                              .colorScheme
+                                              .secondary,
+                                          borderRadius: const BorderRadius.only(
+                                            bottomLeft: Radius.circular(20.0),
+                                            bottomRight: Radius.circular(20.0),
+                                          ),
                                         ),
-                                      ),
-                                      child: SingleChildScrollView(
-                                        controller: _descriptionScrollController,
-                                          scrollDirection: Axis.vertical,//.horizontal
+                                        child: SingleChildScrollView(
+                                          controller:
+                                              _descriptionScrollController,
+                                          scrollDirection:
+                                              Axis.vertical, //.horizontal
                                           child: Column(
                                             children: [
                                               Text(
                                                 _roundData['name'] ?? '',
                                                 textAlign: TextAlign.center,
-                                                style: TextStyle(color: Theme.of(context).secondaryHeaderColor, fontSize: 20),
+                                                style: TextStyle(
+                                                    color: Theme.of(context)
+                                                        .secondaryHeaderColor,
+                                                    fontSize: 20),
                                               ),
                                               const Divider(),
                                               Text(
@@ -607,45 +630,61 @@ class _GamePageState extends State<GamePage> with SingleTickerProviderStateMixin
                                               ),
                                             ],
                                           ),
+                                        ),
                                       ),
                                     ),
-                                  ),
-                                  Row(
-                                    mainAxisAlignment: MainAxisAlignment.center,
-                                    children: [
-                                      Container(
-                                        padding: EdgeInsets.zero,
-                                        height: 30,
-                                        decoration: BoxDecoration(
-                                          color: Theme.of(context).colorScheme.secondary,
-                                          borderRadius: const BorderRadius.only(
-                                            bottomLeft: Radius.circular(40.0),
-                                            bottomRight: Radius.circular(40.0),
-                                          ),
-                                        ),
-                                        child: RotationTransition(
-                                        turns: Tween(begin: 1.0, end: 0.5).animate(_rotationController),
-                                        child: IconButton(
-                                              padding: EdgeInsets.zero,
-                                              constraints: const BoxConstraints(),
-                                              color: Theme.of(context).primaryColor,
-                                              iconSize: 30,
-                                              icon: const Icon(Icons.arrow_drop_down_circle_outlined),
-                                              onPressed: _description == null ? null : () {
-                                                _expandableController.toggle();
-                                                _rotationController.animateTo(_expandableController.expanded ? 1 : 0);
-                                              }
-                                          ),
-                                        ),
-                                      )
-
-                                    ]
-                                  ),
-                                ],
+                                    Row(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.center,
+                                        children: [
+                                          Container(
+                                            padding: EdgeInsets.zero,
+                                            height: 30,
+                                            decoration: BoxDecoration(
+                                              color: Theme.of(context)
+                                                  .colorScheme
+                                                  .secondary,
+                                              borderRadius:
+                                                  const BorderRadius.only(
+                                                bottomLeft:
+                                                    Radius.circular(40.0),
+                                                bottomRight:
+                                                    Radius.circular(40.0),
+                                              ),
+                                            ),
+                                            child: RotationTransition(
+                                              turns: Tween(begin: 1.0, end: 0.5)
+                                                  .animate(_rotationController),
+                                              child: IconButton(
+                                                  padding: EdgeInsets.zero,
+                                                  constraints:
+                                                      const BoxConstraints(),
+                                                  color: Theme.of(context)
+                                                      .primaryColor,
+                                                  iconSize: 30,
+                                                  icon: const Icon(Icons
+                                                      .arrow_drop_down_circle_outlined),
+                                                  onPressed:
+                                                      _description == null
+                                                          ? null
+                                                          : () {
+                                                              _expandableController
+                                                                  .toggle();
+                                                              _rotationController
+                                                                  .animateTo(
+                                                                      _expandableController
+                                                                              .expanded
+                                                                          ? 1
+                                                                          : 0);
+                                                            }),
+                                            ),
+                                          )
+                                        ]),
+                                  ],
+                                ),
                               ),
-                            ),
-                          );
-                        },
+                            );
+                          },
                         ),
                       ),
                       if (!widget.gameService.isSingle())
