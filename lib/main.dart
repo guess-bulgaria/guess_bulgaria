@@ -7,7 +7,7 @@ import 'package:guess_bulgaria/pages/main_page.dart';
 import 'package:guess_bulgaria/services/audio_service.dart';
 import 'package:guess_bulgaria/storage/user_data.dart';
 import 'package:guess_bulgaria/themes/light_theme.dart';
-import 'package:wakelock/wakelock.dart';
+import 'package:wakelock_plus/wakelock_plus.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -15,7 +15,7 @@ void main() async {
   EnvConfig.setupEnvConfig();
   SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
   await UserData().setupUserData();
-  Wakelock.enable();
+  WakelockPlus.enable();
   loadLicenses();
   AudioService();
   runApp(const App());

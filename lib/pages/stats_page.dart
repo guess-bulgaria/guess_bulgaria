@@ -134,7 +134,7 @@ class _StatsPageState extends State<StatsPage> {
                     children: [
                       for (int j = 0; j < 2; j++)
                         Expanded(
-                          child: Badge(
+                          child: CustomBadge(
                             title: multiStatsData[(i + i) + j]['title'],
                             text: '${multiStatsData[(i + i) + j]['value']}',
                             icon: multiStatsData[(i + i) + j]['icon'],

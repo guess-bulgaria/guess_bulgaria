@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 
-class Badge extends StatelessWidget {
+class CustomBadge extends StatelessWidget {
   final String? title;
   final String? text;
   final int? value;
@@ -13,7 +13,7 @@ class Badge extends StatelessWidget {
   final IconData? icon;
   final String? image;
 
-  const Badge({
+  const CustomBadge({
     Key? key,
     this.text,
     this.value,

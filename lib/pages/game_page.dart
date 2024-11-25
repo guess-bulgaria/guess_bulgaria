@@ -351,7 +351,7 @@ class _GamePageState extends State<GamePage>
                             flex: 2,
                             child: Container(
                               decoration: BoxDecoration(
-                                color: Theme.of(context).backgroundColor,
+                                color: Theme.of(context).cardColor,
                                 border: Border.symmetric(
                                     horizontal: BorderSide(
                                   color: Theme.of(context)
@@ -362,7 +362,7 @@ class _GamePageState extends State<GamePage>
                               ),
                               child: Column(
                                 children: [
-                                  Badge(
+                                  CustomBadge(
                                     textCenter: true,
                                     text: _hiddenName ?? '',
                                     letterSpacing: 1.2,
@@ -371,7 +371,7 @@ class _GamePageState extends State<GamePage>
                                     child: Row(
                                       children: [
                                         Expanded(
-                                          child: Badge(
+                                          child: CustomBadge(
                                             title: 'Рунд',
                                             text:
                                                 '$_currentRound${totalRounds > 0 ? '/$totalRounds' : ''}',
@@ -381,7 +381,7 @@ class _GamePageState extends State<GamePage>
                                         ),
                                         if (!widget.gameService.isSingle())
                                           Expanded(
-                                            child: Badge(
+                                            child: CustomBadge(
                                               title: 'Отговорили играчи',
                                               text:
                                                   '$answeredPlayers/$totalPlayers',

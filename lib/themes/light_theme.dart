@@ -57,7 +57,7 @@ class LightTheme {
       // brightness: Brightness.dark,
       primaryColor: mainColor,
       primarySwatch: mainColor,
-      backgroundColor: buttonBackground,
+      cardColor: buttonBackground,
       secondaryHeaderColor: Colors.white70,
       dividerColor: Colors.black,
       colorScheme: ThemeData().colorScheme.copyWith(
@@ -81,9 +81,9 @@ class LightTheme {
         ),
       ),
       textTheme: TextTheme(
-        bodyText1: GoogleFonts.roboto(color: textColor),
-        bodyText2: GoogleFonts.roboto(color: textColor),
-        subtitle1: GoogleFonts.roboto(color: textColor),
+        bodySmall: GoogleFonts.roboto(color: textColor),
+        bodyMedium: GoogleFonts.roboto(color: textColor),
+        bodyLarge: GoogleFonts.roboto(color: textColor),
       ),
       inputDecorationTheme: const InputDecorationTheme(
           labelStyle: TextStyle(color: Colors.white70),

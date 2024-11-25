@@ -139,7 +139,7 @@ class _EndGameDialogState extends State<EndGameDialog> {
                       children: [
                         for (int j = 0; j < 2; j++)
                           Expanded(
-                            child: Badge(
+                            child: CustomBadge(
                                 title: multiStatsData[(i + i) + j]['title'],
                                 value: multiStatsData[(i + i) + j]['value'],
                                 plus: multiStatsData[(i + i) + j]['plus'],

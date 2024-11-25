@@ -38,7 +38,7 @@ class Board extends StatelessWidget {
               flex: 10,
               child: Container(
                 decoration: BoxDecoration(
-                  color: Theme.of(context).backgroundColor,
+                  color: Theme.of(context).cardColor,
                   borderRadius: BorderRadius.circular(18.0),
                   border: Border.all(
                     color: Theme.of(context).colorScheme.inversePrimary,
